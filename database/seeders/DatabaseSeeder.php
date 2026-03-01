@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Enums\UserRole;
 use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -13,11 +13,52 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        $this->seedDefaultAccounts();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        $this->call([
+            UserSeeder::class,        // 30 user giả
+            ReviewSeeder::class,      // Reviews + quick ratings
+            InteractionSeeder::class, // Watchlist, likes, comments, follows
         ]);
+    }
+
+    /**
+     * Tạo tài khoản mặc định cho mỗi role.
+     */
+    protected function seedDefaultAccounts(): void
+    {
+        $accounts = [
+            [
+                'name' => 'Admin',
+                'email' => 'thongnguyen.111004@gmail.com',
+                'password' => '123456',
+                'role' => UserRole::ADMIN,
+            ],
+            [
+                'name' => 'Moderator',
+                'email' => 'mod@gmail.com',
+                'password' => '123456',
+                'role' => UserRole::MODERATOR,
+            ],
+            [
+                'name' => 'Tester',
+                'email' => 'tester.test@gmail.com',
+                'password' => '123456',
+                'role' => UserRole::TESTER,
+            ],
+            [
+                'name' => 'User',
+                'email' => 'user@gmail.com',
+                'password' => '123456',
+                'role' => UserRole::USER,
+            ],
+        ];
+
+        foreach ($accounts as $account) {
+            User::updateOrCreate(
+                ['email' => $account['email']],
+                $account
+            );
+        }
     }
 }

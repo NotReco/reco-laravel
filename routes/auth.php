@@ -8,8 +8,14 @@ use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\Auth\TwoFactorController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
+
+// ── 2FA Routes (giữa guest và auth — user đang xác thực giữa chừng) ──
+Route::get('2fa/verify', [TwoFactorController::class, 'show'])->name('2fa.verify');
+Route::post('2fa/verify', [TwoFactorController::class, 'verify']);
+Route::post('2fa/resend', [TwoFactorController::class, 'resend'])->name('2fa.resend');
 
 Route::middleware('guest')->group(function () {
     Route::get('register', [RegisteredUserController::class, 'create'])

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Notifications\TwoFactorCode;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -26,6 +27,37 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate();
 
+        $user = Auth::user();
+
+        // ── Kiểm tra tài khoản bị khóa (mod lock) ──
+        if (!$user->is_active) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return back()->withErrors([
+                'email' => 'Tài khoản này hiện đang bị khóa. Liên hệ Admin để được kích hoạt.',
+            ])->onlyInput('email');
+        }
+
+        // ── Admin cần 2FA ──
+        if ($user->requiresTwoFactor()) {
+            // Tạo mã 2FA và gửi email
+            $user->generateTwoFactorCode();
+            $user->notify(new TwoFactorCode());
+
+            // Lưu user_id vào session, chưa đăng nhập chính thức
+            $userId = $user->id;
+            Auth::logout();
+
+            $request->session()->put('2fa:user_id', $userId);
+            $request->session()->regenerate();
+
+            return redirect()->route('2fa.verify');
+        }
+
+        // ── Đăng nhập thường ──
+        $user->update(['last_login_at' => now()]);
         $request->session()->regenerate();
 
         return redirect()->intended(route('dashboard', absolute: false));
