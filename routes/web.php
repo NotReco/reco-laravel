@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MovieController;
+use App\Http\Controllers\PersonController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReviewController;
 use Illuminate\Support\Facades\Route;
@@ -16,8 +17,21 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/explore', [MovieController::class, 'index'])->name('explore');
 Route::get('/movies/{movie}', [MovieController::class, 'show'])->name('movies.show');
 
-// TODO: Person detail
-// Route::get('/person/{person}', [PersonController::class, 'show'])->name('person.show');
+// Search API cho Navbar Live Search
+Route::get('/api/search', function (\Illuminate\Http\Request $request) {
+    $q = $request->query('q');
+    if (!$q) return response()->json([]);
+    $movies = \App\Models\Movie::where('title', 'like', "%{$q}%")
+        ->orWhere('original_title', 'like', "%{$q}%")
+        ->select('id', 'title', 'poster', 'release_date')
+        ->orderByDesc('view_count')
+        ->take(5)
+        ->get();
+    return response()->json($movies);
+})->name('api.search');
+
+// Person detail
+Route::get('/person/{person}', [PersonController::class, 'show'])->name('person.show');
 
 // TODO: Forum (public)
 // Route::get('/forum', [ForumController::class, 'index'])->name('forum.index');

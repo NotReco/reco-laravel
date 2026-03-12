@@ -73,20 +73,76 @@
             <div class="flex items-center gap-2 ml-auto">
 
                 {{-- Search expandable (desktop) --}}
-                <div class="hidden md:flex items-center relative">
+                <div class="hidden md:flex items-center relative" x-data="{
+                    searchQuery: '{{ request('q') }}',
+                    results: [],
+                    loading: false,
+                    showResults: false,
+                    async performSearch() {
+                        if (this.searchQuery.length < 2) {
+                            this.results = [];
+                            this.showResults = false;
+                            return;
+                        }
+                        this.loading = true;
+                        try {
+                            const res = await fetch('/api/search?q=' + encodeURIComponent(this.searchQuery));
+                            this.results = await res.json();
+                            this.showResults = true;
+                        } finally {
+                            this.loading = false;
+                        }
+                    }
+                }" @click.outside="showResults = false">
                     <div x-show="searchOpen" x-transition:enter="transition ease-out duration-150"
                         x-transition:enter-start="opacity-0 -translate-x-4"
                         x-transition:enter-end="opacity-100 translate-x-0"
                         x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100"
-                        x-transition:leave-end="opacity-0" class="absolute right-10 w-64 origin-right"
+                        x-transition:leave-end="opacity-0" class="absolute right-10 w-72 origin-right z-50"
                         style="display:none">
-                        <form action="{{ route('explore') }}" method="GET">
-                            <input type="text" name="q" id="nav-search-input" value="{{ request('q') }}"
-                                @keydown.escape="closeSearch()" placeholder="Tìm kiếm phim..." class="w-full pl-4 pr-4 py-1.5 text-sm rounded-xl
-                                          bg-slate-800 border border-slate-600 text-slate-100
-                                          placeholder-slate-500 focus:border-rose-500 focus:outline-none
-                                          focus:ring-1 focus:ring-rose-500 transition-colors">
+                        
+                        <form action="{{ route('explore') }}" method="GET" class="relative">
+                            <input type="text" name="q" id="nav-search-input" x-model="searchQuery"
+                                @input.debounce.300ms="performSearch()"
+                                @focus="if(results.length > 0) showResults = true"
+                                @keydown.escape="closeSearch(); showResults = false"
+                                placeholder="Tìm kiếm phim..." autocomplete="off"
+                                class="w-full pl-4 pr-10 py-2 text-sm rounded-xl
+                                      bg-dark-800 border border-dark-600 text-white
+                                      placeholder-dark-400 focus:border-rose-500 focus:outline-none
+                                      focus:ring-1 focus:ring-rose-500 transition-colors shadow-lg">
+                            
+                            {{-- Loading spinner --}}
+                            <div x-show="loading" class="absolute right-3 top-1/2 -translate-y-1/2">
+                                <svg class="animate-spin h-4 w-4 text-rose-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            </div>
                         </form>
+
+                        {{-- Live Search Results Dropdown --}}
+                        <div x-show="showResults && results.length > 0" x-transition
+                            class="absolute top-12 left-0 right-0 bg-dark-800 border border-dark-700 rounded-xl shadow-2xl overflow-hidden z-50">
+                            <template x-for="movie in results" :key="movie.id">
+                                <a :href="'/movies/' + movie.id" class="flex items-center gap-3 p-2 hover:bg-dark-700 transition-colors border-b border-dark-700/50 last:border-0">
+                                    <div class="w-10 h-14 bg-dark-900 rounded bg-cover bg-center shrink-0" :style="movie.poster ? `background-image: url('${movie.poster}')` : ''">
+                                        <template x-if="!movie.poster">
+                                            <div class="w-full h-full flex items-center justify-center text-dark-500">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"/></svg>
+                                            </div>
+                                        </template>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-semibold text-white truncate" x-text="movie.title"></p>
+                                        <p class="text-xs text-dark-400" x-text="movie.release_date ? movie.release_date.substring(0, 4) : ''"></p>
+                                    </div>
+                                </a>
+                            </template>
+                            <a :href="'/explore?q=' + encodeURIComponent(searchQuery)" class="block text-center p-2 text-xs font-medium text-rose-400 hover:text-rose-300 hover:bg-dark-700 transition-colors">
+                                Xem tất cả kết quả →
+                            </a>
+                        </div>
                     </div>
 
                     <button @click="searchOpen ? closeSearch() : openSearch()"

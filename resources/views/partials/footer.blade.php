@@ -115,6 +115,18 @@
             </div>
         </div>
 
+        {{-- Guest CTA --}}
+        @guest
+            <div class="card bg-gradient-to-br from-rose-900/40 to-slate-900/40 border-rose-500/20 p-8 text-center rounded-2xl mb-12">
+                <h3 class="text-2xl font-display font-bold text-white mb-2">Tham gia cộng đồng RecoDB</h3>
+                <p class="text-slate-400 max-w-xl mx-auto mb-6">Đăng ký tài khoản để đánh giá phim, tạo danh sách yêu thích và tham gia thảo luận cùng hàng ngàn thành viên khác.</p>
+                <div class="flex items-center justify-center gap-4">
+                    <a href="{{ route('register') }}" class="btn-primary">Tạo tài khoản miễn phí</a>
+                    <a href="{{ route('login') }}" class="btn-secondary">Đăng nhập</a>
+                </div>
+            </div>
+        @endguest
+
         {{-- Bottom bar --}}
         <div
             class="pt-6 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-2 text-sm text-slate-500">
