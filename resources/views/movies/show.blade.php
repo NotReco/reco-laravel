@@ -85,7 +85,7 @@
                 @if($movie->genres->isNotEmpty())
                     <div class="flex items-center gap-2 flex-wrap">
                         @foreach($movie->genres as $genre)
-                            <a href="{{ route('movies.index', ['genre' => $genre->id]) }}"
+                            <a href="{{ route('explore', ['genre' => $genre->id]) }}"
                                 class="px-3 py-1 rounded-full text-xs font-medium bg-dark-800 text-dark-300 border border-dark-700 hover:border-accent-500/50 hover:text-white transition-colors">
                                 {{ $genre->name }}
                             </a>

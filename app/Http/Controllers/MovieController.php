@@ -49,7 +49,7 @@ class MovieController extends Controller
             ->orderByDesc('movies_count')
             ->get();
 
-        return view('movies.index', compact('movies', 'genres', 'sort'));
+        return view('explore', compact('movies', 'genres', 'sort'));
     }
 
     /**

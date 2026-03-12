@@ -30,6 +30,7 @@
 }
 
 @layer components {
+    /* ── Buttons ── */
     .btn-primary {
         @apply inline-flex items-center justify-center px-6 py-3 bg-accent-500 text-white font-semibold rounded-xl hover:bg-accent-600 focus:outline-none focus:ring-2 focus:ring-accent-500 focus:ring-offset-2 focus:ring-offset-dark-900 transition-all duration-200 ease-out;
     }
@@ -38,22 +39,113 @@
         @apply inline-flex items-center justify-center px-6 py-3 bg-dark-700 text-dark-100 font-semibold rounded-xl border border-dark-600 hover:bg-dark-600 hover:border-dark-500 focus:outline-none focus:ring-2 focus:ring-dark-500 focus:ring-offset-2 focus:ring-offset-dark-900 transition-all duration-200 ease-out;
     }
 
+    .btn-rose {
+        @apply inline-flex items-center justify-center px-6 py-3 bg-rose-600 text-white font-semibold rounded-xl hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 focus:ring-offset-dark-900 transition-all duration-200 ease-out shadow-lg shadow-rose-600/25;
+    }
+
+    .btn-ghost {
+        @apply inline-flex items-center justify-center px-6 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white font-semibold rounded-xl border border-white/20 transition-all duration-200;
+    }
+
+    /* ── Cards ── */
     .card {
         @apply bg-dark-800/60 backdrop-blur-sm border border-dark-700/50 rounded-2xl;
     }
 
+    .card-hover {
+        @apply card hover:border-rose-500/30 transition-all duration-300;
+    }
+
+    /* ── Inputs ── */
     .input-dark {
         @apply w-full px-4 py-3 bg-dark-800 border border-dark-600 rounded-xl text-dark-100 placeholder-dark-400 focus:border-accent-500 focus:ring-1 focus:ring-accent-500 transition-colors duration-200;
     }
 
+    /* ── Glass effect ── */
     .glass {
         @apply bg-dark-900/80 backdrop-blur-xl border border-white/5;
+    }
+
+    .glass-light {
+        @apply bg-dark-900/60 backdrop-blur-sm border border-dark-700/50;
+    }
+
+    /* ── Rating Colors (1-10 scale) ── */
+    .rating-terrible {
+        color: #E63946;
+    }           /* 1-2: Rất tệ / Tệ */
+    .rating-below-avg {
+        color: #E63946;
+    }          /* 3-4: Dưới TB / Tạm được */
+    .rating-average {
+        color: #d97b2a;
+    }            /* 5-6: Trung bình / Khá */
+    .rating-good {
+        color: #2A9D8F;
+    }               /* 7-8: Tốt / Rất tốt */
+    .rating-excellent {
+        color: #f5c518;
+    }          /* 9-10: Xuất sắc / Kiệt tác */
+
+    .rating-bg-terrible {
+        background-color: #E63946;
+    }
+    .rating-bg-below-avg {
+        background-color: #E63946;
+    }
+    .rating-bg-average {
+        background-color: #d97b2a;
+    }
+    .rating-bg-good {
+        background-color: #2A9D8F;
+    }
+    .rating-bg-excellent {
+        background-color: #f5c518;
+    }
+
+    /* ── Section Headers ── */
+    .section-title {
+        @apply text-2xl lg:text-3xl font-display font-bold text-white flex items-center gap-2;
+    }
+
+    .section-subtitle {
+        @apply text-dark-400 text-sm mb-6;
+    }
+
+    .section-link {
+        @apply text-sm font-medium text-dark-400 hover:text-white transition-colors whitespace-nowrap;
+    }
+
+    /* ── Badges ── */
+    .badge {
+        @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold;
+    }
+
+    .badge-rose {
+        @apply badge bg-rose-600 text-white;
+    }
+
+    .badge-dark {
+        @apply badge bg-dark-950/80 backdrop-blur-sm text-white;
+    }
+
+    /* ── Genre Pills ── */
+    .genre-pill {
+        @apply px-5 py-2.5 rounded-full text-sm font-medium bg-dark-800 text-dark-300 border border-dark-700 hover:border-rose-500/50 hover:text-white transition-all duration-200;
+    }
+
+    .genre-pill-active {
+        @apply px-5 py-2.5 rounded-full text-sm font-medium bg-rose-600 text-white hover:bg-rose-700 transition-colors;
     }
 }
 
 @layer utilities {
     .text-gradient {
         @apply bg-gradient-to-r from-accent-400 to-accent-600 bg-clip-text text-transparent;
+    }
+
+    .text-gradient-rose {
+        @apply bg-gradient-to-r from-rose-400 to-rose-600 bg-clip-text text-transparent;
     }
 
     .animate-fade-in {
@@ -66,6 +158,36 @@
 
     .animate-float {
         animation: float 6s ease-in-out infinite;
+    }
+
+    .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
+
+    .line-clamp-1 {
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .line-clamp-3 {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
     }
 }
 

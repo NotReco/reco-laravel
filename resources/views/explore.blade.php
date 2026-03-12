@@ -26,7 +26,7 @@
                     'popular' => 'Phổ biến',
                     'title' => 'A-Z',
                 ] as $key => $label)
-                    <a href="{{ route('movies.index', array_merge(request()->query(), ['sort' => $key])) }}"
+                    <a href="{{ route('explore', array_merge(request()->query(), ['sort' => $key])) }}"
                        class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors {{ $sort === $key ? 'bg-accent-500 text-white' : 'bg-dark-800 text-dark-300 hover:text-white' }}">
                         {{ $label }}
                     </a>
@@ -36,12 +36,12 @@
 
         {{-- Genre Pills --}}
         <div class="flex items-center gap-2 flex-wrap mb-8">
-            <a href="{{ route('movies.index', ['sort' => $sort]) }}"
+            <a href="{{ route('explore', ['sort' => $sort]) }}"
                class="px-3 py-1.5 rounded-full text-xs font-medium transition-colors {{ !request('genre') ? 'bg-accent-500 text-white' : 'bg-dark-800 text-dark-300 border border-dark-700 hover:text-white' }}">
                 Tất cả
             </a>
             @foreach($genres as $genre)
-                <a href="{{ route('movies.index', ['genre' => $genre->id, 'sort' => $sort]) }}"
+                <a href="{{ route('explore', ['genre' => $genre->id, 'sort' => $sort]) }}"
                    class="px-3 py-1.5 rounded-full text-xs font-medium transition-colors {{ request('genre') == $genre->id ? 'bg-accent-500 text-white' : 'bg-dark-800 text-dark-300 border border-dark-700 hover:text-white' }}">
                     {{ $genre->name }}
                 </a>
@@ -66,7 +66,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
                 </svg>
                 <p class="text-dark-400 text-lg">Không tìm thấy phim nào</p>
-                <a href="{{ route('movies.index') }}" class="text-accent-400 hover:text-accent-300 text-sm mt-2 inline-block">← Xem tất cả phim</a>
+                <a href="{{ route('explore') }}" class="text-accent-400 hover:text-accent-300 text-sm mt-2 inline-block">← Xem tất cả phim</a>
             </div>
         @endif
     </div>

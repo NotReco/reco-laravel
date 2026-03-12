@@ -14,6 +14,8 @@ export default {
             fontFamily: {
                 sans: ["Inter", ...defaultTheme.fontFamily.sans],
                 display: ["Outfit", ...defaultTheme.fontFamily.sans],
+                serif: ["Playfair Display", ...defaultTheme.fontFamily.serif],
+                heading: ["Montserrat", ...defaultTheme.fontFamily.sans],
             },
             colors: {
                 dark: {
