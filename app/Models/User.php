@@ -85,6 +85,11 @@ class User extends Authenticatable
         return $this->belongsToMany(Movie::class, 'watchlists')->withPivot('status')->withTimestamps();
     }
 
+    public function favoriteMovies()
+    {
+        return $this->belongsToMany(Movie::class, 'favorites')->withTimestamps();
+    }
+
     public function chatMessages()
     {
         return $this->hasMany(ChatMessage::class);

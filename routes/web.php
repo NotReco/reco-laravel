@@ -54,40 +54,44 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // ── Reviews ──
     Route::post('/movies/{movie}/review', [ReviewController::class, 'store'])->name('reviews.store');
-    // TODO: Route::put('/reviews/{review}', [ReviewController::class, 'update'])->name('reviews.update');
-    // TODO: Route::delete('/reviews/{review}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
+    Route::put('/reviews/{review}', [ReviewController::class, 'update'])->name('reviews.update');
+    Route::delete('/reviews/{review}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
 
     // ── Profile ──
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::get('/users/{id}', [\App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');
+    Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // TODO: Favorites
-    // Route::post('/api/favorites/toggle', [FavoriteController::class, 'toggle'])->name('favorites.toggle');
+    // ── Favorites ──
+    Route::post('/api/favorites/toggle', [\App\Http\Controllers\FavoriteController::class, 'toggle'])->name('favorites.toggle');
 
-    // TODO: Watchlist
-    // Route::post('/api/watchlist/toggle', [WatchlistController::class, 'toggle'])->name('watchlist.toggle');
-    // Route::get('/my-list', [WatchlistController::class, 'myList'])->name('mylist');
+    // ── Watchlist ──
+    Route::post('/api/watchlist/toggle', [\App\Http\Controllers\WatchlistController::class, 'toggle'])->name('watchlist.toggle');
+    Route::get('/my-list', [\App\Http\Controllers\WatchlistController::class, 'myList'])->name('mylist');
 
-    // TODO: Follows
-    // Route::post('/api/follow/toggle', [FollowController::class, 'toggle'])->name('follow.toggle');
+    // ── Follows ──
+    Route::post('/api/follow/toggle', [\App\Http\Controllers\FollowController::class, 'toggle'])->name('follow.toggle');
 
-    // TODO: Likes
-    // Route::post('/api/likes/toggle', [LikeController::class, 'toggle'])->name('likes.toggle');
+    // ── Likes ──
+    Route::post('/api/likes/toggle', [\App\Http\Controllers\LikeController::class, 'toggle'])->name('likes.toggle');
 
-    // TODO: Comments
-    // Route::post('/comments', [CommentController::class, 'store'])->name('comments.store');
-    // Route::put('/comments/{comment}', [CommentController::class, 'update'])->name('comments.update');
-    // Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
+    // ── Comments ──
+    Route::post('/comments', [\App\Http\Controllers\CommentController::class, 'store'])->name('comments.store');
+    Route::put('/comments/{comment}', [\App\Http\Controllers\CommentController::class, 'update'])->name('comments.update');
+    Route::delete('/comments/{comment}', [\App\Http\Controllers\CommentController::class, 'destroy'])->name('comments.destroy');
 
-    // TODO: Notifications
-    // Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    // ── Notifications ──
+    Route::get('/api/notifications', [\App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/api/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
+    Route::post('/api/notifications/read-all', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.markAllAsRead');
+    Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'all'])->name('notifications.all');
 
     // TODO: Messages
     // Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
 
-    // TODO: Settings
-    // Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
+    // ── Settings ──
+    Route::get('/settings', [\App\Http\Controllers\SettingsController::class, 'index'])->name('settings.index');
 });
 
 // ═══════════════════════════════════════════════════

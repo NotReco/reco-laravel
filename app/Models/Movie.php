@@ -58,6 +58,16 @@ class Movie extends Model
         return $this->belongsToMany(Genre::class, 'movie_genre');
     }
 
+    public function favoritedBy()
+    {
+        return $this->belongsToMany(User::class, 'favorites');
+    }
+
+    public function watchlistedBy()
+    {
+        return $this->belongsToMany(User::class, 'watchlists')->withPivot('status')->withTimestamps();
+    }
+
     public function people()
     {
         return $this->belongsToMany(Person::class, 'movie_person')
@@ -99,11 +109,6 @@ class Movie extends Model
         return $this->morphToMany(Tag::class, 'taggable');
     }
 
-    public function watchlistedBy()
-    {
-        return $this->belongsToMany(User::class, 'watchlists')
-            ->withPivot('status')->withTimestamps();
-    }
 
     // ── Scopes ──
 

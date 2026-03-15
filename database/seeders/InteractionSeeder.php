@@ -50,9 +50,10 @@ class InteractionSeeder extends Seeder
                     default => 'dropped',
                 };
 
-                Watchlist::create([
+                Watchlist::updateOrCreate([
                     'user_id' => $userId,
                     'movie_id' => $movieId,
+                ], [
                     'status' => $status,
                 ]);
                 $count++;
@@ -81,7 +82,7 @@ class InteractionSeeder extends Seeder
                 if ($userId == $review->user_id)
                     continue;
 
-                Like::create([
+                Like::firstOrCreate([
                     'user_id' => $userId,
                     'review_id' => $review->id,
                 ]);

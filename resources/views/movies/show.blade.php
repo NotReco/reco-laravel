@@ -110,18 +110,75 @@
                         </div>
                     @endif
 
-                    {{-- Actions --}}
-                    <div class="flex items-center justify-center md:justify-start gap-3 pt-2">
+                    {{-- Actions & Interactions --}}
+                    <div class="flex flex-wrap items-center justify-center md:justify-start gap-3 mt-6 pt-6 border-t border-dark-700/50">
                         @if($movie->trailer_url)
-                            <button @click="openTrailer('{{ $movie->trailer_url }}')" class="btn-rose">
+                            <button @click="openTrailer('{{ $movie->trailer_url }}')" class="btn-rose flex-1 md:flex-none justify-center">
                                 <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
-                                Xem Trailer
+                                Trailer
                             </button>
                         @endif
-                        <a href="#review-form" class="btn-ghost">
+                        <a href="#review-form" class="btn-ghost flex-1 md:flex-none justify-center">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
-                            Viết Review
+                            Review
                         </a>
+
+                        {{-- User Actions --}}
+                        <div class="flex items-center gap-2 w-full md:w-auto mt-2 md:mt-0" x-data="{
+                            isFavorited: {{ auth()->check() && $movie->favoritedBy->contains(auth()->id()) ? 'true' : 'false' }},
+                            watchlistStatus: '{{ auth()->check() ? optional($movie->watchlistedBy->where('id', auth()->id())->first())->pivot->status : '' }}',
+                            async toggleFavorite() {
+                                @guest window.location.href = '{{ route('login') }}'; return; @endguest
+                                const res = await fetch('{{ route('favorites.toggle') }}', {
+                                    method: 'POST',
+                                    headers: {'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}'},
+                                    body: JSON.stringify({ movie_id: {{ $movie->id }} })
+                                });
+                                const data = await res.json();
+                                if(data.success) this.isFavorited = data.is_favorited;
+                            },
+                            async updateWatchlist(status) {
+                                @guest window.location.href = '{{ route('login') }}'; return; @endguest
+                                const res = await fetch('{{ route('watchlist.toggle') }}', {
+                                    method: 'POST',
+                                    headers: {'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}'},
+                                    body: JSON.stringify({ movie_id: {{ $movie->id }}, status: status })
+                                });
+                                const data = await res.json();
+                                if(data.success) {
+                                    this.watchlistStatus = data.in_watchlist ? data.status : '';
+                                    // Optional: show a toast here using Alpine events
+                                }
+                            }
+                        }">
+                            {{-- Favorite --}}
+                            <button @click="toggleFavorite()" 
+                                class="flex-1 md:flex-none p-2.5 rounded-xl border transition-all flex items-center justify-center group"
+                                :class="isFavorited ? 'bg-rose-900/30 border-rose-500/50 text-rose-400' : 'bg-dark-800 border-dark-600 text-dark-300 hover:text-white hover:border-dark-500'">
+                                <svg class="w-5 h-5 transition-transform group-active:scale-75" :fill="isFavorited ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                            </button>
+
+                            {{-- Watchlist Dropdown --}}
+                            <div class="relative flex-1 md:flex-none" x-data="{ open: false }" @click.outside="open = false">
+                                <button @click="open = !open" 
+                                    class="w-full p-2.5 rounded-xl border transition-all flex items-center justify-center gap-2 group"
+                                    :class="watchlistStatus ? 'bg-blue-900/30 border-blue-500/50 text-blue-400' : 'bg-dark-800 border-dark-600 text-dark-300 hover:text-white hover:border-dark-500'">
+                                    <svg class="w-5 h-5 transition-transform group-active:scale-75" :fill="watchlistStatus ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                                    </svg>
+                                    <span class="text-sm font-medium" x-text="watchlistStatus === 'want_to_watch' ? 'Muốn xem' : (watchlistStatus === 'watching' ? 'Đang xem' : (watchlistStatus === 'watched' ? 'Đã xem' : (watchlistStatus === 'dropped' ? 'Bỏ dở' : 'Watchlist')))"></span>
+                                </button>
+
+                                <div x-show="open" x-transition.opacity.duration.200ms class="absolute right-0 mt-2 w-48 bg-dark-800 border border-dark-600 rounded-xl shadow-xl overflow-hidden z-20" style="display: none;">
+                                    <button @click="updateWatchlist('want_to_watch'); open = false" class="w-full text-left px-4 py-2 text-sm text-dark-300 hover:text-white hover:bg-dark-700 transition" :class="{'text-blue-400 bg-dark-700/50': watchlistStatus === 'want_to_watch'}">Muốn xem</button>
+                                    <button @click="updateWatchlist('watching'); open = false" class="w-full text-left px-4 py-2 text-sm text-dark-300 hover:text-white hover:bg-dark-700 transition" :class="{'text-blue-400 bg-dark-700/50': watchlistStatus === 'watching'}">Đang xem</button>
+                                    <button @click="updateWatchlist('watched'); open = false" class="w-full text-left px-4 py-2 text-sm text-dark-300 hover:text-white hover:bg-dark-700 transition" :class="{'text-blue-400 bg-dark-700/50': watchlistStatus === 'watched'}">Đã xem</button>
+                                    <button @click="updateWatchlist('dropped'); open = false" class="w-full text-left px-4 py-2 text-sm text-dark-300 hover:text-white hover:bg-dark-700 transition" :class="{'text-blue-400 bg-dark-700/50': watchlistStatus === 'dropped'}">Bỏ dở</button>
+                                    <button x-show="watchlistStatus" @click="updateWatchlist(watchlistStatus); open = false" class="w-full text-left px-4 py-2 text-sm text-rose-400 hover:bg-dark-700 transition border-t border-dark-600">Gỡ khỏi danh sách</button>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>

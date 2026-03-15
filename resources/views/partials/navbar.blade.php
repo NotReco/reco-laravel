@@ -158,16 +158,83 @@
 
                 @auth
                     {{-- Bell --}}
-                    <button title="Thông báo" class="hidden sm:flex w-9 h-9 rounded-xl bg-slate-800/80 border border-slate-700
-                                       text-slate-400 hover:text-white hover:bg-slate-700 items-center justify-center
-                                       transition-all duration-150">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11
-                                         a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341
-                                         C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436
-                                         L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                        </svg>
-                    </button>
+                    {{-- Notification Dropdown --}}
+                    <div class="relative hidden sm:block" x-data="{
+                        open: false,
+                        notifications: [],
+                        unreadCount: 0,
+                        async fetchNotifications() {
+                            try {
+                                const res = await fetch('{{ route('notifications.index') }}');
+                                const data = await res.json();
+                                this.notifications = data.notifications;
+                                this.unreadCount = data.unread_count;
+                            } catch (e) { console.error('Error fetching notifications:', e); }
+                        },
+                        async markAsRead(id) {
+                            try {
+                                await fetch(`/api/notifications/${id}/read`, {
+                                    method: 'POST',
+                                    headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'}
+                                });
+                                this.fetchNotifications();
+                            } catch (e) { console.error(e); }
+                        },
+                        async markAllAsRead() {
+                            try {
+                                await fetch('{{ route('notifications.markAllAsRead') }}', {
+                                    method: 'POST',
+                                    headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'}
+                                });
+                                this.fetchNotifications();
+                            } catch (e) { console.error(e); }
+                        },
+                        init() { this.fetchNotifications(); }
+                    }" @click.outside="open = false">
+                        
+                        <button @click="open = !open; if(open) fetchNotifications()" title="Thông báo" 
+                            class="relative w-9 h-9 rounded-xl border flex items-center justify-center transition-all duration-150"
+                            :class="open ? 'bg-slate-700 border-slate-600 text-white' : 'bg-slate-800/80 border-slate-700 text-slate-400 hover:text-white hover:bg-slate-700'">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                            </svg>
+                            <span x-show="unreadCount > 0" x-text="unreadCount > 9 ? '9+' : unreadCount" style="display: none;" class="absolute -top-1.5 -right-1.5 w-4 h-4 bg-rose-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center border-2 border-slate-900"></span>
+                        </button>
+
+                        {{-- Dropdown Panel --}}
+                        <div x-show="open" x-transition.opacity.duration.200ms style="display: none;" 
+                             class="absolute right-0 mt-3 w-80 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl overflow-hidden z-50">
+                            <div class="p-3 border-b border-slate-700 flex items-center justify-between bg-slate-800/90 backdrop-blur-sm">
+                                <h3 class="font-bold text-white text-sm">Thông báo</h3>
+                                <button x-show="unreadCount > 0" @click="markAllAsRead()" class="text-xs text-rose-400 hover:text-rose-300 font-medium">Đánh dấu đã đọc</button>
+                            </div>
+                            
+                            <div class="max-h-[300px] overflow-y-auto scrollbar-hide">
+                                <template x-if="notifications.length === 0">
+                                    <div class="p-6 text-center text-slate-400 text-sm">
+                                        Không có thông báo nào cả.
+                                    </div>
+                                </template>
+                                <template x-for="item in notifications" :key="item.id">
+                                    <div @click="if(!item.read_at) markAsRead(item.id); if(item.data.url) window.location.href = item.data.url;" 
+                                         class="p-3 border-b border-slate-700/50 hover:bg-slate-700/50 transition cursor-pointer flex gap-3"
+                                         :class="!item.read_at ? 'bg-slate-800' : 'bg-transparent opacity-70'">
+                                        <div class="w-8 h-8 rounded-full bg-rose-500/20 text-rose-500 flex items-center justify-center shrink-0 mt-0.5" x-html="item.data.icon || `<svg class='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'/></svg>`">
+                                        </div>
+                                        <div class="min-w-0 flex-1">
+                                            <p class="text-sm text-white leading-snug break-words" x-text="item.data.message"></p>
+                                            <p class="text-xs text-slate-500 mt-1" x-text="item.created_at"></p>
+                                        </div>
+                                        <div x-show="!item.read_at" class="w-2 h-2 rounded-full bg-rose-500 shrink-0 mt-1.5 line-clamp-2"></div>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <a href="{{ route('notifications.all') }}" class="block p-2.5 text-center text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-700 transition border-t border-slate-700 bg-slate-800/90 backdrop-blur-sm">
+                                Xem tất cả thông báo
+                            </a>
+                        </div>
+                    </div>
 
                     {{-- Avatar Dropdown --}}
                     <div class="relative" x-data="{ open: false }">
@@ -241,14 +308,14 @@
                                 Dashboard
                             </a>
 
-                            <a href="#" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-slate-300
+                            <a href="{{ route('mylist') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-slate-300
                                           hover:text-white hover:bg-slate-700 transition-colors group">
                                 <svg class="w-4 h-4 text-slate-500 group-hover:text-rose-400 transition-colors shrink-0"
                                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                                 </svg>
-                                Danh sách yêu thích
+                                Danh sách của tôi
                             </a>
 
                             <a href="#" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-slate-300
