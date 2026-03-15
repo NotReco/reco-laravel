@@ -22,6 +22,11 @@ class InteractionSeeder extends Seeder
         $movies = Movie::pluck('id')->toArray();
         $reviews = Review::where('status', 'published')->get();
 
+        if (empty($movies)) {
+            $this->command->warn('⚠️ Không có phim nào trong DB! Chạy `php artisan import:tmdb-movies` trước khi seed.');
+            return;
+        }
+
         $this->seedWatchlists($users, $movies);
         $this->seedLikes($users, $reviews);
         $this->seedComments($users, $reviews);

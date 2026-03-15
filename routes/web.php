@@ -5,6 +5,8 @@ use App\Http\Controllers\MovieController;
 use App\Http\Controllers\PersonController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\ForumController;
+use App\Http\Controllers\MessageController;
 use Illuminate\Support\Facades\Route;
 
 // ═══════════════════════════════════════════════════
@@ -33,12 +35,9 @@ Route::get('/api/search', function (\Illuminate\Http\Request $request) {
 // Person detail
 Route::get('/person/{person}', [PersonController::class, 'show'])->name('person.show');
 
-// TODO: Forum (public)
-// Route::get('/forum', [ForumController::class, 'index'])->name('forum.index');
-// Route::get('/forum/{thread}', [ForumController::class, 'show'])->name('forum.show');
-
-// TODO: Public profile
-// Route::get('/@{username}', [ProfileController::class, 'public'])->name('profile.public');
+// Forum (public)
+Route::get('/forum', [ForumController::class, 'index'])->name('forum.index');
+Route::get('/forum/threads/{thread:slug}', [ForumController::class, 'show'])->name('forum.show');
 
 // ═══════════════════════════════════════════════════
 //  GROUP 2: AUTH — Login, Register, Password Reset
@@ -87,8 +86,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/api/notifications/read-all', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.markAllAsRead');
     Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'all'])->name('notifications.all');
 
-    // TODO: Messages
-    // Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
+    // ── Forum (auth actions) ──
+    Route::get('/forum/create', [ForumController::class, 'create'])->name('forum.create');
+    Route::post('/forum/threads', [ForumController::class, 'storeThread'])->name('forum.storeThread');
+    Route::post('/forum/threads/{thread:slug}/reply', [ForumController::class, 'storeReply'])->name('forum.reply');
+    Route::delete('/forum/threads/{thread:slug}', [ForumController::class, 'destroy'])->name('forum.destroy');
+
+    // ── Messages ──
+    Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
+    Route::get('/messages/{userId}', [MessageController::class, 'show'])->name('messages.show');
+    Route::post('/messages', [MessageController::class, 'store'])->name('messages.store');
 
     // ── Settings ──
     Route::get('/settings', [\App\Http\Controllers\SettingsController::class, 'index'])->name('settings.index');
@@ -99,21 +106,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
 // ═══════════════════════════════════════════════════
 
 Route::middleware(['auth', 'role:staff'])->prefix('admin')->name('admin.')->group(function () {
-    // TODO: Admin Dashboard
-    // Route::get('/', [Admin\DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
 
-    // TODO: Admin Movies
-    // Route::resource('movies', Admin\MovieController::class);
+    // Movies
+    Route::get('/movies', [\App\Http\Controllers\Admin\MovieController::class, 'index'])->name('movies.index');
+    Route::get('/movies/{movie}/edit', [\App\Http\Controllers\Admin\MovieController::class, 'edit'])->name('movies.edit');
+    Route::put('/movies/{movie}', [\App\Http\Controllers\Admin\MovieController::class, 'update'])->name('movies.update');
+    Route::delete('/movies/{movie}', [\App\Http\Controllers\Admin\MovieController::class, 'destroy'])->name('movies.destroy');
 
-    // TODO: Admin Reviews
-    // Route::resource('reviews', Admin\ReviewController::class)->only(['index', 'show', 'update', 'destroy']);
+    // Reviews
+    Route::get('/reviews', [\App\Http\Controllers\Admin\ReviewController::class, 'index'])->name('reviews.index');
+    Route::post('/reviews/{review}/approve', [\App\Http\Controllers\Admin\ReviewController::class, 'approve'])->name('reviews.approve');
+    Route::post('/reviews/{review}/reject', [\App\Http\Controllers\Admin\ReviewController::class, 'reject'])->name('reviews.reject');
+    Route::delete('/reviews/{review}', [\App\Http\Controllers\Admin\ReviewController::class, 'destroy'])->name('reviews.destroy');
 
-    // TODO: Admin Users
-    // Route::resource('users', Admin\UserController::class)->only(['index', 'show', 'update']);
-
-    // TODO: Admin Categories
-    // Route::resource('categories', Admin\CategoryController::class);
-
-    // TODO: Admin Reports
-    // Route::resource('reports', Admin\ReportController::class)->only(['index', 'show', 'update']);
+    // Users
+    Route::get('/users', [\App\Http\Controllers\Admin\UserController::class, 'index'])->name('users.index');
+    Route::put('/users/{user}', [\App\Http\Controllers\Admin\UserController::class, 'update'])->name('users.update');
+    Route::post('/users/{user}/toggle-ban', [\App\Http\Controllers\Admin\UserController::class, 'toggleBan'])->name('users.toggleBan');
 });

@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,        // 30 user giả
             ReviewSeeder::class,      // Reviews + quick ratings
             InteractionSeeder::class, // Watchlist, likes, comments, follows
+            ForumSeeder::class,       // Forum categories
         ]);
     }
 

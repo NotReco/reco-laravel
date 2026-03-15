@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class ProfileController extends Controller
@@ -19,21 +20,23 @@ class ProfileController extends Controller
     {
         $user = User::withCount(['followers', 'following', 'reviews'])
             ->with([
-                'favoriteMovies' => fn($q) => $q->latest()->take(6),
+                'favorites' => fn($q) => $q->latest()->take(6),
                 'reviews' => fn($q) => $q->with('movie')->latest()->take(5)
             ])
             ->findOrFail($id);
 
         $isOwnProfile = Auth::check() && Auth::id() === $user->id;
+        /** @var \App\Models\User|null $authUser */
+        $authUser = Auth::user();
         $isFollowing = Auth::check() && !$isOwnProfile 
-            ? Auth::user()->following()->where('following_id', $user->id)->exists() 
+            ? $authUser->following()->where('following_id', $user->id)->exists() 
             : false;
 
         $stats = [
             'reviews_count' => $user->reviews_count,
             'followers_count' => $user->followers_count,
             'following_count' => $user->following_count,
-            'favorites_count' => $user->favoriteMovies()->count(),
+            'favorites_count' => $user->favorites()->count(),
             'watch_time' => 0 // Gợi ý: có thể tính tổng thời lượng phim đã xem
         ];
 
@@ -55,12 +58,25 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $data = $request->validated();
 
-        // Hardcode handle avatar upload if we add it later
         if ($request->hasFile('avatar')) {
-             // Handle file upload here
+            if ($request->user()->avatar && !str_starts_with($request->user()->avatar, 'http')) {
+                Storage::disk('public')->delete(str_replace('/storage/', '', $request->user()->avatar));
+            }
+            $path = $request->file('avatar')->store('avatars', 'public');
+            $data['avatar'] = '/storage/' . $path;
         }
+
+        if ($request->hasFile('cover_photo')) {
+            if ($request->user()->cover_photo && !str_starts_with($request->user()->cover_photo, 'http')) {
+                Storage::disk('public')->delete(str_replace('/storage/', '', $request->user()->cover_photo));
+            }
+            $path = $request->file('cover_photo')->store('covers', 'public');
+            $data['cover_photo'] = '/storage/' . $path;
+        }
+
+        $request->user()->fill($data);
 
         if ($request->user()->isDirty('email')) {
             $request->user()->email_verified_at = null;

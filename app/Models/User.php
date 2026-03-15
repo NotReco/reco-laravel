@@ -75,20 +75,16 @@ class User extends Authenticatable
         return $this->belongsToMany(User::class, 'follows', 'follower_id', 'following_id')->withTimestamps();
     }
 
-    public function watchlists()
+    public function favorites()
     {
-        return $this->hasMany(Watchlist::class);
+        return $this->belongsToMany(Movie::class, 'favorites')->withTimestamps();
     }
 
-    public function watchlistMovies()
+    public function watchlists()
     {
         return $this->belongsToMany(Movie::class, 'watchlists')->withPivot('status')->withTimestamps();
     }
 
-    public function favoriteMovies()
-    {
-        return $this->belongsToMany(Movie::class, 'favorites')->withTimestamps();
-    }
 
     public function chatMessages()
     {

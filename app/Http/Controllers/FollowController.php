@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Notifications\NewFollowerNotification;
 
 class FollowController extends Controller
 {
@@ -43,6 +44,12 @@ class FollowController extends Controller
 
         // Thực hiện follow
         $follower->following()->attach($followingId);
+
+        // Gửi thông báo cho người được theo dõi
+        $userToFollow = User::find($followingId);
+        if ($userToFollow) {
+            $userToFollow->notify(new NewFollowerNotification($follower));
+        }
         
         return response()->json([
             'success' => true,

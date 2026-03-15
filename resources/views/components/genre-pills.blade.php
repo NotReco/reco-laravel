@@ -13,7 +13,7 @@
             class="{{ $selectedId == $genre->id ? 'genre-pill-active' : 'genre-pill' }}">
             {{ $genre->name }}
             @if(isset($genre->movies_count))
-                <span class="text-dark-500 ml-1">{{ $genre->movies_count }}</span>
+                <span class="text-gray-400 ml-1">{{ $genre->movies_count }}</span>
             @endif
         </a>
     @endforeach

@@ -105,13 +105,13 @@
                                 <a href="#" class="text-xs text-rose-500 hover:text-rose-400">Xem tất cả</a>
                             @endif
                         </div>
-                        @if($user->favoriteMovies->isEmpty())
+                        @if($user->favorites->isEmpty())
                             <div class="text-center py-8">
                                 <p class="text-dark-400 text-sm">Chưa có phim yêu thích.</p>
                             </div>
                         @else
                             <div class="grid grid-cols-3 gap-2">
-                                @foreach($user->favoriteMovies as $favMovie)
+                                @foreach($user->favorites as $favMovie)
                                     <a href="{{ route('movies.show', $favMovie) }}" class="block shrink-0 group relative rounded-lg overflow-hidden aspect-[2/3]">
                                         <img src="{{ $favMovie->poster }}" alt="{{ $favMovie->title }}" class="w-full h-full object-cover transition-transform group-hover:scale-110">
                                         <div class="absolute inset-0 bg-gradient-to-t from-dark-950/80 via-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2">
