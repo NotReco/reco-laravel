@@ -224,6 +224,7 @@
                                 <p class="text-dark-400 text-xs line-clamp-1 mt-0.5">{{ $person->pivot->character_name }}</p>
                             @endif
                         </a>
+                        @endforeach
                     </div>
                 </section>
             @endif

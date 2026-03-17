@@ -11,7 +11,7 @@
             {{-- Brand --}}
             <div class="lg:col-span-1">
                 <a href="{{ route('home') }}" class="flex items-center gap-2.5 mb-4 group w-fit">
-                    <img src="{{ asset('storage/images/logo.svg') }}" alt="RecoDB" class="h-10 w-auto group-hover:opacity-70 transition-opacity">
+                    <img src="{{ asset('storage/images/logo.svg') }}" alt="RecoDB" class="h-9 w-auto group-hover:opacity-70 transition-opacity">
                 </a>
                 <p class="text-gray-500 text-sm leading-relaxed mb-5">
                     Khám phá, đánh giá và chia sẻ cảm nhận về phim điện ảnh cùng cộng đồng yêu phim.

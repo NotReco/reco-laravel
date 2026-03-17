@@ -31,7 +31,7 @@
 
             {{-- ══ LOGO ══════════════════════════════════════ --}}
             <a href="{{ route('home') }}" class="flex items-center shrink-0 mr-8 group">
-                <img src="{{ asset('storage/images/logo.svg') }}" alt="RecoDB" class="h-10 w-auto group-hover:opacity-80 transition-opacity">
+                <img src="{{ asset('storage/images/logo.svg') }}" alt="RecoDB" class="h-9 w-auto group-hover:opacity-80 transition-opacity">
             </a>
 
             {{-- ══ NAV LINKS (desktop) ═══════════════════════ --}}
