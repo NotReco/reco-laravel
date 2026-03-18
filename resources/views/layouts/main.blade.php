@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>@isset($title){{ $title }} — @endisset{{ config('app.name', 'RecoDB') }}</title>
+    <title>@isset($title){{ $title }} | @endisset{{ config('app.name', 'RecoDB') }}</title>
     <meta name="description"
         content="@isset($description){{ $description }}@else RecoDB — Khám phá, đánh giá và chia sẻ cảm nhận về phim điện ảnh cùng cộng đồng.@endisset">
 

@@ -17,7 +17,7 @@
     }" @keydown.escape.window="closeTrailer()">
 
         {{-- Backdrop Hero --}}
-        <section class="relative h-[400px] md:h-[500px] overflow-hidden -mt-16">
+        <section data-hero-dark class="relative h-[400px] md:h-[500px] overflow-hidden -mt-16">
             @if($movie->backdrop)
                 <img src="{{ $movie->backdrop }}" alt="{{ $movie->title }}" class="w-full h-full object-cover">
             @endif
