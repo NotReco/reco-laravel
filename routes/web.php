@@ -15,6 +15,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
+// Static Pages
+Route::view('/terms', 'pages.terms', ['title' => 'Điều khoản dịch vụ'])->name('pages.terms');
+Route::view('/privacy', 'pages.privacy', ['title' => 'Chính sách bảo mật'])->name('pages.privacy');
+
 // Phim
 Route::get('/explore', [MovieController::class, 'index'])->name('explore');
 Route::get('/movies/{movie}', [MovieController::class, 'show'])->name('movies.show');
