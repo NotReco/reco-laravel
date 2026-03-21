@@ -33,7 +33,13 @@ class NewPasswordController extends Controller
         $request->validate([
             'token' => ['required'],
             'email' => ['required', 'email'],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'password' => ['required', 'confirmed', Rules\Password::min(4)],
+        ], [
+            'email.required' => 'Email là bắt buộc.',
+            'email.email' => 'Địa chỉ email không hợp lệ.',
+            'password.required' => 'Vui lòng nhập mật khẩu mới.',
+            'password.confirmed' => 'Xác nhận mật khẩu không khớp.',
+            'password.min' => 'Mật khẩu phải dài ít nhất 4 ký tự.',
         ]);
 
         // Here we will attempt to reset the user's password. If it is successful we
@@ -51,12 +57,17 @@ class NewPasswordController extends Controller
             }
         );
 
-        // If the password was successfully reset, we will redirect the user back to
-        // the application's home authenticated view. If there is an error we can
-        // redirect them back to where they came from with their error message.
-        return $status == Password::PASSWORD_RESET
-                    ? redirect()->route('login')->with('status', __($status))
-                    : back()->withInput($request->only('email'))
-                        ->withErrors(['email' => __($status)]);
+        if ($status == Password::PASSWORD_RESET) {
+            return redirect()->route('login')->with('status', 'Mật khẩu của bạn đã được đặt lại thành công! Vui lòng đăng nhập.');
+        }
+
+        $errorMessage = $status == Password::INVALID_USER 
+            ? 'Không tìm thấy tài khoản nào được liên kết với email này.' 
+            : ($status == Password::INVALID_TOKEN 
+                ? 'Liên kết đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.' 
+                : 'Đã có lỗi xảy ra, vui lòng thử lại sau.');
+
+        return back()->withInput($request->only('email'))
+            ->withErrors(['email' => $errorMessage]);
     }
 }
