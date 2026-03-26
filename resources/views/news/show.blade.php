@@ -25,7 +25,7 @@
     <div class="mt-5 flex items-center gap-3">
         <div class="w-10 h-10 rounded-full bg-gradient-to-br from-rose-400 to-rose-600 flex items-center justify-center shrink-0 ring-2 ring-rose-100">
             @if($article->user->avatar ?? false)
-                <img src="{{ $article->user->avatar }}" alt="" class="w-full h-full rounded-full object-cover">
+                <img src="{{ $article->user->avatar }}" alt="" class="w-full h-full rounded-full object-cover" loading="lazy">
             @else
                 <span class="text-sm font-bold text-white">{{ strtoupper(substr($article->user->name ?? '?', 0, 1)) }}</span>
             @endif
@@ -48,7 +48,7 @@
     {{-- Thumbnail --}}
     @if($article->thumbnail)
         <div class="mt-8 rounded-2xl overflow-hidden border border-gray-100">
-            <img src="{{ $article->thumbnail }}" alt="{{ $article->title }}" class="w-full object-cover">
+            <img src="{{ $article->thumbnail }}" alt="{{ $article->title }}" class="w-full object-cover" loading="lazy">
         </div>
     @endif
 
@@ -96,7 +96,7 @@
                 <div class="flex gap-3">
                     <div class="w-10 h-10 rounded-full bg-gradient-to-br from-rose-400 to-rose-600 flex items-center justify-center shrink-0 mt-0.5">
                         @if(auth()->user()->avatar)
-                            <img src="{{ auth()->user()->avatar }}" alt="" class="w-full h-full rounded-full object-cover">
+                            <img src="{{ auth()->user()->avatar }}" alt="" class="w-full h-full rounded-full object-cover" loading="lazy">
                         @else
                             <span class="text-sm font-bold text-white">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
                         @endif
@@ -126,7 +126,7 @@
                     <div class="flex gap-3" id="comment-{{ $comment->id }}">
                         <div class="w-9 h-9 rounded-full bg-gradient-to-br from-gray-300 to-gray-500 flex items-center justify-center shrink-0">
                             @if($comment->user->avatar ?? false)
-                                <img src="{{ $comment->user->avatar }}" alt="" class="w-full h-full rounded-full object-cover">
+                                <img src="{{ $comment->user->avatar }}" alt="" class="w-full h-full rounded-full object-cover" loading="lazy">
                             @else
                                 <span class="text-xs font-bold text-white">{{ strtoupper(substr($comment->user->name ?? '?', 0, 1)) }}</span>
                             @endif

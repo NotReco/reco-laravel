@@ -31,7 +31,7 @@
             {{-- Avatar --}}
             <a href="{{ route('profile.show', $review->user->id) }}" class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden shrink-0 ring-2 ring-white hover:ring-rose-200 transition-colors">
                 @if($review->user?->avatar)
-                    <img src="{{ $review->user->avatar }}" class="w-full h-full object-cover" alt="">
+                    <img src="{{ $review->user->avatar }}" class="w-full h-full object-cover" alt="" loading="lazy">
                 @else
                     <span class="text-sm font-bold text-gray-500">{{ strtoupper(substr($review->user?->name ?? '?', 0, 1)) }}</span>
                 @endif
@@ -142,7 +142,7 @@
                         <div class="flex gap-3">
                             <div class="w-8 h-8 rounded-full bg-gray-100 shrink-0 overflow-hidden text-center leading-8 text-xs font-bold text-gray-500 ring-1 ring-gray-200">
                                 @if($comment->user->avatar)
-                                    <img src="{{ $comment->user->avatar }}" class="w-full h-full object-cover">
+                                    <img src="{{ $comment->user->avatar }}" class="w-full h-full object-cover" loading="lazy">
                                 @else
                                     {{ strtoupper(substr($comment->user->name, 0, 1)) }}
                                 @endif
@@ -166,7 +166,7 @@
                     <input type="hidden" name="review_id" value="{{ $review->id }}">
                     <div class="w-8 h-8 rounded-full bg-gray-100 shrink-0 overflow-hidden text-center leading-8 text-xs font-bold text-gray-500 ring-1 ring-gray-200">
                         @if(Auth::user()->avatar)
-                            <img src="{{ Auth::user()->avatar }}" class="w-full h-full object-cover">
+                            <img src="{{ Auth::user()->avatar }}" class="w-full h-full object-cover" loading="lazy">
                         @else
                             {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
                         @endif

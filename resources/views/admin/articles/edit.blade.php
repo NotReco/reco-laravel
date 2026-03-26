@@ -37,7 +37,7 @@
             <label for="thumbnail" class="block text-sm font-medium text-dark-300 mb-1.5">Ảnh bìa (URL)</label>
             @if($article->thumbnail)
                 <div class="mb-2 rounded-lg overflow-hidden inline-block border border-dark-700">
-                    <img src="{{ $article->thumbnail }}" alt="" class="h-28 object-cover">
+                    <img src="{{ $article->thumbnail }}" alt="" class="h-28 object-cover" loading="lazy">
                 </div>
             @endif
             <input type="url" name="thumbnail" id="thumbnail" value="{{ old('thumbnail', $article->thumbnail) }}" maxlength="500"

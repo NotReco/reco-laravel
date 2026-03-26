@@ -24,7 +24,7 @@
                             {{-- Avatar --}}
                             <div class="w-10 h-10 rounded-full bg-gradient-to-br from-rose-500 to-rose-700 flex items-center justify-center overflow-hidden shrink-0 ring-2 ring-dark-700">
                                 @if($conv->user->avatar)
-                                    <img src="{{ $conv->user->avatar }}" alt="" class="w-full h-full object-cover">
+                                    <img src="{{ $conv->user->avatar }}" alt="" class="w-full h-full object-cover" loading="lazy">
                                 @else
                                     <span class="text-xs font-bold text-white">{{ strtoupper(substr($conv->user->name, 0, 1)) }}</span>
                                 @endif
@@ -63,7 +63,7 @@
                         <a href="{{ route('profile.show', $partner->id) }}" class="flex items-center gap-3 group">
                             <div class="w-9 h-9 rounded-full bg-gradient-to-br from-rose-500 to-rose-700 flex items-center justify-center overflow-hidden ring-2 ring-dark-700">
                                 @if($partner->avatar)
-                                    <img src="{{ $partner->avatar }}" alt="" class="w-full h-full object-cover">
+                                    <img src="{{ $partner->avatar }}" alt="" class="w-full h-full object-cover" loading="lazy">
                                 @else
                                     <span class="text-xs font-bold text-white">{{ strtoupper(substr($partner->name, 0, 1)) }}</span>
                                 @endif

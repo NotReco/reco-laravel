@@ -21,7 +21,7 @@
             <a href="{{ route('profile.show', $thread->user->id) }}" class="shrink-0">
                 <div class="w-12 h-12 rounded-full bg-gradient-to-br from-rose-500 to-rose-700 flex items-center justify-center overflow-hidden ring-2 ring-dark-700 hover:ring-rose-500/50 transition-all">
                     @if($thread->user->avatar)
-                        <img src="{{ $thread->user->avatar }}" alt="" class="w-full h-full object-cover">
+                        <img src="{{ $thread->user->avatar }}" alt="" class="w-full h-full object-cover" loading="lazy">
                     @else
                         <span class="text-sm font-bold text-white">{{ strtoupper(substr($thread->user->name, 0, 1)) }}</span>
                     @endif
@@ -87,7 +87,7 @@
                         <a href="{{ route('profile.show', $reply->user->id) }}" class="shrink-0">
                             <div class="w-9 h-9 rounded-full bg-gradient-to-br from-slate-500 to-slate-700 flex items-center justify-center overflow-hidden ring-2 ring-dark-700">
                                 @if($reply->user->avatar)
-                                    <img src="{{ $reply->user->avatar }}" alt="" class="w-full h-full object-cover">
+                                    <img src="{{ $reply->user->avatar }}" alt="" class="w-full h-full object-cover" loading="lazy">
                                 @else
                                     <span class="text-xs font-bold text-white">{{ strtoupper(substr($reply->user->name, 0, 1)) }}</span>
                                 @endif
