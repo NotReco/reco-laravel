@@ -55,12 +55,55 @@ class ArticleCommentController extends Controller
      */
     public function destroy(ArticleComment $comment)
     {
-        if ($comment->user_id !== Auth::id() && !auth()->user()->isStaff()) {
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+
+        if ($comment->user_id !== $user->id && !$user->isStaff()) {
             abort(403, 'Unauthorized.');
         }
 
         $comment->delete();
 
         return back()->with('success', 'Đã xóa bình luận.');
+    }
+
+    public function toggleLike(ArticleComment $comment)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
+
+        $like = $comment->likes()->where('user_id', $user->id)->first();
+
+        if ($like) {
+            $like->delete();
+            $isLiked = false;
+        } else {
+            $comment->likes()->create(['user_id' => $user->id]);
+            $isLiked = true;
+        }
+
+        return response()->json([
+            'isLiked' => $isLiked,
+            'likesCount' => $comment->likes()->count(),
+        ]);
+    }
+
+    /**
+     * Report a comment.
+     */
+    public function report(Request $request, ArticleComment $comment)
+    {
+        $request->validate([
+            'reason' => ['required', 'string', 'max:255'],
+        ]);
+
+        $comment->reports()->create([
+            'user_id' => Auth::id(),
+            'reason' => $request->input('reason'),
+        ]);
+
+        return back()->with('success', 'Đã báo cáo bình luận. Cảm ơn bạn đã đóng góp.');
     }
 }

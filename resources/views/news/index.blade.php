@@ -2,36 +2,38 @@
 <x-slot:title>Tin tức</x-slot:title>
 
 <div x-data="newsFilter()">
-    {{-- ── Hero Header ──────────────────────────────────────── --}}
-    <section class="bg-gradient-to-b from-gray-50 to-white border-b border-gray-100">
-        <div class="max-w-6xl mx-auto px-4 py-12 text-center">
-            <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight font-outfit">Tin tức</h1>
-            <p class="mt-3 text-lg text-gray-500 max-w-xl mx-auto">Cập nhật những tin tức, bài viết mới nhất</p>
-        </div>
-    </section>
+
 
     {{-- ── Tags Filter ──────────────────────────────────────── --}}
     @if($tags->isNotEmpty())
-    <section class="max-w-6xl mx-auto px-4 pt-6">
-        <div class="flex flex-wrap gap-2">
+    <section class="max-w-6xl mx-auto px-4 pt-8" x-data="{ showAllTags: false }">
+        <div class="flex flex-wrap gap-2 items-center">
             <button @click="fetchArticles('{{ route('news.index') }}', '')"
                class="px-4 py-1.5 rounded-full text-sm font-medium transition-all border"
                :class="!activeTag ? 'bg-gray-900 text-white border-gray-900 shadow-md' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-400 hover:text-gray-900 hover:bg-gray-50'">
                 Tất cả
             </button>
-            @foreach($tags as $tag)
+            @foreach($tags as $index => $tag)
                 <button @click="fetchArticles('{{ route('news.index', ['tag' => $tag->slug]) }}', '{{ $tag->slug }}')"
                    class="px-4 py-1.5 rounded-full text-sm font-medium transition-all border uppercase"
-                   :class="activeTag === '{{ $tag->slug }}' ? 'bg-gray-900 text-white border-gray-900 shadow-md' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-400 hover:text-gray-900 hover:bg-gray-50'">
+                   :class="activeTag === '{{ $tag->slug }}' ? 'bg-gray-900 text-white border-gray-900 shadow-md' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-400 hover:text-gray-900 hover:bg-gray-50'"
+                   x-show="{{ $index }} < 10 || showAllTags"
+                   x-transition>
                     {{ $tag->name }}
                 </button>
             @endforeach
+            @if($tags->count() > 10)
+                <button @click="showAllTags = !showAllTags"
+                   class="px-4 py-1.5 rounded-full text-sm font-medium transition-all border border-dashed border-gray-300 text-gray-500 hover:border-gray-400 hover:text-gray-700 hover:bg-gray-50">
+                    <span x-text="showAllTags ? 'Thu gọn' : '+{{ $tags->count() - 10 }} khác'"></span>
+                </button>
+            @endif
         </div>
     </section>
     @endif
 
     {{-- ── Articles Grid ────────────────────────────────────── --}}
-    <section class="max-w-6xl mx-auto px-4 py-8 relative min-h-[400px]">
+    <section class="max-w-6xl mx-auto px-4 py-8 relative">
         {{-- Loading overlay --}}
         <div x-show="loading" x-transition.opacity 
              class="absolute inset-x-4 inset-y-8 bg-white/60 backdrop-blur-sm z-10 flex items-start pt-20 justify-center rounded-2xl" style="display: none;">

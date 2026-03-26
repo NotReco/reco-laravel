@@ -57,7 +57,7 @@ class ArticleController extends Controller
 
         $article->load(['user', 'tags', 'comments' => function ($q) {
             $q->whereNull('parent_id')
-              ->with(['user', 'replies.user'])
+              ->with(['user', 'likes', 'replies.user', 'replies.likes'])
               ->orderByDesc('created_at');
         }]);
 

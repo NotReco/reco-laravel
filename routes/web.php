@@ -92,6 +92,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // ── Article Comments ──
     Route::post('/article-comments', [ArticleCommentController::class, 'store'])->name('article-comments.store');
+    Route::post('/article-comments/{comment}/like', [ArticleCommentController::class, 'toggleLike'])->name('article-comments.like');
+    Route::post('/article-comments/{comment}/report', [ArticleCommentController::class, 'report'])->name('article-comments.report');
     Route::put('/article-comments/{comment}', [ArticleCommentController::class, 'update'])->name('article-comments.update');
     Route::delete('/article-comments/{comment}', [ArticleCommentController::class, 'destroy'])->name('article-comments.destroy');
 

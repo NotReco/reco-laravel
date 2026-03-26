@@ -44,4 +44,22 @@ class ArticleComment extends Model
     {
         return $this->hasMany(ArticleComment::class, 'parent_id');
     }
+
+    public function likes()
+    {
+        return $this->hasMany(ArticleCommentLike::class, 'article_comment_id');
+    }
+
+    public function reports()
+    {
+        return $this->hasMany(ArticleCommentReport::class, 'article_comment_id');
+    }
+
+    public function isLikedBy($user)
+    {
+        if (!$user) {
+            return false;
+        }
+        return $this->likes->contains('user_id', $user->id);
+    }
 }
