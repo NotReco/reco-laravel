@@ -36,7 +36,7 @@
                     $links = [
                         ['label' => 'Trang chủ', 'route' => 'home', 'match' => 'home'],
                         ['label' => 'Khám phá',  'route' => 'explore', 'match' => 'explore'],
-                        ['label' => 'Tin tức',   'route' => 'forum.index', 'match' => 'forum.*'],
+                        ['label' => 'Tin tức',   'route' => 'news.index', 'match' => 'news.*'],
                         ['label' => 'Diễn đàn',  'route' => 'forum.index', 'match' => 'forum.*'],
                     ];
                 @endphp
@@ -343,9 +343,9 @@
                       {{ request()->routeIs('explore') ? 'bg-rose-50 text-rose-600' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50' }}">
                 Khám phá
             </a>
-            <a href="{{ route('forum.index') }}"
+            <a href="{{ route('news.index') }}"
                 class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
-                      {{ request()->routeIs('forum.*') ? 'bg-rose-50 text-rose-600' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50' }}">
+                      {{ request()->routeIs('news.*') ? 'bg-rose-50 text-rose-600' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50' }}">
                 Tin tức
             </a>
             <a href="{{ route('forum.index') }}"

@@ -1,112 +1,117 @@
 <x-app-layout>
 <x-slot:title>Tin tức</x-slot:title>
 
-{{-- ── Hero Header ──────────────────────────────────────── --}}
-<section class="bg-gradient-to-b from-gray-50 to-white border-b border-gray-100">
-    <div class="max-w-6xl mx-auto px-4 py-12 text-center">
-        <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight font-outfit">Tin tức</h1>
-        <p class="mt-3 text-lg text-gray-500 max-w-xl mx-auto">Cập nhật những tin tức, bài viết mới nhất</p>
-    </div>
-</section>
-
-{{-- ── Tags Filter ──────────────────────────────────────── --}}
-@if($tags->isNotEmpty())
-<section class="max-w-6xl mx-auto px-4 pt-6">
-    <div class="flex flex-wrap gap-2">
-        <a href="{{ route('news.index') }}"
-           class="px-4 py-1.5 rounded-full text-sm font-medium transition-all border
-                  {{ !$activeTag ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-400 hover:text-gray-900' }}">
-            Tất cả
-        </a>
-        @foreach($tags as $tag)
-            <a href="{{ route('news.index', ['tag' => $tag->slug]) }}"
-               class="px-4 py-1.5 rounded-full text-sm font-medium transition-all border uppercase
-                      {{ $activeTag === $tag->slug ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-400 hover:text-gray-900' }}">
-                {{ $tag->name }}
-            </a>
-        @endforeach
-    </div>
-</section>
-@endif
-
-{{-- ── Articles Grid ────────────────────────────────────── --}}
-<section class="max-w-6xl mx-auto px-4 py-8">
-    @if($articles->isEmpty())
-        <div class="text-center py-20">
-            <svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>
-            </svg>
-            <p class="text-gray-400 text-lg">Chưa có tin tức nào.</p>
+<div x-data="newsFilter()">
+    {{-- ── Hero Header ──────────────────────────────────────── --}}
+    <section class="bg-gradient-to-b from-gray-50 to-white border-b border-gray-100">
+        <div class="max-w-6xl mx-auto px-4 py-12 text-center">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight font-outfit">Tin tức</h1>
+            <p class="mt-3 text-lg text-gray-500 max-w-xl mx-auto">Cập nhật những tin tức, bài viết mới nhất</p>
         </div>
-    @else
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            @foreach($articles as $article)
-                <a href="{{ route('news.show', $article) }}"
-                   class="group bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-lg hover:shadow-gray-200/60 hover:border-gray-200 transition-all duration-300">
+    </section>
 
-                    {{-- Thumbnail --}}
-                    <div class="aspect-[16/9] bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
-                        @if($article->thumbnail)
-                            <img src="{{ $article->thumbnail }}" alt="{{ $article->title }}"
-                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                        @else
-                            <div class="w-full h-full flex items-center justify-center">
-                                <svg class="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>
-                                </svg>
-                            </div>
-                        @endif
-                    </div>
-
-                    {{-- Content --}}
-                    <div class="p-5">
-                        {{-- Tags --}}
-                        @if($article->tags->isNotEmpty())
-                            <div class="flex flex-wrap gap-1.5 mb-3">
-                                @foreach($article->tags->take(3) as $tag)
-                                    <span class="px-2 py-0.5 bg-gray-100 text-gray-600 text-[11px] font-semibold rounded-md uppercase tracking-wide">
-                                        {{ $tag->name }}
-                                    </span>
-                                @endforeach
-                            </div>
-                        @endif
-
-                        {{-- Title --}}
-                        <h2 class="text-lg font-bold text-gray-900 line-clamp-2 group-hover:text-rose-600 transition-colors leading-snug">
-                            {{ $article->title }}
-                        </h2>
-
-                        {{-- Subtitle --}}
-                        @if($article->subtitle)
-                            <p class="mt-1.5 text-sm text-gray-500 line-clamp-2">{{ $article->subtitle }}</p>
-                        @endif
-
-                        {{-- Meta --}}
-                        <div class="mt-4 flex items-center gap-3 text-xs text-gray-400">
-                            <div class="flex items-center gap-1.5">
-                                <div class="w-5 h-5 rounded-full bg-gradient-to-br from-rose-400 to-rose-600 flex items-center justify-center shrink-0">
-                                    <span class="text-[10px] font-bold text-white">{{ strtoupper(substr($article->user->name ?? '?', 0, 1)) }}</span>
-                                </div>
-                                <span class="font-medium text-gray-600">{{ $article->user->name ?? 'Ẩn danh' }}</span>
-                            </div>
-                            <span>·</span>
-                            <span>{{ $article->published_at?->format('d/m/Y') }}</span>
-                            <span>·</span>
-                            <span class="flex items-center gap-0.5">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
-                                {{ $article->comments_count }}
-                            </span>
-                        </div>
-                    </div>
-                </a>
+    {{-- ── Tags Filter ──────────────────────────────────────── --}}
+    @if($tags->isNotEmpty())
+    <section class="max-w-6xl mx-auto px-4 pt-6">
+        <div class="flex flex-wrap gap-2">
+            <button @click="fetchArticles('{{ route('news.index') }}', '')"
+               class="px-4 py-1.5 rounded-full text-sm font-medium transition-all border"
+               :class="!activeTag ? 'bg-gray-900 text-white border-gray-900 shadow-md' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-400 hover:text-gray-900 hover:bg-gray-50'">
+                Tất cả
+            </button>
+            @foreach($tags as $tag)
+                <button @click="fetchArticles('{{ route('news.index', ['tag' => $tag->slug]) }}', '{{ $tag->slug }}')"
+                   class="px-4 py-1.5 rounded-full text-sm font-medium transition-all border uppercase"
+                   :class="activeTag === '{{ $tag->slug }}' ? 'bg-gray-900 text-white border-gray-900 shadow-md' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-400 hover:text-gray-900 hover:bg-gray-50'">
+                    {{ $tag->name }}
+                </button>
             @endforeach
         </div>
-
-        {{-- Pagination --}}
-        <div class="mt-10">
-            {{ $articles->links() }}
-        </div>
+    </section>
     @endif
-</section>
+
+    {{-- ── Articles Grid ────────────────────────────────────── --}}
+    <section class="max-w-6xl mx-auto px-4 py-8 relative min-h-[400px]">
+        {{-- Loading overlay --}}
+        <div x-show="loading" x-transition.opacity 
+             class="absolute inset-x-4 inset-y-8 bg-white/60 backdrop-blur-sm z-10 flex items-start pt-20 justify-center rounded-2xl" style="display: none;">
+            <svg class="animate-spin h-8 w-8 text-rose-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+        </div>
+
+        <div id="articles-container" :class="loading ? 'opacity-50 pointer-events-none' : 'transition-opacity duration-300'">
+            @include('news.partials.article_list', ['articles' => $articles])
+        </div>
+    </section>
+</div>
+
+<script>
+function newsFilter() {
+    return {
+        activeTag: '{{ $activeTag }}',
+        loading: false,
+        
+        async fetchArticles(url, tagValue) {
+            // Prevent duplicate requests
+            if (this.loading) return;
+            
+            this.loading = true;
+            this.activeTag = tagValue;
+            
+            try {
+                const res = await fetch(url, {
+                    headers: { 
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (!res.ok) throw new Error('Network response was not ok');
+                
+                const data = await res.json();
+                
+                // Update HTML content
+                document.getElementById('articles-container').innerHTML = data.html;
+                
+                // Update the URL without reloading the page
+                window.history.pushState({tag: this.activeTag}, '', url);
+                
+            } catch (error) {
+                console.error('Error fetching articles:', error);
+            } finally {
+                this.loading = false;
+            }
+        },
+        
+        init() {
+            // Handle browser back/forward buttons
+            window.addEventListener('popstate', (e) => {
+                const url = window.location.href;
+                const urlParams = new URL(url).searchParams;
+                this.activeTag = urlParams.get('tag') || '';
+                
+                // Fetch content for the history state
+                this.fetchArticles(url, this.activeTag);
+            });
+            
+            // Intercept pagination clicks within the articles container
+            document.getElementById('articles-container').addEventListener('click', (e) => {
+                const link = e.target.closest('.ajax-pagination a');
+                if (link) {
+                    e.preventDefault();
+                    
+                    // We keep the current tag active, the pagination link already has the tag query param included
+                    this.fetchArticles(link.href, this.activeTag);
+                    
+                    // Scroll mildly to the top of the grid
+                    document.getElementById('articles-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        }
+    }
+}
+</script>
 
 </x-app-layout>

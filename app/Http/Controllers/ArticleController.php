@@ -33,6 +33,12 @@ class ArticleController extends Controller
 
         $activeTag = $request->input('tag');
 
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'html' => view('news.partials.article_list', compact('articles'))->render()
+            ]);
+        }
+
         return view('news.index', compact('articles', 'tags', 'activeTag'));
     }
 
