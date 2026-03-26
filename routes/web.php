@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\ArticleController;
+use App\Http\Controllers\ArticleCommentController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MovieController;
 use App\Http\Controllers\PersonController;
@@ -38,6 +40,10 @@ Route::get('/api/search', function (\Illuminate\Http\Request $request) {
 
 // Person detail
 Route::get('/person/{person}', [PersonController::class, 'show'])->name('person.show');
+
+// Tin tức (public)
+Route::get('/news', [ArticleController::class, 'index'])->name('news.index');
+Route::get('/news/{article}', [ArticleController::class, 'show'])->name('news.show');
 
 // Forum (public)
 Route::get('/forum', [ForumController::class, 'index'])->name('forum.index');
@@ -84,6 +90,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/comments/{comment}', [\App\Http\Controllers\CommentController::class, 'update'])->name('comments.update');
     Route::delete('/comments/{comment}', [\App\Http\Controllers\CommentController::class, 'destroy'])->name('comments.destroy');
 
+    // ── Article Comments ──
+    Route::post('/article-comments', [ArticleCommentController::class, 'store'])->name('article-comments.store');
+    Route::put('/article-comments/{comment}', [ArticleCommentController::class, 'update'])->name('article-comments.update');
+    Route::delete('/article-comments/{comment}', [ArticleCommentController::class, 'destroy'])->name('article-comments.destroy');
+
     // ── Notifications ──
     Route::get('/api/notifications', [\App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/api/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
@@ -128,4 +139,7 @@ Route::middleware(['auth', 'role:staff'])->prefix('admin')->name('admin.')->grou
     Route::get('/users', [\App\Http\Controllers\Admin\UserController::class, 'index'])->name('users.index');
     Route::put('/users/{user}', [\App\Http\Controllers\Admin\UserController::class, 'update'])->name('users.update');
     Route::post('/users/{user}/toggle-ban', [\App\Http\Controllers\Admin\UserController::class, 'toggleBan'])->name('users.toggleBan');
+
+    // Articles
+    Route::resource('articles', \App\Http\Controllers\Admin\ArticleController::class);
 });
