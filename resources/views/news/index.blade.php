@@ -9,15 +9,22 @@
     <section class="max-w-6xl mx-auto px-4 pt-8" x-data="{ showAllTags: false }">
         <div class="flex flex-wrap gap-2 items-center">
             <button @click="fetchArticles('{{ route('news.index') }}', '')"
-               class="px-4 py-1.5 rounded-full text-sm font-medium transition-all border"
-               :class="!activeTag ? 'bg-gray-900 text-white border-gray-900 shadow-md' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-400 hover:text-gray-900 hover:bg-gray-50'">
+               class="px-4 py-1.5 rounded-full text-sm font-medium transition-all border {{ empty($activeTag) ? 'bg-gray-900 text-white border-gray-900 shadow-md' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-400 hover:text-gray-900 hover:bg-gray-50' }}"
+               :class="{
+                   'bg-gray-900 text-white border-gray-900 shadow-md': !activeTag,
+                   'bg-white text-gray-600 border-gray-200 hover:border-gray-400 hover:text-gray-900 hover:bg-gray-50': activeTag
+               }">
                 Tất cả
             </button>
             @foreach($tags as $index => $tag)
                 <button @click="fetchArticles('{{ route('news.index', ['tag' => $tag->slug]) }}', '{{ $tag->slug }}')"
-                   class="px-4 py-1.5 rounded-full text-sm font-medium transition-all border uppercase"
-                   :class="activeTag === '{{ $tag->slug }}' ? 'bg-gray-900 text-white border-gray-900 shadow-md' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-400 hover:text-gray-900 hover:bg-gray-50'"
+                   class="px-4 py-1.5 rounded-full text-sm font-medium transition-all border uppercase {{ $activeTag === $tag->slug ? 'bg-gray-900 text-white border-gray-900 shadow-md' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-400 hover:text-gray-900 hover:bg-gray-50' }}"
+                   :class="{
+                       'bg-gray-900 text-white border-gray-900 shadow-md': activeTag === '{{ $tag->slug }}',
+                       'bg-white text-gray-600 border-gray-200 hover:border-gray-400 hover:text-gray-900 hover:bg-gray-50': activeTag !== '{{ $tag->slug }}'
+                   }"
                    x-show="{{ $index }} < 10 || showAllTags"
+                   {{ $index >= 10 ? 'x-cloak style=display:none' : '' }}
                    x-transition>
                     {{ $tag->name }}
                 </button>

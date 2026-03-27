@@ -57,7 +57,7 @@ try {
         <a href="{{ route('movies.show', $movie) }}" class="absolute inset-0 z-0">
             @if ($movie->poster)
                 <img src="{{ $movie->poster }}" alt="{{ $movie->title }}"
-                    class="w-full h-full object-cover transition-all duration-300" loading="lazy">
+                    class="w-full h-full object-cover transition-all duration-300 bg-gray-200" loading="lazy">
             @else
                 <div class="w-full h-full flex items-center justify-center text-gray-400 bg-gray-100">
                     <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">

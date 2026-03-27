@@ -2,7 +2,7 @@
 {{-- Used inside hero-carousel or movie detail page --}}
 {{-- Requires Alpine.js parent with showTrailer, trailerUrl, closeTrailer() --}}
 
-<div x-show="showTrailer"
+<div x-show="showTrailer" x-cloak style="display: none"
     x-transition:enter="transition ease-out duration-300"
     x-transition:enter-start="opacity-0"
     x-transition:enter-end="opacity-100"

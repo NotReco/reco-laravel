@@ -27,9 +27,51 @@
 
     {{-- Vite Assets --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    {{-- Alpine.js Cloak --}}
+    <style>
+        [x-cloak] { display: none !important; }
+
+        /* Page Loading Overlay – masks ALL FOUC until window.onload */
+        #page-loader {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity .3s ease;
+        }
+        #page-loader.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+        #page-loader .spinner {
+            width: 28px;
+            height: 28px;
+            border: 3px solid #e5e7eb;
+            border-top-color: #f43f5e;
+            border-radius: 50%;
+            animation: spin .6s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
 </head>
 
 <body class="font-sans antialiased bg-white text-gray-800">
+
+    {{-- Page Loading Overlay --}}
+    <div id="page-loader"><div class="spinner"></div></div>
+    <script>
+        window.addEventListener('load', function() {
+            var loader = document.getElementById('page-loader');
+            if (loader) {
+                loader.classList.add('fade-out');
+                setTimeout(function() { loader.remove(); }, 350);
+            }
+        });
+    </script>
 
     {{-- ── Navbar ─────────────────────────────────────── --}}
     @include('partials.navbar')

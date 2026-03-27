@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Auth;
 class ArticleCommentController extends Controller
 {
     /**
-     * Tạo bình luận cho bài viết.
+     * Tạo bình luận cho bài viết (AJAX).
      */
     public function store(Request $request)
     {
@@ -19,54 +19,60 @@ class ArticleCommentController extends Controller
             'content'    => ['required', 'string', 'max:1000'],
         ]);
 
-        ArticleComment::create([
+        $comment = ArticleComment::create([
             'user_id'    => Auth::id(),
             'article_id' => $request->input('article_id'),
             'parent_id'  => $request->input('parent_id'),
             'content'    => $request->input('content'),
         ]);
 
-        return back()->with('success', 'Bình luận đã được đăng.');
-    }
+        $comment->load('user');
 
-    /**
-     * Sửa bình luận.
-     */
-    public function update(Request $request, ArticleComment $comment)
-    {
-        if ($comment->user_id !== Auth::id()) {
-            abort(403, 'Unauthorized.');
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'comment' => [
+                    'id'         => $comment->id,
+                    'content'    => $comment->content,
+                    'parent_id'  => $comment->parent_id,
+                    'created_at' => $comment->created_at->diffForHumans(),
+                    'user'       => [
+                        'id'     => $comment->user->id,
+                        'name'   => $comment->user->name,
+                        'avatar' => $comment->user->avatar,
+                        'initial' => strtoupper(substr($comment->user->name, 0, 1)),
+                    ],
+                ],
+            ]);
         }
 
-        $request->validate([
-            'content' => ['required', 'string', 'max:1000'],
-        ]);
-
-        $comment->update([
-            'content'   => $request->input('content'),
-            'is_edited' => true,
-        ]);
-
-        return back()->with('success', 'Đã cập nhật bình luận.');
+        return back();
     }
 
     /**
-     * Xóa bình luận (chủ comment hoặc staff).
+     * Xóa bình luận (chỉ staff: admin/mod).
      */
     public function destroy(ArticleComment $comment)
     {
         /** @var \App\Models\User $user */
         $user = auth()->user();
 
-        if ($comment->user_id !== $user->id && !$user->isStaff()) {
-            abort(403, 'Unauthorized.');
+        if (!$user->isStaff()) {
+            abort(403, 'Chỉ quản trị viên mới có thể xóa bình luận.');
         }
 
         $comment->delete();
 
-        return back()->with('success', 'Đã xóa bình luận.');
+        if (request()->wantsJson() || request()->ajax()) {
+            return response()->json(['success' => true]);
+        }
+
+        return back();
     }
 
+    /**
+     * Toggle like bình luận (AJAX).
+     */
     public function toggleLike(ArticleComment $comment)
     {
         $user = Auth::user();
@@ -91,7 +97,7 @@ class ArticleCommentController extends Controller
     }
 
     /**
-     * Report a comment.
+     * Báo cáo bình luận (AJAX).
      */
     public function report(Request $request, ArticleComment $comment)
     {
@@ -99,11 +105,27 @@ class ArticleCommentController extends Controller
             'reason' => ['required', 'string', 'max:255'],
         ]);
 
+        // Kiểm tra user đã báo cáo comment này chưa
+        $alreadyReported = $comment->reports()->where('user_id', Auth::id())->exists();
+        if ($alreadyReported) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Bạn đã báo cáo bình luận này rồi.',
+            ], 422);
+        }
+
         $comment->reports()->create([
             'user_id' => Auth::id(),
             'reason' => $request->input('reason'),
         ]);
 
-        return back()->with('success', 'Đã báo cáo bình luận. Cảm ơn bạn đã đóng góp.');
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Đã báo cáo bình luận. Cảm ơn bạn!',
+            ]);
+        }
+
+        return back();
     }
 }

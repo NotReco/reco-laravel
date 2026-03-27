@@ -26,7 +26,7 @@
         'bg-white/55 border-b border-gray-100': !scrolled && !darkHero,
         'bg-black/30 border-b border-white/10': !scrolled && darkHero,
     }"
-    class="fixed top-0 left-0 right-0 z-50 transition-all duration-500 backdrop-blur-xl backdrop-saturate-150">
+    class="fixed top-0 left-0 right-0 z-50 transition-all duration-500 backdrop-blur-xl backdrop-saturate-150 bg-white/55 border-b border-gray-100">
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-3 items-center h-16">
@@ -46,10 +46,11 @@
                         $active = $link['match'] && request()->routeIs($link['match']);
                         $href = $link['route'] ? route($link['route']) : '#';
                     @endphp
-                    <a href="{{ $href }}" class="text-[13px] uppercase tracking-wider font-medium transition-colors duration-300"
-                       :class="darkHero
-                            ? '{{ $active ? "text-white" : "text-white/70 hover:text-white" }}'
-                            : '{{ $active ? "text-gray-900" : "text-gray-500 hover:text-gray-900" }}'">
+                    <a href="{{ $href }}" class="text-[13px] uppercase tracking-wider font-medium transition-colors duration-300 {{ $active ? 'text-gray-900' : 'text-gray-500 hover:text-gray-900' }}"
+                       :class="{
+                           '{{ $active ? "text-white" : "text-white/70 hover:text-white" }}': darkHero,
+                           '{{ $active ? "text-gray-900" : "text-gray-500 hover:text-gray-900" }}': !darkHero
+                       }">
                         {{ $link['label'] }}
                     </a>
                 @endforeach
@@ -74,8 +75,8 @@
             {{-- CENTER: LOGO --}}
             <div class="flex items-center justify-center">
                 <a href="{{ route('home') }}" class="flex items-center shrink-0">
-                    <img x-show="!darkHero" src="{{ asset('storage/images/logo.svg') }}" alt="RecoDB" class="h-7 w-auto">
-                    <img x-show="darkHero" src="{{ asset('storage/images/logo-dark.svg') }}" alt="RecoDB" class="h-7 w-auto" style="display:none">
+                    <img x-show="!darkHero" src="{{ asset('storage/images/logo.svg') }}" alt="RecoDB" height="28" style="height: 28px; width: auto;">
+                    <img x-cloak x-show="darkHero" src="{{ asset('storage/images/logo-dark.svg') }}" alt="RecoDB" height="28" style="height: 28px; width: auto; display:none">
                 </a>
             </div>
 
@@ -86,10 +87,11 @@
                 <div x-data x-on:keydown.window.prevent.ctrl.k="$dispatch('open-search')"
                      x-on:keydown.window.prevent.meta.k="$dispatch('open-search')">
                     <button @click="$dispatch('open-search')" title="Tìm kiếm (Ctrl+K)"
-                        class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 border"
-                        :class="darkHero
-                            ? 'bg-white/10 border-white/20 text-white/80 hover:text-white hover:bg-white/20 hover:border-white/30'
-                            : 'bg-gray-100 border-gray-200 text-gray-600 hover:text-gray-900 hover:bg-gray-200/70 hover:border-gray-300'">
+                        class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 border bg-gray-100 border-gray-200 text-gray-600 hover:text-gray-900 hover:bg-gray-200/70 hover:border-gray-300"
+                        :class="{
+                            'bg-white/10 border-white/20 text-white/80 hover:text-white hover:bg-white/20 hover:border-white/30': darkHero,
+                            'bg-gray-100 border-gray-200 text-gray-600 hover:text-gray-900 hover:bg-gray-200/70 hover:border-gray-300': !darkHero
+                        }">
                         <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -133,12 +135,12 @@
                     }" @click.outside="open = false">
                         
                         <button @click="open = !open; if(open) fetchNotifications()" title="Thông báo" 
-                            class="relative w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 border"
-                            :class="open
-                                ? 'bg-gray-200/70 border-gray-300 text-gray-900'
-                                : (darkHero
-                                    ? 'bg-white/10 border-white/20 text-white/80 hover:text-white hover:bg-white/20 hover:border-white/30'
-                                    : 'bg-gray-100 border-gray-200 text-gray-600 hover:text-gray-900 hover:bg-gray-200/70 hover:border-gray-300')">
+                            class="relative w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 border bg-gray-100 border-gray-200 text-gray-600 hover:text-gray-900 hover:bg-gray-200/70 hover:border-gray-300"
+                            :class="{
+                                'bg-gray-200/70 border-gray-300 text-gray-900': open,
+                                'bg-white/10 border-white/20 text-white/80 hover:text-white hover:bg-white/20 hover:border-white/30': !open && darkHero,
+                                'bg-gray-100 border-gray-200 text-gray-600 hover:text-gray-900 hover:bg-gray-200/70 hover:border-gray-300': !open && !darkHero
+                            }">
                             <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                             </svg>
@@ -407,14 +409,16 @@
         loading: false,
         showResults: false,
         async search() {
-            if (this.query.length < 2) {
+            // Sanitize: strip +, -, %, _ from query
+            const cleanQuery = this.query.replace(/[+\-%_]/g, '').trim();
+            if (cleanQuery.length < 2) {
                 this.results = [];
                 this.showResults = false;
                 return;
             }
             this.loading = true;
             try {
-                const res = await fetch('/api/search?q=' + encodeURIComponent(this.query));
+                const res = await fetch('/api/search?q=' + encodeURIComponent(cleanQuery));
                 this.results = await res.json();
                 this.showResults = true;
             } finally {

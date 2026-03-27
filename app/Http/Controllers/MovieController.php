@@ -26,30 +26,73 @@ class MovieController extends Controller
             });
         }
 
-        // Lọc theo thể loại
-        if ($genreId = $request->input('genre')) {
+        // Lọc theo nhiều thể loại
+        if ($request->has('genres') && is_array($request->input('genres'))) {
+            foreach ($request->input('genres') as $genreId) {
+                $query->whereHas('genres', fn($qb) => $qb->where('genres.id', $genreId));
+            }
+        } elseif ($genreId = $request->input('genre')) { // Keep for backward compatibility
             $query->whereHas('genres', fn($qb) => $qb->where('genres.id', $genreId));
+        }
+
+        // Lọc theo Năm phát hành
+        if ($yearFrom = $request->input('year_from')) {
+            $query->whereYear('release_date', '>=', $yearFrom);
+        }
+        if ($yearTo = $request->input('year_to')) {
+            $query->whereYear('release_date', '<=', $yearTo);
+        }
+
+        // Lọc theo Quốc gia
+        if ($country = $request->input('country')) {
+            $query->where('country', $country);
+        }
+
+        // Lọc theo Điểm đánh giá tối thiểu
+        if ($minRating = $request->input('min_rating')) {
+            $query->where('avg_rating', '>=', $minRating);
+        }
+
+        // Lọc theo Thời lượng (phút)
+        if ($minRuntime = $request->input('min_runtime')) {
+            $query->where('runtime', '>=', $minRuntime);
+        }
+        if ($maxRuntime = $request->input('max_runtime')) {
+            $query->where('runtime', '<=', $maxRuntime);
         }
 
         // Sắp xếp
         $sort = $request->input('sort', 'latest');
         $query = match ($sort) {
-            'top_rated' => $query->withAvg('reviews', 'rating')
-                ->orderByDesc('reviews_avg_rating'),
-            'popular' => $query->withCount('reviews')
-                ->orderByDesc('reviews_count'),
-            'title' => $query->orderBy('title'),
+            'rating_desc' => $query->orderByDesc('avg_rating')->orderByDesc('rating_count'),
+            'popularity_desc' => $query->orderByDesc('view_count'),
+            'title_asc' => $query->orderBy('title'),
+            'title_desc' => $query->orderByDesc('title'),
+            'release_date_asc' => $query->orderBy('release_date'),
+            'latest', 'release_date_desc' => $query->orderByDesc('release_date'),
             default => $query->orderByDesc('release_date'),
         };
 
-        $movies = $query->paginate(20)->withQueryString();
+        $movies = $query->paginate(24)->withQueryString();
 
         $genres = Genre::withCount('movies')
             ->having('movies_count', '>', 0)
-            ->orderByDesc('movies_count')
+            ->orderBy('name')
             ->get();
 
-        return view('explore', compact('movies', 'genres', 'sort'));
+        // Lấy danh sách quốc gia cho bộ lọc
+        $countries = Movie::whereNotNull('country')
+            ->where('country', '!=', '')
+            ->select('country')
+            ->distinct()
+            ->orderBy('country')
+            ->pluck('country');
+
+        if ($request->ajax()) {
+            return view('partials.explore-results', compact('movies'))->render();
+        }
+
+        return view('explore', compact('movies', 'genres', 'countries', 'sort'));
     }
 
     /**

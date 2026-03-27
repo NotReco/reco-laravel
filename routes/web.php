@@ -27,14 +27,32 @@ Route::get('/movies/{movie}', [MovieController::class, 'show'])->name('movies.sh
 
 // Search API cho Navbar Live Search
 Route::get('/api/search', function (\Illuminate\Http\Request $request) {
-    $q = $request->query('q');
-    if (!$q) return response()->json([]);
-    $movies = \App\Models\Movie::where('title', 'like', "%{$q}%")
-        ->orWhere('original_title', 'like', "%{$q}%")
-        ->select('id', 'title', 'poster', 'release_date')
-        ->orderByDesc('view_count')
-        ->take(5)
+    $q = trim($request->query('q', ''));
+
+    // Strip SQL wildcards
+    $q = str_replace(['%', '_'], '', $q);
+
+    // Only allow: Unicode letters, digits 0-9, spaces (reject +, -, etc.)
+    if (!$q || !preg_match('/^[\p{L}\p{N}\s]+$/u', $q)) {
+        return response()->json([]);
+    }
+
+    $movies = \App\Models\Movie::where(function ($qb) use ($q) {
+            $qb->where('title', 'like', "%{$q}%")
+               ->orWhere('original_title', 'like', "%{$q}%");
+        })
+        ->select('id', 'title', 'poster', 'release_date', 'view_count')
+        ->limit(20)
         ->get();
+
+    // Sort in PHP to ensure exact diacritics match but case-insensitive
+    // mb_stripos is case-insensitive, but diacritics-sensitive!
+    $movies = $movies->sortByDesc('view_count')->sortBy(function ($movie) use ($q) {
+        $titleMatch = mb_stripos($movie->title, $q) !== false;
+        $originalMatch = mb_stripos($movie->original_title ?? '', $q) !== false;
+        return ($titleMatch || $originalMatch) ? 1 : 2;
+    })->take(8)->values();
+
     return response()->json($movies);
 })->name('api.search');
 
@@ -94,7 +112,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/article-comments', [ArticleCommentController::class, 'store'])->name('article-comments.store');
     Route::post('/article-comments/{comment}/like', [ArticleCommentController::class, 'toggleLike'])->name('article-comments.like');
     Route::post('/article-comments/{comment}/report', [ArticleCommentController::class, 'report'])->name('article-comments.report');
-    Route::put('/article-comments/{comment}', [ArticleCommentController::class, 'update'])->name('article-comments.update');
     Route::delete('/article-comments/{comment}', [ArticleCommentController::class, 'destroy'])->name('article-comments.destroy');
 
     // ── Notifications ──
