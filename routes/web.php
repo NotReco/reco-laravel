@@ -41,7 +41,7 @@ Route::get('/api/search', function (\Illuminate\Http\Request $request) {
             $qb->where('title', 'like', "%{$q}%")
                ->orWhere('original_title', 'like', "%{$q}%");
         })
-        ->select('id', 'title', 'poster', 'release_date', 'view_count')
+        ->select('id', 'slug', 'title', 'poster', 'release_date', 'view_count')
         ->limit(20)
         ->get();
 

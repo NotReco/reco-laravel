@@ -418,7 +418,7 @@
             }
             this.loading = true;
             try {
-                const res = await fetch('/api/search?q=' + encodeURIComponent(cleanQuery));
+                const res = await fetch('{{ route("api.search") }}?q=' + encodeURIComponent(cleanQuery));
                 this.results = await res.json();
                 this.showResults = true;
             } finally {
@@ -427,7 +427,7 @@
         },
         goToExplore() {
             if (this.query.length > 0) {
-                window.location.href = '/explore?q=' + encodeURIComponent(this.query);
+                window.location.href = '{{ route("explore") }}?q=' + encodeURIComponent(this.query);
             }
         },
         reset() {
@@ -466,7 +466,7 @@
                             d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                     <input x-ref="searchInput" x-model="query" @input.debounce.300ms="search()"
-                           type="text" placeholder="Tìm kiếm phim, diễn viên, đạo diễn..." autocomplete="off"
+                           type="text" placeholder="Tìm kiếm phim..." autocomplete="off"
                            class="flex-1 px-4 py-4 text-base text-gray-900 placeholder-gray-400
                                   border-0 focus:outline-none focus:ring-0 bg-transparent">
                     
@@ -488,7 +488,7 @@
             {{-- Results --}}
             <div x-show="showResults && results.length > 0" class="max-h-[320px] overflow-y-auto">
                 <template x-for="movie in results" :key="movie.id">
-                    <a :href="'/movies/' + movie.id" @click="reset()"
+                    <a :href="'/movies/' + movie.slug" @click="reset()"
                        class="flex items-center gap-4 px-5 py-3 hover:bg-gray-50 transition-colors border-b border-gray-50 last:border-0 group">
                         <div class="w-10 h-14 bg-gray-100 rounded-lg bg-cover bg-center shrink-0 overflow-hidden" :style="movie.poster ? `background-image: url('${movie.poster}')` : ''">
                             <template x-if="!movie.poster">
@@ -509,23 +509,32 @@
             </div>
 
             {{-- No results --}}
-            <div x-show="showResults && results.length === 0 && !loading && query.length >= 2" class="px-5 py-8 text-center">
-                <p class="text-gray-400 text-sm">Không tìm thấy kết quả cho "<span class="text-gray-600 font-medium" x-text="query"></span>"</p>
+            <div x-show="showResults && results.length === 0 && !loading && query.length >= 2" class="px-5 py-8 text-center border-t border-gray-50">
+                <p class="text-gray-400 text-sm mb-4">Không tìm thấy kết quả cho "<span class="text-gray-600 font-bold" x-text="query"></span>"</p>
+                <a :href="'{{ route("explore") }}?q=' + encodeURIComponent(query)" @click="reset()" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-50 border border-gray-200 hover:bg-gray-100 hover:border-gray-300 text-gray-700 font-medium text-[13px] transition-all">
+                    <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+                    Tìm kiếm nâng cao
+                </a>
             </div>
 
             {{-- Footer --}}
             <div x-show="showResults && results.length > 0" class="px-5 py-3 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
                 <span class="text-xs text-gray-400">
-                    Nhấn <kbd class="px-1.5 py-0.5 bg-white border border-gray-200 rounded text-[10px] font-medium">Enter</kbd> để xem tất cả
+                    Nhấn <kbd class="px-1.5 py-0.5 bg-white border border-gray-200 shadow-sm rounded text-[10px] font-medium text-gray-600">Enter</kbd> để tìm chi tiết
                 </span>
-                <a :href="'/explore?q=' + encodeURIComponent(query)" @click="reset()" class="text-xs font-medium text-rose-500 hover:text-rose-600 transition-colors">
-                    Xem tất cả kết quả →
+                <a :href="'{{ route("explore") }}?q=' + encodeURIComponent(query)" @click="reset()" class="inline-flex items-center gap-1.5 text-[13px] font-medium text-rose-600 hover:text-rose-700 transition-colors">
+                    Tìm kiếm nâng cao
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
                 </a>
             </div>
 
             {{-- Empty state hint --}}
-            <div x-show="!showResults && query.length === 0" class="px-5 py-4 text-center">
-                <p class="text-xs text-gray-400">Nhập tên phim, diễn viên hoặc đạo diễn để tìm kiếm</p>
+            <div x-show="!showResults && query.length === 0" class="px-5 py-6 text-center flex flex-col items-center border-t border-gray-50">
+                <p class="text-[13px] text-gray-400 mb-3">Nhập tên phim để tìm kiếm nhanh</p>
+                <a href="{{ route('explore') }}" @click="reset()" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-50 border border-gray-200 hover:bg-gray-100 hover:border-gray-300 text-gray-700 font-medium text-[13px] transition-all">
+                    <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+                    Sử dụng Tìm kiếm nâng cao
+                </a>
             </div>
         </div>
     </div>

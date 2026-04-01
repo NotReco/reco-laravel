@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\ArticleComment;
+use App\Notifications\ArticleCommentMentioned;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class ArticleCommentController extends Controller
 {
@@ -19,15 +21,76 @@ class ArticleCommentController extends Controller
             'content'    => ['required', 'string', 'max:1000'],
         ]);
 
+        $parentId = $request->input('parent_id');
+        if ($parentId) {
+            $parentComment = ArticleComment::query()
+                ->select('id', 'article_id', 'parent_id')
+                ->with(['parent:id,parent_id'])
+                ->find($parentId);
+
+            if (!$parentComment || (int) $parentComment->article_id !== (int) $request->input('article_id')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Bình luận cha không hợp lệ hoặc không thuộc bài viết này.',
+                ], 422);
+            }
+
+            // Cho phép tối đa 2 tầng dưới bình luận gốc (root -> reply -> nested reply).
+            if ($parentComment->parent_id && optional($parentComment->parent)->parent_id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Chỉ hỗ trợ tối đa 2 cấp phản hồi cho mỗi bình luận gốc.',
+                ], 422);
+            }
+        }
+
         $comment = ArticleComment::create([
             'user_id'    => Auth::id(),
             'article_id' => $request->input('article_id'),
-            'parent_id'  => $request->input('parent_id'),
+            'parent_id'  => $parentId,
             'content'    => $request->input('content'),
         ]);
 
-        $comment->load('user');
+        $comment->load(['user', 'article']);
 
+        // Xử lý gửi thông báo khi có @tên (mention)
+        $content = $comment->content;
+        if (str_contains($content, '@')) {
+            // Lấy danh sách user tham gia bình luận trong bài + tác giả
+            $participantIds = \App\Models\ArticleComment::where('article_id', $comment->article_id)
+                ->distinct()
+                ->pluck('user_id');
+            
+            $articleUserId = $comment->article->user_id ?? null;
+            if ($articleUserId) {
+                $participantIds->push($articleUserId);
+            }
+
+            $users = \App\Models\User::whereIn('id', $participantIds->filter()->unique())->get();
+            $mentionerName = $comment->user->name;
+
+            foreach ($users as $notifiableUser) {
+                if ($notifiableUser->id === \Illuminate\Support\Facades\Auth::id()) {
+                    continue; // Không thông báo cho chính mình
+                }
+                
+                // Match đúng @username trọn vẹn, tránh khớp nhầm khi sau tên còn chữ/số/_.
+                $pattern = '/@' . preg_quote($notifiableUser->name, '/') . '(?![\p{L}\p{N}_])/u';
+                
+                if (preg_match($pattern, $content)) {
+                    try {
+                        $notifiableUser->notify(new ArticleCommentMentioned($comment, $mentionerName));
+                    } catch (\Throwable $e) {
+                        // Không để lỗi notification làm hỏng luồng tạo bình luận/trả lời.
+                        Log::warning('Failed to send article comment mention notification', [
+                            'comment_id' => $comment->id,
+                            'notifiable_user_id' => $notifiableUser->id,
+                            'error' => $e->getMessage(),
+                        ]);
+                    }
+                }
+            }
+        }
         if ($request->wantsJson() || $request->ajax()) {
             return response()->json([
                 'success' => true,
@@ -55,7 +118,7 @@ class ArticleCommentController extends Controller
     public function destroy(ArticleComment $comment)
     {
         /** @var \App\Models\User $user */
-        $user = auth()->user();
+        $user = Auth::user();
 
         if (!$user->isStaff()) {
             abort(403, 'Chỉ quản trị viên mới có thể xóa bình luận.');

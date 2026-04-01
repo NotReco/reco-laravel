@@ -84,6 +84,9 @@
     {{-- ── Footer ──────────────────────────────────────── --}}
     @include('partials.footer')
 
+    {{-- ── Page Scripts ─────────────────────────────────── --}}
+    @stack('scripts')
+
     {{-- ── Toast Notifications ─────────────────────────── --}}
     @if(session('success') || session('error') || session('info'))
         <x-toast />

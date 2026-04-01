@@ -227,10 +227,6 @@ try {
             @if ($movie->release_date)
                 <span>{{ $movie->release_date->format('d/m/Y') }}</span>
             @endif
-            @if ($showGenre && $movie->genres && $movie->genres->isNotEmpty())
-                <span>•</span>
-                <span class="line-clamp-1">{{ $movie->genres->take(2)->pluck('name')->join(', ') }}</span>
-            @endif
         </div>
     </a>
 </div>

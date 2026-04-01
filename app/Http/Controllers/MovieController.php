@@ -19,27 +19,33 @@ class MovieController extends Controller
 
         // Tìm kiếm
         if ($q = $request->input('q')) {
-            $query->where(function ($qb) use ($q) {
-                $qb->where('title', 'like', "%{$q}%")
-                    ->orWhere('original_title', 'like', "%{$q}%")
-                    ->orWhere('synopsis', 'like', "%{$q}%");
-            });
+            $qStr = trim(str_replace(['%', '_'], '', $q));
+            if ($qStr !== '') {
+                $query->where(function ($qb) use ($qStr) {
+                    $qb->where('title', 'like', "%{$qStr}%")
+                        ->orWhere('original_title', 'like', "%{$qStr}%");
+                });
+            }
         }
 
-        // Lọc theo nhiều thể loại
-        if ($request->has('genres') && is_array($request->input('genres'))) {
-            foreach ($request->input('genres') as $genreId) {
-                $query->whereHas('genres', fn($qb) => $qb->where('genres.id', $genreId));
-            }
+        // Lọc theo nhiều thể loại (logic OR: phim chứa ít nhất 1 thể loại được chọn)
+        if ($request->has('genres') && is_array($request->input('genres')) && count($request->input('genres')) > 0) {
+            $genreIds = $request->input('genres');
+            $query->whereHas('genres', fn($qb) => $qb->whereIn('genres.id', $genreIds));
         } elseif ($genreId = $request->input('genre')) { // Keep for backward compatibility
             $query->whereHas('genres', fn($qb) => $qb->where('genres.id', $genreId));
         }
 
         // Lọc theo Năm phát hành
-        if ($yearFrom = $request->input('year_from')) {
+        $yearFrom = $request->input('year_from');
+        $yearTo = $request->input('year_to');
+        if ($yearFrom && $yearTo && $yearFrom > $yearTo) {
+            $tmp = $yearFrom; $yearFrom = $yearTo; $yearTo = $tmp;
+        }
+        if ($yearFrom) {
             $query->whereYear('release_date', '>=', $yearFrom);
         }
-        if ($yearTo = $request->input('year_to')) {
+        if ($yearTo) {
             $query->whereYear('release_date', '<=', $yearTo);
         }
 
@@ -49,20 +55,36 @@ class MovieController extends Controller
         }
 
         // Lọc theo Điểm đánh giá tối thiểu
-        if ($minRating = $request->input('min_rating')) {
-            $query->where('avg_rating', '>=', $minRating);
+        $minRating = $request->input('min_rating');
+        if ($minRating !== null && $minRating !== '' && (int) $minRating > 0) {
+            $query->where('avg_rating', '>=', (int) $minRating);
         }
 
         // Lọc theo Thời lượng (phút)
-        if ($minRuntime = $request->input('min_runtime')) {
+        $minRuntime = $request->input('min_runtime');
+        $maxRuntime = $request->input('max_runtime');
+        if ($minRuntime && $maxRuntime && $minRuntime > $maxRuntime) {
+            $tmp = $minRuntime; $minRuntime = $maxRuntime; $maxRuntime = $tmp;
+        }
+        if ($minRuntime) {
             $query->where('runtime', '>=', $minRuntime);
         }
-        if ($maxRuntime = $request->input('max_runtime')) {
+        if ($maxRuntime) {
             $query->where('runtime', '<=', $maxRuntime);
         }
 
         // Sắp xếp
-        $sort = $request->input('sort', 'latest');
+        $sort = $request->input('sort', 'popularity_desc');
+        
+        if ($request->filled('q')) {
+            $qStr = trim(str_replace(['%', '_'], '', $request->input('q')));
+            if ($qStr !== '') {
+                $query->orderByRaw(
+                    "CASE WHEN title LIKE ? THEN 1 WHEN original_title LIKE ? THEN 2 ELSE 3 END",
+                    ["{$qStr}%", "{$qStr}%"]
+                );
+            }
+        }
         $query = match ($sort) {
             'rating_desc' => $query->orderByDesc('avg_rating')->orderByDesc('rating_count'),
             'popularity_desc' => $query->orderByDesc('view_count'),
@@ -81,12 +103,32 @@ class MovieController extends Controller
             ->get();
 
         // Lấy danh sách quốc gia cho bộ lọc
+        $countryNames = [
+            'AR' => 'Argentina',
+            'AU' => 'Úc',
+            'BR' => 'Brazil',
+            'CA' => 'Canada',
+            'CN' => 'Trung Quốc',
+            'ES' => 'Tây Ban Nha',
+            'FR' => 'Pháp',
+            'GB' => 'Anh',
+            'IE' => 'Ireland',
+            'IN' => 'Ấn Độ',
+            'JP' => 'Nhật Bản',
+            'KR' => 'Hàn Quốc',
+            'NO' => 'Na Uy',
+            'PH' => 'Philippines',
+            'RU' => 'Nga',
+            'US' => 'Mỹ',
+        ];
+
         $countries = Movie::whereNotNull('country')
             ->where('country', '!=', '')
             ->select('country')
             ->distinct()
             ->orderBy('country')
-            ->pluck('country');
+            ->pluck('country')
+            ->mapWithKeys(fn($code) => [$code => $countryNames[$code] ?? $code]);
 
         if ($request->ajax()) {
             return view('partials.explore-results', compact('movies'))->render();
