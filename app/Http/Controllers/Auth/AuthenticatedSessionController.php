@@ -36,8 +36,8 @@ class AuthenticatedSessionController extends Controller
             $request->session()->regenerateToken();
 
             return back()->withErrors([
-                'email' => 'Tài khoản này hiện đang bị khóa. Liên hệ Admin để được kích hoạt.',
-            ])->onlyInput('email');
+                'name' => 'Tài khoản này hiện đang bị khóa. Liên hệ Admin để được kích hoạt.',
+            ])->onlyInput('name');
         }
 
         // ── Admin cần 2FA ──

@@ -113,7 +113,7 @@
                             <div class="grid grid-cols-3 gap-2">
                                 @foreach($user->favorites as $favMovie)
                                     <a href="{{ route('movies.show', $favMovie) }}" class="block shrink-0 group relative rounded-lg overflow-hidden aspect-[2/3]">
-                                        <img src="{{ $favMovie->poster }}" alt="{{ $favMovie->title }}" class="w-full h-full object-cover transition-transform group-hover:scale-110">
+                                        <img src="{{ $favMovie->poster }}" alt="{{ $favMovie->title }}" class="w-full h-full object-cover transition-transform group-hover:scale-110" loading="lazy">
                                         <div class="absolute inset-0 bg-gradient-to-t from-dark-950/80 via-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2">
                                             <span class="text-[10px] font-bold text-white leading-tight line-clamp-2">{{ $favMovie->title }}</span>
                                         </div>
@@ -135,7 +135,7 @@
                         <div class="card p-5 group flex flex-col md:flex-row gap-5">
                             @if($review->movie)
                                 <a href="{{ route('movies.show', $review->movie) }}" class="shrink-0 w-24 md:w-32 aspect-[2/3] rounded-lg overflow-hidden shadow-lg border border-dark-700/50 block">
-                                    <img src="{{ $review->movie->poster }}" alt="{{ $review->movie->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform">
+                                    <img src="{{ $review->movie->poster }}" alt="{{ $review->movie->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform" loading="lazy">
                                 </a>
                             @endif
                             <div class="flex-1 min-w-0">

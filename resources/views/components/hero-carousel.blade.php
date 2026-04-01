@@ -42,7 +42,8 @@
 
     {{-- Backdrop Slides --}}
     @foreach($movies as $i => $movie)
-        <div x-show="current === {{ $i }}"
+        <div {{ $i > 0 ? 'x-cloak style=display:none' : '' }}
+            x-show="current === {{ $i }}"
             x-transition:enter="transition ease-out duration-700"
             x-transition:enter-start="opacity-0 scale-105"
             x-transition:enter-end="opacity-100 scale-100"
@@ -52,7 +53,8 @@
             class="absolute inset-0"
         >
             @if($movie->backdrop)
-                <img src="{{ $movie->backdrop }}" alt="{{ $movie->title }}" class="w-full h-full object-cover">
+                <img src="{{ $movie->backdrop }}" alt="{{ $movie->title }}" 
+                     class="w-full h-full object-cover bg-gray-200">
             @endif
             <div class="absolute inset-0 bg-gradient-to-t from-white via-white/80 to-white/30"></div>
             <div class="absolute inset-0 bg-gradient-to-r from-white/90 via-white/50 to-transparent"></div>
@@ -67,7 +69,8 @@
                 {{-- Left: Movie Info --}}
                 <div class="flex-1 max-w-2xl space-y-4">
                     @foreach($movies as $i => $movie)
-                        <div x-show="current === {{ $i }}"
+                        <div {{ $i > 0 ? 'x-cloak style=display:none' : '' }}
+                            x-show="current === {{ $i }}"
                             x-transition:enter="transition ease-out duration-500 delay-200"
                             x-transition:enter-start="opacity-0 translate-y-4"
                             x-transition:enter-end="opacity-100 translate-y-0"
@@ -147,12 +150,14 @@
                     @foreach($movies as $i => $movie)
                         @if($movie->poster)
                             <button @click="current = {{ $i }}"
-                                :class="current === {{ $i }}
-                                    ? 'ring-4 ring-rose-500 ring-offset-4 ring-offset-white scale-105 opacity-100 w-28 h-40'
-                                    : 'opacity-70 hover:opacity-100 w-20 h-28'"
-                                class="shrink-0 rounded-xl overflow-hidden transition-all duration-300 shadow-xl bg-gray-100"
+                                class="shrink-0 rounded-xl overflow-hidden transition-all duration-300 shadow-xl bg-gray-100 {{ $i === 0 ? 'ring-4 ring-rose-500 ring-offset-4 ring-offset-white scale-105 opacity-100 w-28 h-40' : 'opacity-70 hover:opacity-100 w-20 h-28' }}"
+                                :class="{
+                                    'ring-4 ring-rose-500 ring-offset-4 ring-offset-white scale-105 opacity-100 w-28 h-40': current === {{ $i }},
+                                    'opacity-70 hover:opacity-100 w-20 h-28': current !== {{ $i }}
+                                }"
                             >
-                                <img src="{{ $movie->poster }}" alt="{{ $movie->title }}" class="w-full h-full object-cover">
+                                <img src="{{ $movie->poster }}" alt="{{ $movie->title }}" 
+                                     class="w-full h-full object-cover bg-gray-200">
                             </button>
                         @endif
                     @endforeach
@@ -176,8 +181,8 @@
     <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-10">
         @for($i = 0; $i < $movies->count(); $i++)
             <button @click="current = {{ $i }}; stopAutoplay(); startAutoplay()"
-                :class="current === {{ $i }} ? 'bg-rose-500 w-8' : 'bg-gray-300 w-2 hover:bg-gray-400'"
-                class="h-2 rounded-full transition-all duration-300"></button>
+                class="h-2 rounded-full transition-all duration-300 {{ $i === 0 ? 'bg-rose-500 w-8' : 'bg-gray-300 w-2 hover:bg-gray-400' }}"
+                :class="{ 'bg-rose-500 w-8': current === {{ $i }}, 'bg-gray-300 w-2 hover:bg-gray-400': current !== {{ $i }} }"></button>
         @endfor
     </div>
 

@@ -8,7 +8,7 @@
             <div class="w-full md:w-1/3 lg:w-1/4 shrink-0 space-y-6">
                 <div class="w-48 h-48 md:w-full md:aspect-[3/4] mx-auto md:h-auto rounded-3xl overflow-hidden shadow-2xl border-4 border-dark-800 bg-dark-800 flex items-center justify-center">
                     @if($person->photo)
-                        <img src="{{ $person->photo }}" alt="{{ $person->name }}" class="w-full h-full object-cover">
+                        <img src="{{ $person->photo }}" alt="{{ $person->name }}" class="w-full h-full object-cover" loading="lazy">
                     @else
                         <svg class="w-24 h-24 text-dark-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                     @endif
@@ -52,7 +52,7 @@
                                 <a href="{{ route('movies.show', $movie) }}" class="card-hover overflow-hidden rounded-xl bg-dark-800 flex gap-3 h-32 group">
                                     <div class="w-20 shrink-0 h-full">
                                         @if($movie->poster)
-                                            <img src="{{ $movie->poster }}" class="w-full h-full object-cover">
+                                            <img src="{{ $movie->poster }}" class="w-full h-full object-cover" loading="lazy">
                                         @else
                                             <div class="w-full h-full bg-dark-700"></div>
                                         @endif
@@ -81,7 +81,7 @@
                                 <a href="{{ route('movies.show', $movie) }}" class="card-hover overflow-hidden rounded-xl bg-dark-800 flex gap-3 h-32 group">
                                     <div class="w-20 shrink-0 h-full">
                                         @if($movie->poster)
-                                            <img src="{{ $movie->poster }}" class="w-full h-full object-cover">
+                                            <img src="{{ $movie->poster }}" class="w-full h-full object-cover" loading="lazy">
                                         @else
                                             <div class="w-full h-full bg-dark-700"></div>
                                         @endif

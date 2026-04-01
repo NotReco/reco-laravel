@@ -24,6 +24,11 @@ class Tag extends Model
         return $this->morphedByMany(Review::class, 'taggable');
     }
 
+    public function articles()
+    {
+        return $this->morphedByMany(Article::class, 'taggable');
+    }
+
     /**
      * Tag không dùng SoftDeletes nên override withTrashed cho HasSlug.
      */

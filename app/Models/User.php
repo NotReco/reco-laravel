@@ -86,9 +86,22 @@ class User extends Authenticatable
     }
 
 
+    public function articles()
+    {
+        return $this->hasMany(Article::class);
+    }
+
     public function chatMessages()
     {
         return $this->hasMany(ChatMessage::class);
+    }
+
+    /**
+     * Tùy chỉnh hệ thống gửi Email khôi phục mật khẩu.
+     */
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new \App\Notifications\ResetPasswordNotification($token));
     }
 
     // ── Role Helpers ──

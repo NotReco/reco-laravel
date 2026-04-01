@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\ArticleController;
+use App\Http\Controllers\ArticleCommentController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MovieController;
 use App\Http\Controllers\PersonController;
@@ -15,25 +17,51 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
+// Static Pages
+Route::view('/terms', 'pages.terms', ['title' => 'Điều khoản dịch vụ'])->name('pages.terms');
+Route::view('/privacy', 'pages.privacy', ['title' => 'Chính sách bảo mật'])->name('pages.privacy');
+
 // Phim
 Route::get('/explore', [MovieController::class, 'index'])->name('explore');
 Route::get('/movies/{movie}', [MovieController::class, 'show'])->name('movies.show');
 
 // Search API cho Navbar Live Search
 Route::get('/api/search', function (\Illuminate\Http\Request $request) {
-    $q = $request->query('q');
-    if (!$q) return response()->json([]);
-    $movies = \App\Models\Movie::where('title', 'like', "%{$q}%")
-        ->orWhere('original_title', 'like', "%{$q}%")
-        ->select('id', 'title', 'poster', 'release_date')
-        ->orderByDesc('view_count')
-        ->take(5)
+    $q = trim($request->query('q', ''));
+
+    // Strip SQL wildcards
+    $q = str_replace(['%', '_'], '', $q);
+
+    // Only allow: Unicode letters, digits 0-9, spaces (reject +, -, etc.)
+    if (!$q || !preg_match('/^[\p{L}\p{N}\s]+$/u', $q)) {
+        return response()->json([]);
+    }
+
+    $movies = \App\Models\Movie::where(function ($qb) use ($q) {
+            $qb->where('title', 'like', "%{$q}%")
+               ->orWhere('original_title', 'like', "%{$q}%");
+        })
+        ->select('id', 'slug', 'title', 'poster', 'release_date', 'view_count')
+        ->limit(20)
         ->get();
+
+    // Sort in PHP to ensure exact diacritics match but case-insensitive
+    // mb_stripos is case-insensitive, but diacritics-sensitive!
+    $movies = $movies->sortByDesc('view_count')->sortBy(function ($movie) use ($q) {
+        $titleMatch = mb_stripos($movie->title, $q) !== false;
+        $originalMatch = mb_stripos($movie->original_title ?? '', $q) !== false;
+        return ($titleMatch || $originalMatch) ? 1 : 2;
+    })->take(8)->values();
+
     return response()->json($movies);
 })->name('api.search');
 
 // Person detail
 Route::get('/person/{person}', [PersonController::class, 'show'])->name('person.show');
+
+// Tin tức (public)
+Route::get('/news', [ArticleController::class, 'index'])->name('news.index');
+Route::get('/news/{article}', [ArticleController::class, 'show'])->name('news.show');
 
 // Forum (public)
 Route::get('/forum', [ForumController::class, 'index'])->name('forum.index');
@@ -80,6 +108,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/comments/{comment}', [\App\Http\Controllers\CommentController::class, 'update'])->name('comments.update');
     Route::delete('/comments/{comment}', [\App\Http\Controllers\CommentController::class, 'destroy'])->name('comments.destroy');
 
+    // ── Article Comments ──
+    Route::post('/article-comments', [ArticleCommentController::class, 'store'])->name('article-comments.store');
+    Route::post('/article-comments/{comment}/like', [ArticleCommentController::class, 'toggleLike'])->name('article-comments.like');
+    Route::post('/article-comments/{comment}/report', [ArticleCommentController::class, 'report'])->name('article-comments.report');
+    Route::delete('/article-comments/{comment}', [ArticleCommentController::class, 'destroy'])->name('article-comments.destroy');
+
     // ── Notifications ──
     Route::get('/api/notifications', [\App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/api/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
@@ -124,4 +158,7 @@ Route::middleware(['auth', 'role:staff'])->prefix('admin')->name('admin.')->grou
     Route::get('/users', [\App\Http\Controllers\Admin\UserController::class, 'index'])->name('users.index');
     Route::put('/users/{user}', [\App\Http\Controllers\Admin\UserController::class, 'update'])->name('users.update');
     Route::post('/users/{user}/toggle-ban', [\App\Http\Controllers\Admin\UserController::class, 'toggleBan'])->name('users.toggleBan');
+
+    // Articles
+    Route::resource('articles', \App\Http\Controllers\Admin\ArticleController::class);
 });

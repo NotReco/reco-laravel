@@ -8,9 +8,6 @@
         @apply bg-dark-950 text-dark-100;
     }
 
-    ::selection {
-        @apply bg-accent-500/30 text-white;
-    }
 
     ::-webkit-scrollbar {
         width: 8px;

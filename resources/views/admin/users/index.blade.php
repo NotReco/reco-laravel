@@ -38,7 +38,7 @@
                             <div class="flex items-center gap-3">
                                 <div class="w-9 h-9 rounded-full bg-gradient-to-br from-rose-500 to-rose-700 flex items-center justify-center overflow-hidden shrink-0 ring-2 ring-dark-700">
                                     @if($user->avatar)
-                                        <img src="{{ $user->avatar }}" alt="" class="w-full h-full object-cover">
+                                        <img src="{{ $user->avatar }}" alt="" class="w-full h-full object-cover" loading="lazy">
                                     @else
                                         <span class="text-xs font-bold text-white">{{ strtoupper(substr($user->name, 0, 1)) }}</span>
                                     @endif
