@@ -9,7 +9,14 @@
         </p>
     </header>
 
-    <form method="post" action="{{ route('password.update') }}" class="mt-6 space-y-6">
+    <form
+        id="update-password-form"
+        data-unsaved-bar
+        data-unsaved-title="Mật khẩu"
+        method="post"
+        action="{{ route('password.update') }}"
+        class="mt-6 space-y-6"
+    >
         @csrf
         @method('put')
 

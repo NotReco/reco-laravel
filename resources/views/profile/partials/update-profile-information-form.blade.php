@@ -13,7 +13,15 @@
         @csrf
     </form>
 
-    <form method="post" action="{{ route('profile.update') }}" enctype="multipart/form-data" class="mt-6 space-y-6">
+    <form
+        id="profile-information-form"
+        data-unsaved-bar
+        data-unsaved-title="Thông tin hồ sơ"
+        method="post"
+        action="{{ route('profile.update') }}"
+        enctype="multipart/form-data"
+        class="mt-6 space-y-6"
+    >
         @csrf
         @method('patch')
 

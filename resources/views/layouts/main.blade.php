@@ -92,6 +92,34 @@
         <x-toast />
     @endif
 
+    {{-- ── 2FA Remember Login Prompt ───────────────────── --}}
+    @if(session('2fa_remember_prompt'))
+        <div x-data="{ open: true }" x-cloak>
+            <div x-show="open" class="fixed inset-0 z-[10000] flex items-center justify-center px-4">
+                <div class="absolute inset-0 bg-black/50" x-on:click="open = false"></div>
+
+                <div class="relative w-full max-w-lg rounded-2xl bg-white border border-gray-200 shadow-2xl p-6">
+                    <h3 class="text-xl font-display font-bold text-gray-900">Tin cậy thiết bị này?</h3>
+                    <p class="mt-2 text-sm text-gray-600">
+                        Lưu đăng nhập để bạn không cần nhập mã xác thực vào lần tới.
+                    </p>
+
+                    <div class="mt-6 flex flex-col sm:flex-row gap-3 sm:justify-end">
+                        <form method="post" action="{{ route('2fa.dismissTrust') }}">
+                            @csrf
+                            <button type="submit" class="btn-ghost w-full sm:w-auto italic" x-on:click="open = false">Không, cảm ơn</button>
+                        </form>
+
+                        <form method="post" action="{{ route('2fa.trustDevice') }}">
+                            @csrf
+                            <button type="submit" class="btn-primary w-full sm:w-auto">Tin cậy thiết bị</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
 </body>
 
-</html>
+</html>

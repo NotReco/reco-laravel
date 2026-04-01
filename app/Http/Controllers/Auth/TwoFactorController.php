@@ -12,6 +12,8 @@ use Illuminate\View\View;
 
 class TwoFactorController extends Controller
 {
+    private const TWO_FACTOR_TRUST_COOKIE = 'reco_2fa_trust';
+
     /**
      * Hiển thị form nhập mã 2FA.
      */
@@ -70,7 +72,13 @@ class TwoFactorController extends Controller
         Auth::login($user);
         $request->session()->regenerate();
 
-        return redirect()->intended(route('home', absolute: false));
+        $shouldPromptTrust = $user->two_factor_enabled
+            && $user->two_factor_remember_enabled
+            && !(bool) $request->cookie(self::TWO_FACTOR_TRUST_COOKIE);
+
+        return redirect()
+            ->intended(route('home', absolute: false))
+            ->with('2fa_remember_prompt', $shouldPromptTrust);
     }
 
     /**

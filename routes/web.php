@@ -133,6 +133,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // ── Settings ──
     Route::get('/settings', [\App\Http\Controllers\SettingsController::class, 'index'])->name('settings.index');
+    Route::patch('/settings/security', [\App\Http\Controllers\SettingsController::class, 'updateSecurity'])->name('settings.security.update');
 });
 
 // ═══════════════════════════════════════════════════

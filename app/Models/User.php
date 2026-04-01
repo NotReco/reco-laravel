@@ -28,6 +28,10 @@ class User extends Authenticatable
         'last_login_at',
         'two_factor_code',
         'two_factor_expires_at',
+        'two_factor_enabled',
+        'two_factor_remember_enabled',
+        'two_factor_trusted_token_hash',
+        'two_factor_trusted_until',
     ];
 
     protected $hidden = [
@@ -45,6 +49,9 @@ class User extends Authenticatable
             'last_login_at' => 'datetime',
             'role' => UserRole::class,
             'two_factor_expires_at' => 'datetime',
+            'two_factor_enabled' => 'boolean',
+            'two_factor_remember_enabled' => 'boolean',
+            'two_factor_trusted_until' => 'datetime',
         ];
     }
 
@@ -225,7 +232,7 @@ class User extends Authenticatable
      */
     public function requiresTwoFactor(): bool
     {
-        return $this->isAdmin();
+        return (bool) $this->two_factor_enabled;
     }
 }
 
