@@ -115,14 +115,6 @@
 
         </div>
 
-        <div class="flex items-center gap-4 pt-4 border-t border-dark-700/50">
-            <button type="submit" class="btn-primary">Lưu thay đổi</button>
-
-            @if (session('status') === 'profile-updated')
-                <p x-data="{ show: true }" x-show="show" x-transition x-init="setTimeout(() => show = false, 3000)" class="text-sm text-green-400 align-middle">
-                    Đã lưu thành công.
-                </p>
-            @endif
-        </div>
+        <button type="submit" class="hidden" aria-hidden="true" tabindex="-1">Lưu</button>
     </form>
 </section>

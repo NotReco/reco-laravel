@@ -268,7 +268,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
-                                Cài đặt
+                                Cài đặt bảo mật
                             </a>
 
                             @if(Auth::user()->isStaff())
@@ -376,13 +376,13 @@
                         </div>
                     </div>
                     <a href="{{ route('profile.edit') }}"
-                        class="block px-3 py-2.5 rounded-xl text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors">Hồ sơ cá nhân</a>
+                        class="block px-3 py-2.5 rounded-xl text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors">Hồ sơ (thông tin tài khoản)</a>
                     <a href="{{ route('messages.index') }}"
                         class="block px-3 py-2.5 rounded-xl text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors">Tin nhắn</a>
                     <a href="{{ route('mylist') }}"
                         class="block px-3 py-2.5 rounded-xl text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors">Danh sách của tôi</a>
                     <a href="{{ route('settings.index') }}"
-                        class="block px-3 py-2.5 rounded-xl text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors">Cài đặt</a>
+                        class="block px-3 py-2.5 rounded-xl text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors">Cài đặt bảo mật (2FA)</a>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit"

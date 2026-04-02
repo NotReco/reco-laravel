@@ -161,5 +161,7 @@ Route::middleware(['auth', 'role:staff'])->prefix('admin')->name('admin.')->grou
     Route::post('/users/{user}/toggle-ban', [\App\Http\Controllers\Admin\UserController::class, 'toggleBan'])->name('users.toggleBan');
 
     // Articles
+    Route::post('articles/editor-upload', [\App\Http\Controllers\Admin\ArticleEditorUploadController::class, 'store'])
+        ->name('articles.editor-upload');
     Route::resource('articles', \App\Http\Controllers\Admin\ArticleController::class);
 });

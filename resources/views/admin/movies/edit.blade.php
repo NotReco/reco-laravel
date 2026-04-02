@@ -35,7 +35,8 @@
             <div>
                 <label for="overview" class="block text-sm font-medium text-dark-200 mb-2">Mô tả</label>
                 <textarea id="overview" name="overview" rows="5"
-                          class="input-dark text-sm resize-none">{{ old('overview', $movie->overview) }}</textarea>
+                          class="js-richtext input-dark text-sm resize-none"
+                          data-richtext-height="320">{{ old('overview', $movie->overview) }}</textarea>
                 @error('overview') <p class="text-red-400 text-sm mt-1">{{ $message }}</p> @enderror
             </div>
 

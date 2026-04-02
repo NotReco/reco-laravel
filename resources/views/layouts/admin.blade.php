@@ -6,6 +6,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="article-editor-upload-url" content="{{ route('admin.articles.editor-upload') }}">
 
     <title>@isset($title){{ $title }} | @endisset Admin | {{ config('app.name', 'RecoDB') }}</title>
 
@@ -108,6 +109,18 @@
 
             {{-- Content --}}
             <div class="p-6">
+                {{-- Lỗi validation (Laravel dùng $errors, không phải session error) --}}
+                @if ($errors->any())
+                    <div class="mb-5 rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-100" role="alert">
+                        <p class="font-semibold text-white mb-2">Không lưu được — vui lòng sửa các lỗi sau:</p>
+                        <ul class="list-disc list-inside space-y-1 text-red-100/95">
+                            @foreach ($errors->all() as $message)
+                                <li>{{ $message }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
                 {{-- Toast --}}
                 @if(session('success') || session('error') || session('info'))
                     <x-toast />
@@ -118,5 +131,6 @@
         </main>
     </div>
 
+    @stack('scripts')
 </body>
 </html>

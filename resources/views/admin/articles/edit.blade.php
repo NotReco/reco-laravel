@@ -1,6 +1,6 @@
 <x-admin-layout :title="'Chỉnh sửa bài viết'" pageTitle="Chỉnh sửa bài viết">
 
-<form action="{{ route('admin.articles.update', $article) }}" method="POST" class="max-w-4xl">
+<form action="{{ route('admin.articles.update', $article) }}" method="POST" enctype="multipart/form-data" class="max-w-4xl" id="article-form">
     @csrf
     @method('PUT')
 
@@ -26,25 +26,82 @@
         {{-- Content --}}
         <div>
             <label for="content" class="block text-sm font-medium text-dark-300 mb-1.5">Nội dung <span class="text-red-400">*</span></label>
-            <textarea name="content" id="content" rows="15" required
-                      class="w-full px-4 py-3 bg-dark-800 border border-dark-700 rounded-xl text-white text-sm leading-relaxed
-                             focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500 transition-all resize-y">{{ old('content', $article->content) }}</textarea>
+            <textarea name="content" id="content" rows="15"
+                      class="js-richtext w-full px-4 py-3 bg-dark-800 border border-dark-700 rounded-xl text-white text-sm leading-relaxed
+                             focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500 transition-all resize-y"
+                      data-richtext-height="520">{{ old('content', $article->content) }}</textarea>
+            <p class="mt-1.5 text-xs text-dark-500">Cỡ chữ: nút <strong class="text-dark-400">Styles</strong> → nhóm <strong class="text-dark-400">Cỡ chữ</strong>. Ảnh/video từ máy: <strong class="text-dark-400">Duyệt</strong> trong hộp thoại ảnh/media, hoặc dán/kéo ảnh. YouTube/Vimeo vẫn dán URL trong media.</p>
             @error('content') <p class="mt-1 text-xs text-red-400">{{ $message }}</p> @enderror
         </div>
 
-        {{-- Thumbnail --}}
-        <div>
-            <label for="thumbnail" class="block text-sm font-medium text-dark-300 mb-1.5">Ảnh bìa (URL)</label>
-            @if($article->thumbnail)
-                <div class="mb-2 rounded-lg overflow-hidden inline-block border border-dark-700">
-                    <img src="{{ $article->thumbnail }}" alt="" class="h-28 object-cover" loading="lazy">
+        {{-- Điểm đánh giá đa nguồn --}}
+        <div class="rounded-xl border border-dark-700 bg-dark-800/40 p-5 space-y-4">
+            <h3 class="text-sm font-semibold text-white">Điểm đánh giá (tùy chọn)</h3>
+            <p class="text-xs text-dark-500 -mt-2">Nhập tay theo bản in / nguồn lúc đăng (hiển thị cùng khối ngày giờ trên trang bài; không tự cập nhật API). Để trống nếu không dùng.</p>
+            <div class="grid sm:grid-cols-2 gap-4">
+                <div>
+                    <label for="rating_reco" class="block text-xs font-medium text-dark-400 mb-1">Điểm {{ config('app.name', 'Reco') }}</label>
+                    <input type="text" name="rating_reco" id="rating_reco" value="{{ old('rating_reco', $article->rating_reco) }}" maxlength="32"
+                           class="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500"
+                           placeholder="vd: 9.7">
+                    @error('rating_reco') <p class="mt-1 text-xs text-red-400">{{ $message }}</p> @enderror
                 </div>
+                <div>
+                    <label for="rating_imdb" class="block text-xs font-medium text-dark-400 mb-1">IMDb</label>
+                    <input type="text" name="rating_imdb" id="rating_imdb" value="{{ old('rating_imdb', $article->rating_imdb) }}" maxlength="32"
+                           class="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500"
+                           placeholder="vd: 7.6">
+                    @error('rating_imdb') <p class="mt-1 text-xs text-red-400">{{ $message }}</p> @enderror
+                </div>
+                <div>
+                    <label for="rating_metacritic" class="block text-xs font-medium text-dark-400 mb-1">Metacritic</label>
+                    <input type="text" name="rating_metacritic" id="rating_metacritic" value="{{ old('rating_metacritic', $article->rating_metacritic) }}" maxlength="32"
+                           class="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500"
+                           placeholder="vd: 80">
+                    @error('rating_metacritic') <p class="mt-1 text-xs text-red-400">{{ $message }}</p> @enderror
+                </div>
+                <div>
+                    <label for="rating_rotten_tomatoes" class="block text-xs font-medium text-dark-400 mb-1">Rotten Tomatoes</label>
+                    <input type="text" name="rating_rotten_tomatoes" id="rating_rotten_tomatoes" value="{{ old('rating_rotten_tomatoes', $article->rating_rotten_tomatoes) }}" maxlength="32"
+                           class="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500"
+                           placeholder="vd: 93%">
+                    @error('rating_rotten_tomatoes') <p class="mt-1 text-xs text-red-400">{{ $message }}</p> @enderror
+                </div>
+                <div class="sm:col-span-2">
+                    <label for="rating_tmdb" class="block text-xs font-medium text-dark-400 mb-1">TMDb</label>
+                    <input type="text" name="rating_tmdb" id="rating_tmdb" value="{{ old('rating_tmdb', $article->rating_tmdb) }}" maxlength="32"
+                           class="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500"
+                           placeholder="vd: 8.2">
+                    @error('rating_tmdb') <p class="mt-1 text-xs text-red-400">{{ $message }}</p> @enderror
+                </div>
+            </div>
+        </div>
+
+        {{-- Thumbnail: URL hoặc upload --}}
+        <div class="space-y-3">
+            <label class="block text-sm font-medium text-dark-300 mb-1.5">Ảnh bìa</label>
+            @if($article->thumbnail)
+                <div class="mb-1 rounded-lg overflow-hidden inline-block border border-dark-700">
+                    <img src="{{ $article->thumbnail }}" alt="" class="h-28 object-cover max-w-full" loading="lazy">
+                </div>
+                <p class="text-[11px] text-dark-500">Ảnh hiện tại. Chọn file mới hoặc đổi URL rồi lưu để thay.</p>
             @endif
-            <input type="url" name="thumbnail" id="thumbnail" value="{{ old('thumbnail', $article->thumbnail) }}" maxlength="500"
-                   class="w-full px-4 py-2.5 bg-dark-800 border border-dark-700 rounded-xl text-white text-sm
-                          focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500 transition-all"
-                   placeholder="https://example.com/image.jpg">
-            @error('thumbnail') <p class="mt-1 text-xs text-red-400">{{ $message }}</p> @enderror
+            <div>
+                <label for="thumbnail_upload" class="block text-xs font-medium text-dark-400 mb-1">Tải từ máy</label>
+                <input type="file" name="thumbnail_upload" id="thumbnail_upload" accept="image/jpeg,image/png,image/webp,image/gif"
+                       class="block w-full text-sm text-dark-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-dark-700 file:text-white hover:file:bg-dark-600 file:cursor-pointer cursor-pointer">
+                <p class="mt-1 text-[11px] text-dark-500">JPEG, PNG, WebP hoặc GIF — tối đa 3&nbsp;MB. Upload mới sẽ thay ảnh cũ (và xóa file cũ trên server nếu là ảnh đã upload).</p>
+                @error('thumbnail_upload') <p class="mt-1 text-xs text-red-400">{{ $message }}</p> @enderror
+            </div>
+            <div>
+                <label for="thumbnail" class="block text-xs font-medium text-dark-400 mb-1">Hoặc dán URL</label>
+                <input type="text" name="thumbnail" id="thumbnail" value="{{ old('thumbnail', $article->thumbnail) }}" maxlength="500" inputmode="url" autocomplete="off"
+                       class="w-full px-4 py-2.5 bg-dark-800 border border-dark-700 rounded-xl text-white text-sm
+                              focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500 transition-all"
+                       placeholder="https://example.com/image.jpg">
+                <p class="mt-1 text-[11px] text-dark-500">Xóa hết URL và không chọn file để bỏ ảnh bìa.</p>
+                @error('thumbnail') <p class="mt-1 text-xs text-red-400">{{ $message }}</p> @enderror
+            </div>
         </div>
 
         {{-- Tags --}}
@@ -62,7 +119,8 @@
                 <div class="mt-2 flex flex-wrap gap-1.5">
                     @foreach($tags as $tag)
                         <button type="button"
-                                onclick="addTag('{{ $tag->name }}')"
+                                data-tag-name="{{ $tag->name }}"
+                                onclick="addTagFromButton(this)"
                                 class="px-2 py-0.5 bg-dark-700 text-dark-300 text-[11px] font-semibold rounded-md uppercase hover:bg-dark-600 hover:text-white transition-colors cursor-pointer">
                             + {{ $tag->name }}
                         </button>
@@ -101,6 +159,7 @@
                class="px-4 py-2.5 text-dark-400 text-sm hover:text-white transition-colors">
                 Hủy
             </a>
+            <span id="autosave-indicator" class="ml-auto text-xs text-dark-400 opacity-0 transition-opacity duration-300"></span>
         </div>
     </div>
 </form>
@@ -108,12 +167,18 @@
 <script>
 function addTag(tagName) {
     const input = document.getElementById('tags');
+    if (!input || !tagName) return;
     const currentTags = input.value.split(',').map(t => t.trim()).filter(t => t);
     if (!currentTags.includes(tagName)) {
         currentTags.push(tagName);
         input.value = currentTags.join(', ');
     }
 }
+function addTagFromButton(btn) {
+    addTag(btn.getAttribute('data-tag-name') || '');
+}
 </script>
+
+@include('admin.articles.partials.autosave', ['autosaveKey' => 'autosave_article_edit_' . $article->id])
 
 </x-admin-layout>

@@ -1,12 +1,15 @@
 <x-app-layout>
-    <x-slot:title>Cài đặt Tài khoản</x-slot:title>
+    <x-slot:title>Hồ sơ</x-slot:title>
 
     <div class="py-12" x-data="unsavedChangesHub()">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
             
             <div class="flex items-center gap-3 mb-8">
-                <svg class="w-8 h-8 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                <h1 class="text-3xl font-display font-bold text-white">Cài đặt</h1>
+                <svg class="w-8 h-8 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                <h1 class="text-3xl font-display font-bold text-white">Hồ sơ</h1>
             </div>
 
             <div class="card p-6 sm:p-8">
@@ -15,10 +18,6 @@
 
             <div class="card p-6 sm:p-8">
                 @include('profile.partials.update-password-form')
-            </div>
-
-            <div class="card p-6 sm:p-8">
-                @include('profile.partials.security-settings-form')
             </div>
 
             <div class="card p-6 sm:p-8 border-rose-900 border-2">
@@ -34,21 +33,26 @@
             class="fixed left-0 right-0 bottom-0 z-[9998] px-4 pb-4"
         >
             <div class="max-w-4xl mx-auto">
-                <div class="rounded-2xl border border-dark-700 bg-dark-800/95 backdrop-blur shadow-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+                <div class="rounded-2xl border border-gray-200 bg-white shadow-xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
                     <div class="flex-1">
-                        <div class="text-sm font-semibold text-amber-300">
+                        <div class="text-sm font-semibold text-gray-900">
                             Hãy cẩn thận - bạn chưa lưu các thay đổi!
-                        </div>
-                        <div class="text-xs text-dark-300 mt-0.5" x-show="dirtyTitles.length">
-                            Khu vực: <span class="text-dark-200" x-text="dirtyTitles.join(', ')"></span>
                         </div>
                     </div>
 
                     <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 sm:justify-end">
-                        <button type="button" class="btn-ghost w-full sm:w-auto" x-on:click="resetAll()">
+                        <button
+                            type="button"
+                            class="w-full sm:w-auto px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 underline-offset-4 hover:underline"
+                            x-on:click="resetAll()"
+                        >
                             Đặt lại
                         </button>
-                        <button type="button" class="btn-primary w-full sm:w-auto" x-on:click="save()">
+                        <button
+                            type="button"
+                            class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 rounded-xl text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-white transition"
+                            x-on:click="save()"
+                        >
                             Lưu thay đổi
                         </button>
                     </div>
@@ -82,22 +86,12 @@
                     get dirty() {
                         return this.dirtyFormIds.size > 0;
                     },
-                    get dirtyTitles() {
-                        const titles = [];
-                        for (const form of this.forms) {
-                            if (this.dirtyFormIds.has(form.id)) {
-                                titles.push(form.dataset.unsavedTitle || form.id);
-                            }
-                        }
-                        return titles;
-                    },
                     _snapshot(form) {
                         const fd = new FormData(form);
                         const entries = [];
                         for (const [k, v] of fd.entries()) {
                             entries.push([k, v instanceof File ? v.name : String(v)]);
                         }
-                        // include unchecked checkboxes so toggles are tracked reliably
                         for (const el of form.querySelectorAll('input[type="checkbox"][name]')) {
                             if (!el.checked) entries.push([el.name, '__unchecked__']);
                         }
@@ -121,7 +115,6 @@
                         }
                     },
                     save() {
-                        // submit the first dirty form (DOM order)
                         const target = this.forms.find(f => this.dirtyFormIds.has(f.id));
                         if (!target) return;
                         if (typeof target.requestSubmit === 'function') target.requestSubmit();

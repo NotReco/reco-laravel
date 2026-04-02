@@ -52,9 +52,7 @@
             </label>
         </div>
 
-        <div class="flex items-center gap-4 pt-4 border-t border-dark-700/50">
-            <button type="submit" class="btn-primary">Lưu thay đổi</button>
-        </div>
+        <button type="submit" class="hidden" aria-hidden="true" tabindex="-1">Lưu</button>
     </form>
 </section>
 

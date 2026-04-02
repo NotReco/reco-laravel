@@ -22,8 +22,8 @@
             {{ $article->title }}
         </h1>
 
-        {{-- Author & Date --}}
-        <div class="mt-5 flex items-center gap-3">
+        {{-- Author, date & điểm nguồn (cùng khối meta như trang báo) --}}
+        <div class="mt-5 flex items-start gap-3">
             <div
                 class="w-10 h-10 rounded-full bg-gradient-to-br from-rose-400 to-rose-600 flex items-center justify-center shrink-0 ring-2 ring-rose-100">
                 @if ($article->user->avatar ?? false)
@@ -34,11 +34,12 @@
                         class="text-sm font-bold text-white">{{ strtoupper(substr($article->user->name ?? '?', 0, 1)) }}</span>
                 @endif
             </div>
-            <div>
+            <div class="min-w-0 flex-1">
                 <p class="text-sm font-semibold text-gray-900">{{ $article->user->name ?? 'Ẩn danh' }}</p>
                 <p class="text-xs text-gray-400">
                     {{ $article->published_at?->format('d/m/Y') }} lúc {{ $article->published_at?->format('H:i') }}
                 </p>
+                @include('news.partials.article-ratings')
             </div>
         </div>
 
@@ -57,14 +58,14 @@
             </div>
         @endif
 
-        {{-- Content --}}
+        {{-- Content (HTML từ editor; đã làm sạch khi lưu) --}}
         <div
-            class="mt-8 prose prose-lg prose-gray max-w-none
+            class="article-body mt-8 prose prose-lg prose-gray max-w-none
                 prose-headings:font-outfit prose-headings:text-gray-900
                 prose-p:text-gray-700 prose-p:leading-relaxed
                 prose-a:text-rose-600 prose-a:no-underline hover:prose-a:underline
                 prose-img:rounded-xl prose-img:border prose-img:border-gray-100">
-            {!! nl2br(e($article->content)) !!}
+            {!! $article->content !!}
         </div>
 
         {{-- Article Footer --}}

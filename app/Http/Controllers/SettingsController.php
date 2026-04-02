@@ -14,9 +14,7 @@ class SettingsController extends Controller
      */
     public function index(Request $request)
     {
-        // Re-use the existing profile.edit view from Breeze
-        // but it could be expanded later to include app-specific preferences (theme, privacy)
-        return view('profile.edit', [
+        return view('settings.edit', [
             'user' => $request->user(),
         ]);
     }

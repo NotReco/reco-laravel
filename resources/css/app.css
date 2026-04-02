@@ -186,6 +186,21 @@
         -webkit-box-orient: vertical;
         overflow: hidden;
     }
+
+    /* Rich article HTML (TinyMCE): ảnh/video/chú thích giữa bài */
+    .article-body figure {
+        @apply my-8 mx-0;
+    }
+
+    .article-body figcaption {
+        @apply text-center text-sm text-gray-500 mt-2 italic;
+    }
+
+    .article-body iframe {
+        @apply w-full max-w-full rounded-xl border border-gray-100;
+        aspect-ratio: 16 / 9;
+        height: auto;
+    }
 }
 
 @keyframes fadeIn {
