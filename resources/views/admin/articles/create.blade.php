@@ -9,7 +9,7 @@
             <div>
                 <label for="title" class="block text-sm font-medium text-dark-300 mb-1.5">Tiêu đề <span
                         class="text-red-400">*</span></label>
-                <input type="text" name="title" id="title" value="{{ old('title') }}" required maxlength="255"
+                <input type="text" name="title" id="title" value="{{ old('title') }}" required maxlength="255" autocomplete="off"
                     class="w-full px-4 py-2.5 bg-dark-800 border border-dark-700 rounded-xl text-white text-sm
                           focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500 transition-all">
                 @error('title')
@@ -20,7 +20,7 @@
             {{-- Subtitle --}}
             <div>
                 <label for="subtitle" class="block text-sm font-medium text-dark-300 mb-1.5">Phụ đề</label>
-                <input type="text" name="subtitle" id="subtitle" value="{{ old('subtitle') }}" maxlength="500"
+                <input type="text" name="subtitle" id="subtitle" value="{{ old('subtitle') }}" maxlength="500" autocomplete="off"
                     class="w-full px-4 py-2.5 bg-dark-800 border border-dark-700 rounded-xl text-white text-sm
                           focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500 transition-all">
                 @error('subtitle')
@@ -53,7 +53,7 @@
                         <label for="rating_reco"
                             class="block text-xs font-medium text-dark-400 mb-1">{{ config('app.name', 'Reco') }}</label>
                         <input type="text" name="rating_reco" id="rating_reco" value="{{ old('rating_reco') }}"
-                            maxlength="32"
+                            maxlength="32" autocomplete="off"
                             class="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500">
                         @error('rating_reco')
                             <p class="mt-1 text-xs text-red-400">{{ $message }}</p>
@@ -62,7 +62,7 @@
                     <div>
                         <label for="rating_imdb" class="block text-xs font-medium text-dark-400 mb-1">IMDb</label>
                         <input type="text" name="rating_imdb" id="rating_imdb" value="{{ old('rating_imdb') }}"
-                            maxlength="32"
+                            maxlength="32" autocomplete="off"
                             class="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500">
                         @error('rating_imdb')
                             <p class="mt-1 text-xs text-red-400">{{ $message }}</p>
@@ -72,7 +72,7 @@
                         <label for="rating_metacritic"
                             class="block text-xs font-medium text-dark-400 mb-1">Metacritic</label>
                         <input type="text" name="rating_metacritic" id="rating_metacritic"
-                            value="{{ old('rating_metacritic') }}" maxlength="32"
+                            value="{{ old('rating_metacritic') }}" maxlength="32" autocomplete="off"
                             class="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500">
                         @error('rating_metacritic')
                             <p class="mt-1 text-xs text-red-400">{{ $message }}</p>
@@ -82,7 +82,7 @@
                         <label for="rating_rotten_tomatoes" class="block text-xs font-medium text-dark-400 mb-1">Rotten
                             Tomatoes</label>
                         <input type="text" name="rating_rotten_tomatoes" id="rating_rotten_tomatoes"
-                            value="{{ old('rating_rotten_tomatoes') }}" maxlength="32"
+                            value="{{ old('rating_rotten_tomatoes') }}" maxlength="32" autocomplete="off"
                             class="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500">
                         @error('rating_rotten_tomatoes')
                             <p class="mt-1 text-xs text-red-400">{{ $message }}</p>
@@ -91,7 +91,7 @@
                     <div class="sm:col-span-2">
                         <label for="rating_tmdb" class="block text-xs font-medium text-dark-400 mb-1">TMDb</label>
                         <input type="text" name="rating_tmdb" id="rating_tmdb" value="{{ old('rating_tmdb') }}"
-                            maxlength="32"
+                            maxlength="32" autocomplete="off"
                             class="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500">
                         @error('rating_tmdb')
                             <p class="mt-1 text-xs text-red-400">{{ $message }}</p>
@@ -130,7 +130,7 @@
             {{-- Tags --}}
             <div>
                 <label for="tags" class="block text-sm font-medium text-dark-300 mb-1.5">Từ khóa</label>
-                <input type="text" name="tags" id="tags" value="{{ old('tags') }}"
+                <input type="text" name="tags" id="tags" value="{{ old('tags') }}" autocomplete="off"
                     class="w-full px-4 py-2.5 bg-dark-800 border border-dark-700 rounded-xl text-white text-sm
                           focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500 transition-all">
                 <p class="mt-1 text-xs text-dark-500">Nhập các từ khóa, phân tách bằng dấu phẩy. Ví dụ: HÀNH ĐỘNG, PHIM
@@ -159,7 +159,7 @@
                 <input type="checkbox" name="is_published" id="is_published" value="1"
                     {{ old('is_published') ? 'checked' : '' }}
                     class="w-4 h-4 rounded bg-dark-800 border-dark-600 text-rose-500 focus:ring-rose-500/30 focus:ring-offset-0">
-                <label for="is_published" class="text-sm text-dark-300">Công khai ngay</label>
+                <label for="is_published" class="text-sm text-dark-300">Công khai bài viết</label>
             </div>
 
             {{-- Actions --}}

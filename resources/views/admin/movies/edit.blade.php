@@ -58,8 +58,12 @@
             <div>
                 <label for="status" class="block text-sm font-medium text-dark-200 mb-2">Trạng thái</label>
                 <select id="status" name="status" class="input-dark text-sm">
-                    @foreach(['Released', 'Post Production', 'In Production', 'Planned', 'Canceled'] as $s)
-                        <option value="{{ $s }}" {{ old('status', $movie->status) === $s ? 'selected' : '' }}>{{ $s }}</option>
+                    @foreach([
+                        'active' => 'Hoạt động',
+                        'hidden' => 'Đã ẩn',
+                        'upcoming' => 'Sắp chiếu',
+                    ] as $val => $label)
+                        <option value="{{ $val }}" {{ old('status', $movie->status) === $val ? 'selected' : '' }}>{{ $label }}</option>
                     @endforeach
                 </select>
             </div>

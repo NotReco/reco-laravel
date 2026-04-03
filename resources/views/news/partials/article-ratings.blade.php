@@ -1,39 +1,44 @@
-@php
-    $ratingBits = [];
-    if (filled($article->rating_reco)) {
-        $ratingBits[] = ['label' => 'Điểm ' . config('app.name', 'Reco'), 'value' => $article->rating_reco, 'accent' => true];
-    }
-    if (filled($article->rating_imdb)) {
-        $ratingBits[] = ['label' => 'IMDb', 'value' => $article->rating_imdb, 'accent' => false];
-    }
-    if (filled($article->rating_metacritic)) {
-        $ratingBits[] = ['label' => 'Metacritic', 'value' => $article->rating_metacritic, 'accent' => false];
-    }
-    if (filled($article->rating_rotten_tomatoes)) {
-        $ratingBits[] = ['label' => 'Rotten Tomatoes', 'value' => $article->rating_rotten_tomatoes, 'accent' => false];
-    }
-    if (filled($article->rating_tmdb)) {
-        $ratingBits[] = ['label' => 'TMDb', 'value' => $article->rating_tmdb, 'accent' => false];
-    }
-@endphp
-@if (count($ratingBits) > 0)
-    <div class="mt-2 flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[13px] leading-snug text-gray-600">
-        @foreach ($ratingBits as $i => $bit)
-            @if ($i > 0)
-                <span class="text-gray-300 select-none" aria-hidden="true">·</span>
-            @endif
-            <span class="whitespace-nowrap">
-                <span @class([
-                    'font-semibold',
-                    'text-gray-700' => $bit['accent'],
-                    'text-gray-600' => ! $bit['accent'],
-                ])>{{ $bit['label'] }}</span>
-                <span @class([
-                    'ml-1 font-bold tabular-nums',
-                    'text-rose-600 font-extrabold' => $bit['accent'],
-                    'text-gray-900' => ! $bit['accent'],
-                ])>{{ $bit['value'] }}</span>
-            </span>
-        @endforeach
+@if (
+    $article->rating_reco ||
+        $article->rating_imdb ||
+        $article->rating_rotten_tomatoes ||
+        $article->rating_metacritic ||
+        $article->rating_tmdb)
+    <div class="mt-3 flex items-center divide-x divide-gray-300/80 text-sm font-bold text-gray-700">
+        @if ($article->rating_reco)
+            <div class="flex items-center gap-1.5 px-3.5 first:pl-0 last:pr-0">
+                <div class="flex items-center justify-center w-5 h-5 bg-black rounded-full p-[1px]">
+                    <img src="{{ asset('storage/images/apple-touch-icon.png') }}" class="w-full h-full object-contain"
+                        alt="Reco">
+                </div>
+                <span class="text-gray-900 font-extrabold">{{ $article->rating_reco }}</span>
+            </div>
+        @endif
+        @if ($article->rating_imdb)
+            <div class="flex items-center gap-1.5 px-3.5 first:pl-0 last:pr-0">
+                <img src="{{ asset('storage/images/imdb.png') }}" class="h-5 w-auto object-contain rounded-sm"
+                    alt="IMDb">
+                <span class="text-gray-900">{{ $article->rating_imdb }}</span>
+            </div>
+        @endif
+        @if ($article->rating_rotten_tomatoes)
+            <div class="flex items-center gap-1.5 px-3.5 first:pl-0 last:pr-0">
+                <img src="{{ asset('storage/images/tomato.png') }}" class="w-5 h-5 object-contain" alt="RT">
+                <span class="text-gray-900">{{ $article->rating_rotten_tomatoes }}</span>
+            </div>
+        @endif
+        @if ($article->rating_metacritic)
+            <div class="flex items-center gap-1.5 px-3.5 first:pl-0 last:pr-0">
+                <img src="{{ asset('storage/images/metacritic.png') }}" class="h-5 w-auto object-contain rounded-sm"
+                    alt="MC">
+                <span class="text-gray-900">{{ $article->rating_metacritic }}</span>
+            </div>
+        @endif
+        @if ($article->rating_tmdb)
+            <div class="flex items-center gap-1.5 px-3.5 first:pl-0 last:pr-0">
+                <img src="{{ asset('storage/images/tmdb.png') }}" class="h-5 w-auto object-contain" alt="TMDb">
+                <span class="text-gray-900">{{ $article->rating_tmdb }}</span>
+            </div>
+        @endif
     </div>
 @endif

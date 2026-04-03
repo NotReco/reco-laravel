@@ -112,11 +112,19 @@ async function initRichTextEditors() {
             license_key: "gpl",
             menubar: false,
             height: Number.isFinite(height) ? height : 520,
-            plugins: "lists link image media wordcount",
-            toolbar:
-                "undo redo | bold italic underline | styles | bullist numlist | link | image media | removeformat",
+            language: "vi",
+            plugins:
+                "code lists link image media wordcount fullscreen table searchreplace",
+            toolbar: [
+                "undo redo | bold italic underline strikethrough | styles",
+                "alignleft aligncenter alignright alignjustify | bullist numlist | indent outdent",
+                "link image media table | searchreplace | removeformat | fullscreen code",
+            ].join(" | "),
             skin: "oxide-dark",
             content_css: "dark",
+
+            // Tắt tính năng tự động chuyển đổi markdown (như gõ * biến thành bullet list)
+            text_patterns: false,
 
             // Paste Cleanup Configuration
             paste_as_text: false, // Set to true to force plain text by default, but let's try just cleaning it first
@@ -159,8 +167,10 @@ async function initRichTextEditors() {
             ],
             image_caption: true,
             media_live_embeds: true,
-            relative_urls: false,
-            convert_urls: true,
+            relative_urls: true,
+            convert_urls: false,
+            remove_script_host: false,
+            paste_data_images: true,
             setup: (editor) => {
                 editor.on("init", () => {
                     const textarea = editor.getElement();
@@ -174,46 +184,101 @@ async function initRichTextEditors() {
                         { capture: true },
                     );
                 });
+
+                // Debug image insertion
+                editor.on("NodeChange", (e) => {
+                    if (e.element && e.element.tagName === "IMG") {
+                        console.log("Image inserted:", e.element.src);
+                    }
+                });
             },
         };
 
         if (uploadUrl) {
             options.automatic_uploads = true;
-            options.images_upload_handler = async (blobInfo) => {
-                const file = blobInfo.blob();
-                const name = blobInfo.filename();
-                const wrapped =
-                    file instanceof File
-                        ? file
-                        : new File([file], name, { type: file.type });
-                return uploadEditorFileToServer(wrapped, uploadUrl);
+            options.images_upload_handler = async (blobInfo, progress) => {
+                try {
+                    console.log("Starting upload for:", blobInfo.filename());
+                    const file = blobInfo.blob();
+                    const name = blobInfo.filename();
+                    const wrapped =
+                        file instanceof File
+                            ? file
+                            : new File([file], name, { type: file.type });
+                    const url = await uploadEditorFileToServer(
+                        wrapped,
+                        uploadUrl,
+                    );
+                    console.log("Upload successful, URL:", url);
+                    return url;
+                } catch (err) {
+                    console.error("TinyMCE upload error:", err);
+                    throw err;
+                }
             };
             options.file_picker_types = "image media";
-            options.file_picker_callback = (callback, _value, meta) => {
-                const input = document.createElement("input");
-                input.type = "file";
-                input.accept =
-                    meta.filetype === "image"
-                        ? "image/jpeg,image/png,image/webp,image/gif"
-                        : "video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov";
-                input.onchange = async () => {
-                    const file = input.files?.[0];
-                    if (!file) return;
-                    try {
-                        const url = await uploadEditorFileToServer(
-                            file,
-                            uploadUrl,
-                        );
-                        if (meta.filetype === "image") {
-                            callback(url, { alt: file.name });
-                        } else {
-                            callback(url);
+            options.file_picker_callback = (callback, value, meta) => {
+                console.log("File picker opened for:", meta.filetype);
+
+                if (meta.filetype === "image") {
+                    // Create a simple file input
+                    const input = document.createElement("input");
+                    input.setAttribute("type", "file");
+                    input.setAttribute("accept", "image/*");
+
+                    input.onchange = async () => {
+                        const file = input.files[0];
+                        if (!file) return;
+
+                        try {
+                            console.log("File selected:", file.name);
+                            const url = await uploadEditorFileToServer(
+                                file,
+                                uploadUrl,
+                            );
+                            console.log("Upload successful, URL:", url);
+                            console.log(
+                                "Full image URL for verification:",
+                                window.location.origin + url,
+                            ); // Log full URL
+
+                            // For image dialog, callback with the URL
+                            // TinyMCE will only insert when user clicks "Save" in the dialog
+                            callback(url, {
+                                alt: file.name,
+                                title: file.name,
+                            });
+                        } catch (err) {
+                            console.error("File picker error:", err);
+                            alert(err?.message || "Upload thất bại");
                         }
-                    } catch (err) {
-                        alert(err?.message || "Upload thất bại");
-                    }
-                };
-                input.click();
+                    };
+
+                    input.click();
+                } else {
+                    // Handle other file types (video, etc.)
+                    const input = document.createElement("input");
+                    input.type = "file";
+                    input.accept =
+                        "video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov";
+                    input.onchange = async () => {
+                        const file = input.files?.[0];
+                        if (!file) return;
+                        try {
+                            console.log("File selected:", file.name);
+                            const url = await uploadEditorFileToServer(
+                                file,
+                                uploadUrl,
+                            );
+                            console.log("Upload successful, URL:", url);
+                            callback(url);
+                        } catch (err) {
+                            console.error("File picker error:", err);
+                            alert(err?.message || "Upload thất bại");
+                        }
+                    };
+                    input.click();
+                }
             };
         }
 

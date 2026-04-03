@@ -50,6 +50,14 @@ class ArticleEditorUploadController extends Controller
 
         $url = Storage::disk('public')->url($path);
 
+        // Return relative URL to avoid port issues
+        // TinyMCE will resolve it relative to current domain
+        if (str_starts_with($url, 'http')) {
+            // Extract just the path part (e.g., /storage/articles/...)
+            $parsed = parse_url($url);
+            $url = $parsed['path'] ?? $url;
+        }
+
         return response()->json(['location' => $url]);
     }
 }

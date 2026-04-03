@@ -4,7 +4,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
         <div class="mb-10 lg:mb-12 border-b border-gray-200 pb-6">
             <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Điều Khoản Dịch Vụ</h1>
-            <p class="text-[13px] text-gray-500">Ngày cập nhật gần nhất: {{ date('d/m/Y') }}</p>
+            <p class="text-[13px] text-gray-500">Ngày cập nhật gần nhất: 11/03/2026</p>
         </div>
 
         <div class="flex flex-col lg:flex-row gap-8 lg:gap-16">

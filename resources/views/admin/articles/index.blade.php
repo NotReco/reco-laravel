@@ -48,7 +48,7 @@
                         </td>
                         <td class="px-5 py-3 text-center">
                             @if($article->is_published)
-                                <span class="px-2 py-1 bg-emerald-500/20 text-emerald-400 text-xs font-bold rounded-lg">Đã đăng</span>
+                                <span class="px-2 py-1 bg-emerald-500/20 text-emerald-400 text-xs font-bold rounded-lg">Công khai</span>
                             @else
                                 <span class="px-2 py-1 bg-dark-700 text-dark-400 text-xs font-bold rounded-lg">Nháp</span>
                             @endif

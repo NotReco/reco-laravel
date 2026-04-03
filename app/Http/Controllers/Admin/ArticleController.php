@@ -37,13 +37,19 @@ class ArticleController extends Controller
             'content'      => ['required', 'string'],
             'thumbnail'    => ['nullable', 'string', 'max:500'],
             'thumbnail_upload' => ['nullable', 'image', 'max:3072', 'mimes:jpeg,jpg,png,webp,gif'],
-            'rating_reco'            => ['nullable', 'string', 'max:32'],
-            'rating_imdb'            => ['nullable', 'string', 'max:32'],
-            'rating_metacritic'      => ['nullable', 'string', 'max:32'],
-            'rating_rotten_tomatoes' => ['nullable', 'string', 'max:32'],
-            'rating_tmdb'            => ['nullable', 'string', 'max:32'],
+            'rating_reco'            => ['nullable', 'string', 'regex:/^(10(\.0+)?|[0-9](\.[0-9]+)?)$/'],
+            'rating_imdb'            => ['nullable', 'string', 'regex:/^(10(\.0+)?|[0-9](\.[0-9]+)?)$/'],
+            'rating_metacritic'      => ['nullable', 'string', 'regex:/^(100|[1-9]?[0-9])$/'],
+            'rating_rotten_tomatoes' => ['nullable', 'string', 'regex:/^(100|[1-9]?[0-9])%?$/'],
+            'rating_tmdb'            => ['nullable', 'string', 'regex:/^(100|[1-9]?[0-9])%?$/'],
             'is_published' => ['nullable', 'boolean'],
             'tags'         => ['nullable', 'string'],
+        ], [
+            'rating_reco.regex' => 'Điểm Reco phải từ 0 - 10 (ví dụ: 8.5).',
+            'rating_imdb.regex' => 'Điểm IMDb phải từ 0 - 10 (ví dụ: 7.6).',
+            'rating_tmdb.regex' => 'Điểm TMDb phải từ 0 - 100 có dấu % (ví dụ: 82%).',
+            'rating_metacritic.regex' => 'Điểm Metacritic phải từ 0 - 100 (ví dụ: 80).',
+            'rating_rotten_tomatoes.regex' => 'Điểm Rotten Tomatoes phải từ 0 - 100 có hoặc không có dấu % (ví dụ: 93%).',
         ]);
 
         foreach (['rating_reco', 'rating_imdb', 'rating_metacritic', 'rating_rotten_tomatoes', 'rating_tmdb'] as $rk) {
@@ -117,13 +123,19 @@ class ArticleController extends Controller
             'content'      => ['required', 'string'],
             'thumbnail'    => ['nullable', 'string', 'max:500'],
             'thumbnail_upload' => ['nullable', 'image', 'max:3072', 'mimes:jpeg,jpg,png,webp,gif'],
-            'rating_reco'            => ['nullable', 'string', 'max:32'],
-            'rating_imdb'            => ['nullable', 'string', 'max:32'],
-            'rating_metacritic'      => ['nullable', 'string', 'max:32'],
-            'rating_rotten_tomatoes' => ['nullable', 'string', 'max:32'],
-            'rating_tmdb'            => ['nullable', 'string', 'max:32'],
+            'rating_reco'            => ['nullable', 'string', 'regex:/^(10(\.0+)?|[0-9](\.[0-9]+)?)$/'],
+            'rating_imdb'            => ['nullable', 'string', 'regex:/^(10(\.0+)?|[0-9](\.[0-9]+)?)$/'],
+            'rating_metacritic'      => ['nullable', 'string', 'regex:/^(100|[1-9]?[0-9])$/'],
+            'rating_rotten_tomatoes' => ['nullable', 'string', 'regex:/^(100|[1-9]?[0-9])%?$/'],
+            'rating_tmdb'            => ['nullable', 'string', 'regex:/^(100|[1-9]?[0-9])%?$/'],
             'is_published' => ['nullable', 'boolean'],
             'tags'         => ['nullable', 'string'],
+        ], [
+            'rating_reco.regex' => 'Điểm Reco phải từ 0 - 10 (ví dụ: 8.5).',
+            'rating_imdb.regex' => 'Điểm IMDb phải từ 0 - 10 (ví dụ: 7.6).',
+            'rating_tmdb.regex' => 'Điểm TMDb phải từ 0 - 100 có dấu % (ví dụ: 82%).',
+            'rating_metacritic.regex' => 'Điểm Metacritic phải từ 0 - 100 (ví dụ: 80).',
+            'rating_rotten_tomatoes.regex' => 'Điểm Rotten Tomatoes phải từ 0 - 100 có hoặc không có dấu % (ví dụ: 93%).',
         ]);
 
         foreach (['rating_reco', 'rating_imdb', 'rating_metacritic', 'rating_rotten_tomatoes', 'rating_tmdb'] as $rk) {

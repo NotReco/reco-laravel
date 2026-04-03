@@ -5,28 +5,29 @@
 
 @layer base {
     body {
-        @apply bg-dark-950 text-dark-100;
+        @apply bg-gray-50 text-gray-900;
     }
 
-
     ::-webkit-scrollbar {
-        width: 8px;
+        width: 10px;
+        height: 10px;
     }
 
     ::-webkit-scrollbar-track {
-        @apply bg-dark-900;
+        @apply bg-transparent;
     }
 
     ::-webkit-scrollbar-thumb {
-        @apply bg-dark-600 rounded-full;
+        @apply bg-gray-300/80 rounded-full border-[3px] border-solid border-white bg-clip-padding;
     }
 
     ::-webkit-scrollbar-thumb:hover {
-        @apply bg-dark-500;
+        @apply bg-gray-400;
     }
 }
 
 @layer components {
+
     /* ── Buttons ── */
     .btn-primary {
         @apply inline-flex items-center justify-center px-6 py-3 bg-accent-500 text-white font-semibold rounded-xl hover:bg-accent-600 focus:outline-none focus:ring-2 focus:ring-accent-500 focus:ring-offset-2 focus:ring-offset-dark-900 transition-all duration-200 ease-out;
@@ -70,32 +71,46 @@
     /* ── Rating Colors (1-10 scale) ── */
     .rating-terrible {
         color: #E63946;
-    }           /* 1-2: Rất tệ / Tệ */
+    }
+
+    /* 1-2: Rất tệ / Tệ */
     .rating-below-avg {
         color: #E63946;
-    }          /* 3-4: Dưới TB / Tạm được */
+    }
+
+    /* 3-4: Dưới TB / Tạm được */
     .rating-average {
         color: #d97b2a;
-    }            /* 5-6: Trung bình / Khá */
+    }
+
+    /* 5-6: Trung bình / Khá */
     .rating-good {
         color: #2A9D8F;
-    }               /* 7-8: Tốt / Rất tốt */
+    }
+
+    /* 7-8: Tốt / Rất tốt */
     .rating-excellent {
         color: #f5c518;
-    }          /* 9-10: Xuất sắc / Kiệt tác */
+    }
+
+    /* 9-10: Xuất sắc / Kiệt tác */
 
     .rating-bg-terrible {
         background-color: #E63946;
     }
+
     .rating-bg-below-avg {
         background-color: #E63946;
     }
+
     .rating-bg-average {
         background-color: #d97b2a;
     }
+
     .rating-bg-good {
         background-color: #2A9D8F;
     }
+
     .rating-bg-excellent {
         background-color: #f5c518;
     }
