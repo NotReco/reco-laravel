@@ -12,7 +12,7 @@
                         class="text-red-400">*</span></label>
                 <input type="text" name="title" id="title" value="{{ old('title', $article->title) }}" required maxlength="255" autocomplete="off"
                     class="w-full px-4 py-2.5 bg-dark-800 border border-dark-700 rounded-xl text-white text-sm
-                          focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500 transition-all">
+                          focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-500 transition-all">
                 @error('title')
                     <p class="mt-1 text-xs text-red-400">{{ $message }}</p>
                 @enderror
@@ -23,7 +23,7 @@
                 <label for="subtitle" class="block text-sm font-medium text-dark-300 mb-1.5">Phụ đề</label>
                 <input type="text" name="subtitle" id="subtitle" value="{{ old('subtitle', $article->subtitle) }}" maxlength="500" autocomplete="off"
                     class="w-full px-4 py-2.5 bg-dark-800 border border-dark-700 rounded-xl text-white text-sm
-                          focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500 transition-all">
+                          focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-500 transition-all">
                 @error('subtitle')
                     <p class="mt-1 text-xs text-red-400">{{ $message }}</p>
                 @enderror
@@ -35,7 +35,7 @@
                         class="text-red-400">*</span></label>
                 <textarea name="content" id="content" rows="15"
                     class="js-richtext w-full px-4 py-3 bg-dark-800 border border-dark-700 rounded-xl text-white text-sm leading-relaxed
-                             focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500 transition-all resize-y"
+                             focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-500 transition-all resize-y"
                     data-richtext-height="520" placeholder="Nội dung chính của bài viết...">{{ old('content', $article->content) }}</textarea>
                 <p class="mt-2.5 text-xs text-dark-500 italic">Cỡ chữ chỉnh ở Styles. Chèn ảnh/video bằng cách dán trực
                     tiếp hoặc dùng nút tương ứng trên thanh công cụ (Video tối đa 50MB).</p>
@@ -55,7 +55,7 @@
                             class="block text-xs font-medium text-dark-400 mb-1">{{ config('app.name', 'Reco') }}</label>
                         <input type="text" name="rating_reco" id="rating_reco" value="{{ old('rating_reco', $article->rating_reco) }}"
                             maxlength="32" autocomplete="off"
-                            class="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500">
+                            class="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-500">
                         @error('rating_reco')
                             <p class="mt-1 text-xs text-red-400">{{ $message }}</p>
                         @enderror
@@ -64,7 +64,7 @@
                         <label for="rating_imdb" class="block text-xs font-medium text-dark-400 mb-1">IMDb</label>
                         <input type="text" name="rating_imdb" id="rating_imdb" value="{{ old('rating_imdb', $article->rating_imdb) }}"
                             maxlength="32" autocomplete="off"
-                            class="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500">
+                            class="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-500">
                         @error('rating_imdb')
                             <p class="mt-1 text-xs text-red-400">{{ $message }}</p>
                         @enderror
@@ -74,7 +74,7 @@
                             class="block text-xs font-medium text-dark-400 mb-1">Metacritic</label>
                         <input type="text" name="rating_metacritic" id="rating_metacritic"
                             value="{{ old('rating_metacritic', $article->rating_metacritic) }}" maxlength="32" autocomplete="off"
-                            class="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500">
+                            class="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-500">
                         @error('rating_metacritic')
                             <p class="mt-1 text-xs text-red-400">{{ $message }}</p>
                         @enderror
@@ -84,7 +84,7 @@
                             Tomatoes</label>
                         <input type="text" name="rating_rotten_tomatoes" id="rating_rotten_tomatoes"
                             value="{{ old('rating_rotten_tomatoes', $article->rating_rotten_tomatoes) }}" maxlength="32" autocomplete="off"
-                            class="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500">
+                            class="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-500">
                         @error('rating_rotten_tomatoes')
                             <p class="mt-1 text-xs text-red-400">{{ $message }}</p>
                         @enderror
@@ -93,7 +93,7 @@
                         <label for="rating_tmdb" class="block text-xs font-medium text-dark-400 mb-1">TMDb</label>
                         <input type="text" name="rating_tmdb" id="rating_tmdb" value="{{ old('rating_tmdb', $article->rating_tmdb) }}"
                             maxlength="32" autocomplete="off"
-                            class="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500">
+                            class="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-500">
                         @error('rating_tmdb')
                             <p class="mt-1 text-xs text-red-400">{{ $message }}</p>
                         @enderror
@@ -127,7 +127,7 @@
                     <input type="text" name="thumbnail" id="thumbnail" value="{{ old('thumbnail', $article->thumbnail) }}"
                         maxlength="500" inputmode="url" autocomplete="off"
                         class="w-full px-4 py-2.5 bg-dark-800 border border-dark-700 rounded-xl text-white text-sm
-                              focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500 transition-all">
+                              focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-500 transition-all">
                     <p class="mt-1 text-[11px] text-dark-500 italic">Xóa hết URL và không chọn file để bỏ ảnh bìa.</p>
                     @error('thumbnail')
                         <p class="mt-1 text-xs text-red-400">{{ $message }}</p>
@@ -140,7 +140,7 @@
                 <label for="tags" class="block text-sm font-medium text-dark-300 mb-1.5">Từ khóa</label>
                 <input type="text" name="tags" id="tags" value="{{ old('tags', $article->tags->pluck('name')->implode(', ')) }}" autocomplete="off"
                     class="w-full px-4 py-2.5 bg-dark-800 border border-dark-700 rounded-xl text-white text-sm
-                          focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500 transition-all">
+                          focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-500 transition-all">
                 <p class="mt-1 text-xs text-dark-500">Nhập các từ khóa, phân tách bằng dấu phẩy. Ví dụ: HÀNH ĐỘNG, PHIM
                     MỚI.</p>
                 @error('tags')
@@ -177,14 +177,14 @@
                 <input type="hidden" name="is_published" value="0">
                 <input type="checkbox" name="is_published" id="is_published" value="1"
                     {{ old('is_published', $article->is_published) ? 'checked' : '' }}
-                    class="w-4 h-4 rounded bg-dark-800 border-dark-600 text-rose-500 focus:ring-rose-500/30 focus:ring-offset-0">
+                    class="w-4 h-4 rounded bg-dark-800 border-dark-600 text-sky-500 focus:ring-sky-500/30 focus:ring-offset-0">
                 <label for="is_published" class="text-sm text-dark-300">Công khai bài viết</label>
             </div>
 
             {{-- Actions --}}
             <div class="flex items-center gap-3 pt-4 border-t border-dark-800">
                 <button type="submit"
-                    class="px-6 py-2.5 bg-rose-600 text-white text-sm font-medium rounded-xl hover:bg-rose-700 active:scale-[0.97] transition-all">
+                    class="px-6 py-2.5 bg-sky-600 text-white text-sm font-medium rounded-xl hover:bg-sky-700 active:scale-[0.97] transition-all">
                     Lưu thay đổi
                 </button>
                 <a href="{{ route('admin.articles.index') }}"

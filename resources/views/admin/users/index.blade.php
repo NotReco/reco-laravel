@@ -1,4 +1,4 @@
-<x-admin-layout :title="'Quản lý Users'" pageTitle="Quản lý Users">
+<x-admin-layout :title="'Quản lý người dùng'" pageTitle="Quản lý người dùng">
 
 {{-- ── Filters ───────────────────────────────────────────────── --}}
 <div class="mb-6">
@@ -36,7 +36,7 @@
                     <tr class="hover:bg-dark-800/30 transition-colors">
                         <td class="px-5 py-3">
                             <div class="flex items-center gap-3">
-                                <div class="w-9 h-9 rounded-full bg-gradient-to-br from-rose-500 to-rose-700 flex items-center justify-center overflow-hidden shrink-0 ring-2 ring-dark-700">
+                                <div class="w-9 h-9 rounded-full bg-gradient-to-br from-sky-500 to-sky-700 flex items-center justify-center overflow-hidden shrink-0 ring-2 ring-dark-700">
                                     @if($user->avatar)
                                         <img src="{{ $user->avatar }}" alt="" class="w-full h-full object-cover" loading="lazy">
                                     @else

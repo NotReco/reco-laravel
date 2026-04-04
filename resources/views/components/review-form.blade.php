@@ -79,14 +79,14 @@
         <div class="mb-5">
             <label class="flex items-center gap-2 cursor-pointer">
                 <input type="checkbox" name="is_spoiler" x-model="isSpoiler"
-                    class="w-4 h-4 rounded border-dark-600 bg-dark-800 text-rose-600 focus:ring-rose-500 focus:ring-offset-dark-900">
+                    class="w-4 h-4 rounded border-dark-600 bg-dark-800 text-sky-600 focus:ring-sky-500 focus:ring-offset-dark-900">
                 <span class="text-sm text-dark-300">⚠️ Chứa nội dung spoiler</span>
             </label>
         </div>
 
         {{-- Submit --}}
         <div class="flex items-center gap-3">
-            <button type="submit" class="btn-rose" :disabled="!score">
+            <button type="submit" class="btn-sky" :disabled="!score">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
                 <span x-text="content.length > 0 ? 'Gửi review' : 'Chấm điểm'"></span>
             </button>
@@ -97,6 +97,6 @@
 @else
     <div class="card p-6 text-center">
         <p class="text-dark-400 mb-3">Đăng nhập để viết đánh giá</p>
-        <a href="{{ route('login') }}" class="btn-rose text-sm">Đăng nhập</a>
+        <a href="{{ route('login') }}" class="btn-sky text-sm">Đăng nhập</a>
     </div>
 @endauth

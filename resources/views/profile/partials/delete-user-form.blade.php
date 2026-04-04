@@ -1,6 +1,6 @@
 <section class="space-y-6">
     <header>
-        <h2 class="text-xl font-display font-bold text-rose-500">
+        <h2 class="text-xl font-display font-bold text-red-500">
             Xóa Tài khoản
         </h2>
 
@@ -9,12 +9,12 @@
         </p>
     </header>
 
-    <button x-data="" x-on:click.prevent="$dispatch('open-modal', 'confirm-user-deletion')" class="btn-rose inline-flex items-center px-4 py-2 bg-rose-600 border border-transparent rounded-xl font-semibold text-xs text-white uppercase tracking-widest hover:bg-rose-500 active:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 focus:ring-offset-dark-800 transition ease-in-out duration-150">
+    <button x-data="" x-on:click.prevent="$dispatch('open-modal', 'confirm-user-deletion')" class="btn-danger inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-xl font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-500 active:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-dark-800 transition ease-in-out duration-150">
         Xóa Tài khoản
     </button>
 
     <x-modal name="confirm-user-deletion" :show="$errors->userDeletion->isNotEmpty()" focusable>
-        <form method="post" action="{{ route('profile.destroy') }}" class="p-6 bg-dark-800 border-t-4 border-rose-500">
+        <form method="post" action="{{ route('profile.destroy') }}" class="p-6 bg-dark-800 border-t-4 border-red-500">
             @csrf
             @method('delete')
 
@@ -29,9 +29,9 @@
             <div class="mt-6">
                 <x-input-label for="password" value="Mật khẩu" class="sr-only" />
 
-                <x-text-input id="password" name="password" type="password" class="mt-1 block w-full bg-dark-900 border-dark-700 text-white rounded-xl focus:border-rose-500 focus:ring-rose-500" placeholder="Mật khẩu của bạn..." />
+                <x-text-input id="password" name="password" type="password" class="mt-1 block w-full bg-dark-900 border-dark-700 text-white rounded-xl focus:border-red-500 focus:ring-red-500" placeholder="Mật khẩu của bạn..." />
 
-                <x-input-error :messages="$errors->userDeletion->get('password')" class="mt-2 text-rose-500" />
+                <x-input-error :messages="$errors->userDeletion->get('password')" class="mt-2 text-red-500" />
             </div>
 
             <div class="mt-6 flex justify-end">
@@ -39,7 +39,7 @@
                     Hủy
                 </button>
 
-                <button type="submit" class="btn-rose px-4 py-2 bg-rose-600 border border-transparent rounded-xl font-semibold text-xs text-white uppercase tracking-widest hover:bg-rose-500 active:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 focus:ring-offset-dark-800 transition ease-in-out duration-150">
+                <button type="submit" class="btn-danger px-4 py-2 bg-red-600 border border-transparent rounded-xl font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-500 active:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-dark-800 transition ease-in-out duration-150">
                     Xác nhận Xóa
                 </button>
             </div>

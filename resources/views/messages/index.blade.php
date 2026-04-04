@@ -20,9 +20,9 @@
                     @forelse($partners as $conv)
                         <a href="{{ route('messages.show', $conv->user->id) }}"
                            class="flex items-center gap-3 px-4 py-3 border-b border-dark-800 hover:bg-dark-800/50 transition-colors
-                                  {{ isset($partner) && $partner->id === $conv->user->id ? 'bg-dark-800 border-l-2 border-l-rose-500' : '' }}">
+                                  {{ isset($partner) && $partner->id === $conv->user->id ? 'bg-dark-800 border-l-2 border-l-sky-500' : '' }}">
                             {{-- Avatar --}}
-                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-rose-500 to-rose-700 flex items-center justify-center overflow-hidden shrink-0 ring-2 ring-dark-700">
+                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-sky-500 to-sky-700 flex items-center justify-center overflow-hidden shrink-0 ring-2 ring-dark-700">
                                 @if($conv->user->avatar)
                                     <img src="{{ $conv->user->avatar }}" alt="" class="w-full h-full object-cover" loading="lazy">
                                 @else
@@ -33,7 +33,7 @@
                                 <div class="flex items-center justify-between">
                                     <p class="text-sm font-semibold text-white truncate">{{ $conv->user->name }}</p>
                                     @if($conv->unread_count > 0)
-                                        <span class="w-5 h-5 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shrink-0">{{ $conv->unread_count }}</span>
+                                        <span class="w-5 h-5 bg-sky-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shrink-0">{{ $conv->unread_count }}</span>
                                     @endif
                                 </div>
                                 @if($conv->last_message)
@@ -61,14 +61,14 @@
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
                         </button>
                         <a href="{{ route('profile.show', $partner->id) }}" class="flex items-center gap-3 group">
-                            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-rose-500 to-rose-700 flex items-center justify-center overflow-hidden ring-2 ring-dark-700">
+                            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-sky-500 to-sky-700 flex items-center justify-center overflow-hidden ring-2 ring-dark-700">
                                 @if($partner->avatar)
                                     <img src="{{ $partner->avatar }}" alt="" class="w-full h-full object-cover" loading="lazy">
                                 @else
                                     <span class="text-xs font-bold text-white">{{ strtoupper(substr($partner->name, 0, 1)) }}</span>
                                 @endif
                             </div>
-                            <span class="font-semibold text-white group-hover:text-rose-400 transition-colors">{{ $partner->name }}</span>
+                            <span class="font-semibold text-white group-hover:text-sky-400 transition-colors">{{ $partner->name }}</span>
                         </a>
                     </div>
 
@@ -77,10 +77,10 @@
                         @foreach($messages as $msg)
                             @php $isMine = $msg->sender_id === Auth::id(); @endphp
                             <div class="flex {{ $isMine ? 'justify-end' : 'justify-start' }}">
-                                <div class="max-w-[70%] {{ $isMine ? 'bg-rose-600/80 text-white' : 'bg-dark-800 text-dark-200' }} rounded-2xl px-4 py-2.5 text-sm
+                                <div class="max-w-[70%] {{ $isMine ? 'bg-sky-600/80 text-white' : 'bg-dark-800 text-dark-200' }} rounded-2xl px-4 py-2.5 text-sm
                                             {{ $isMine ? 'rounded-br-md' : 'rounded-bl-md' }}">
                                     <p class="leading-relaxed whitespace-pre-line">{{ $msg->content }}</p>
-                                    <p class="text-[10px] mt-1 {{ $isMine ? 'text-rose-200' : 'text-dark-500' }}">
+                                    <p class="text-[10px] mt-1 {{ $isMine ? 'text-sky-200' : 'text-dark-500' }}">
                                         {{ $msg->created_at->format('H:i') }}
                                     </p>
                                 </div>
@@ -95,7 +95,7 @@
                             <input type="hidden" name="receiver_id" value="{{ $partner->id }}">
                             <input type="text" name="content" placeholder="Nhập tin nhắn..." required
                                    class="input-dark text-sm flex-1 py-2.5" autocomplete="off">
-                            <button type="submit" class="btn-rose py-2.5 px-5 text-sm shrink-0">
+                            <button type="submit" class="btn-sky py-2.5 px-5 text-sm shrink-0">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
                                 </svg>

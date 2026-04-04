@@ -1,10 +1,10 @@
-<div id="autosave-container" class="hidden mb-6 p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl flex items-center justify-between">
-    <div class="text-sm text-rose-100/90">
-        <span class="font-semibold text-rose-400">Có bản nháp chưa lưu!</span> 
+<div id="autosave-container" class="hidden mb-6 p-4 bg-sky-500/10 border border-sky-500/20 rounded-xl flex items-center justify-between">
+    <div class="text-sm text-sky-100/90">
+        <span class="font-semibold text-sky-400">Có bản nháp chưa lưu!</span> 
         Hệ thống tìm thấy nội dung đang làm dở (lưu lúc <span id="autosave-time" class="font-medium text-white"></span>).
     </div>
     <div class="space-x-2 shrink-0 ml-4">
-        <button type="button" id="btn-restore-draft" class="px-3 py-1.5 bg-rose-600 text-white text-xs font-semibold rounded-lg hover:bg-rose-700 active:scale-[0.97] transition-all">Khôi phục</button>
+        <button type="button" id="btn-restore-draft" class="px-3 py-1.5 bg-sky-600 text-white text-xs font-semibold rounded-lg hover:bg-sky-700 active:scale-[0.97] transition-all">Khôi phục</button>
         <button type="button" id="btn-discard-draft" class="px-3 py-1.5 bg-dark-800 border border-dark-700 text-dark-300 text-xs font-medium rounded-lg hover:text-white hover:bg-dark-700 transition-colors">Bỏ qua</button>
     </div>
 </div>

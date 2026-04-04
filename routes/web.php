@@ -164,4 +164,7 @@ Route::middleware(['auth', 'role:staff'])->prefix('admin')->name('admin.')->grou
     Route::post('articles/editor-upload', [\App\Http\Controllers\Admin\ArticleEditorUploadController::class, 'store'])
         ->name('articles.editor-upload');
     Route::resource('articles', \App\Http\Controllers\Admin\ArticleController::class);
+
+    // Forum Categories
+    Route::resource('forum-categories', \App\Http\Controllers\Admin\ForumCategoryController::class)->except(['show']);
 });

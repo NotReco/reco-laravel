@@ -22,20 +22,20 @@
 
         <div>
             <x-input-label for="update_password_current_password" value="Mật khẩu hiện tại" class="text-dark-300" />
-            <x-text-input id="update_password_current_password" name="current_password" type="password" class="mt-1 block w-full md:w-1/2 bg-dark-900 border-dark-700 text-white rounded-xl focus:border-rose-500 focus:ring-rose-500" autocomplete="current-password" />
-            <x-input-error :messages="$errors->updatePassword->get('current_password')" class="mt-2 text-rose-500" />
+            <x-text-input id="update_password_current_password" name="current_password" type="password" class="mt-1 block w-full md:w-1/2 bg-dark-900 border-dark-700 text-white rounded-xl focus:border-sky-500 focus:ring-sky-500" autocomplete="current-password" />
+            <x-input-error :messages="$errors->updatePassword->get('current_password')" class="mt-2 text-sky-500" />
         </div>
 
         <div>
             <x-input-label for="update_password_password" value="Mật khẩu mới" class="text-dark-300" />
-            <x-text-input id="update_password_password" name="password" type="password" class="mt-1 block w-full md:w-1/2 bg-dark-900 border-dark-700 text-white rounded-xl focus:border-rose-500 focus:ring-rose-500" autocomplete="new-password" />
-            <x-input-error :messages="$errors->updatePassword->get('password')" class="mt-2 text-rose-500" />
+            <x-text-input id="update_password_password" name="password" type="password" class="mt-1 block w-full md:w-1/2 bg-dark-900 border-dark-700 text-white rounded-xl focus:border-sky-500 focus:ring-sky-500" autocomplete="new-password" />
+            <x-input-error :messages="$errors->updatePassword->get('password')" class="mt-2 text-sky-500" />
         </div>
 
         <div>
             <x-input-label for="update_password_password_confirmation" value="Xác nhận mật khẩu" class="text-dark-300" />
-            <x-text-input id="update_password_password_confirmation" name="password_confirmation" type="password" class="mt-1 block w-full md:w-1/2 bg-dark-900 border-dark-700 text-white rounded-xl focus:border-rose-500 focus:ring-rose-500" autocomplete="new-password" />
-            <x-input-error :messages="$errors->updatePassword->get('password_confirmation')" class="mt-2 text-rose-500" />
+            <x-text-input id="update_password_password_confirmation" name="password_confirmation" type="password" class="mt-1 block w-full md:w-1/2 bg-dark-900 border-dark-700 text-white rounded-xl focus:border-sky-500 focus:ring-sky-500" autocomplete="new-password" />
+            <x-input-error :messages="$errors->updatePassword->get('password_confirmation')" class="mt-2 text-sky-500" />
         </div>
 
         <button type="submit" class="hidden" aria-hidden="true" tabindex="-1">Lưu</button>

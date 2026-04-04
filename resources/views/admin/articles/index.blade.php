@@ -4,7 +4,7 @@
 <div class="flex items-center justify-between mb-6">
     <p class="text-dark-400 text-sm">Tổng: {{ $articles->total() }} bài viết</p>
     <a href="{{ route('admin.articles.create') }}"
-       class="flex items-center gap-2 px-4 py-2 bg-rose-600 text-white text-sm font-medium rounded-xl hover:bg-rose-700 transition-colors">
+       class="flex items-center gap-2 px-4 py-2 bg-sky-600 text-white text-sm font-medium rounded-xl hover:bg-sky-700 transition-colors">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
         Viết bài mới
     </a>

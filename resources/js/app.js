@@ -158,9 +158,9 @@ async function initRichTextEditors() {
                             styles: { "font-size": "85%", color: "#888" },
                         },
                         {
-                            title: "Chữ nhấn mạnh (Đỏ)",
+                            title: "Chữ nhấn mạnh (Xanh)",
                             inline: "span",
-                            styles: { color: "#e11d48" },
+                            styles: { color: "#0284c7" },
                         },
                     ],
                 },

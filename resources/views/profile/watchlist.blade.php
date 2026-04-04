@@ -2,7 +2,7 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center gap-3 mb-8">
-                <svg class="w-8 h-8 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
+                <svg class="w-8 h-8 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
                 <h1 class="text-3xl font-display font-bold text-white">Danh sách của tôi</h1>
             </div>
 
@@ -20,25 +20,25 @@
                 <div x-data="{ activeTab: 'want_to_watch' }">
                     <div class="flex gap-2 overflow-x-auto pb-4 mb-6 scrollbar-hide">
                         <button @click="activeTab = 'want_to_watch'"
-                                :class="activeTab === 'want_to_watch' ? 'bg-rose-600 text-white border-rose-500 shadow-lg shadow-rose-900/20' : 'bg-dark-800 text-dark-300 border-dark-700 hover:text-white hover:border-dark-500'"
+                                :class="activeTab === 'want_to_watch' ? 'bg-sky-600 text-white border-sky-500 shadow-lg shadow-sky-900/20' : 'bg-dark-800 text-dark-300 border-dark-700 hover:text-white hover:border-dark-500'"
                                 class="px-5 py-2.5 rounded-xl border font-medium text-sm transition-all whitespace-nowrap flex items-center gap-2">
                             <span>Muốn xem</span>
                             <span class="bg-dark-950/50 text-xs py-0.5 px-2 rounded-full">{{ $watchlists->get('want_to_watch') ? $watchlists->get('want_to_watch')->count() : 0 }}</span>
                         </button>
                         <button @click="activeTab = 'watching'"
-                                :class="activeTab === 'watching' ? 'bg-rose-600 text-white border-rose-500 shadow-lg shadow-rose-900/20' : 'bg-dark-800 text-dark-300 border-dark-700 hover:text-white hover:border-dark-500'"
+                                :class="activeTab === 'watching' ? 'bg-sky-600 text-white border-sky-500 shadow-lg shadow-sky-900/20' : 'bg-dark-800 text-dark-300 border-dark-700 hover:text-white hover:border-dark-500'"
                                 class="px-5 py-2.5 rounded-xl border font-medium text-sm transition-all whitespace-nowrap flex items-center gap-2">
                             <span>Đang xem</span>
                             <span class="bg-dark-950/50 text-xs py-0.5 px-2 rounded-full">{{ $watchlists->get('watching') ? $watchlists->get('watching')->count() : 0 }}</span>
                         </button>
                         <button @click="activeTab = 'watched'"
-                                :class="activeTab === 'watched' ? 'bg-rose-600 text-white border-rose-500 shadow-lg shadow-rose-900/20' : 'bg-dark-800 text-dark-300 border-dark-700 hover:text-white hover:border-dark-500'"
+                                :class="activeTab === 'watched' ? 'bg-sky-600 text-white border-sky-500 shadow-lg shadow-sky-900/20' : 'bg-dark-800 text-dark-300 border-dark-700 hover:text-white hover:border-dark-500'"
                                 class="px-5 py-2.5 rounded-xl border font-medium text-sm transition-all whitespace-nowrap flex items-center gap-2">
                             <span>Đã xem</span>
                             <span class="bg-dark-950/50 text-xs py-0.5 px-2 rounded-full">{{ $watchlists->get('watched') ? $watchlists->get('watched')->count() : 0 }}</span>
                         </button>
                         <button @click="activeTab = 'dropped'"
-                                :class="activeTab === 'dropped' ? 'bg-rose-600 text-white border-rose-500 shadow-lg shadow-rose-900/20' : 'bg-dark-800 text-dark-300 border-dark-700 hover:text-white hover:border-dark-500'"
+                                :class="activeTab === 'dropped' ? 'bg-sky-600 text-white border-sky-500 shadow-lg shadow-sky-900/20' : 'bg-dark-800 text-dark-300 border-dark-700 hover:text-white hover:border-dark-500'"
                                 class="px-5 py-2.5 rounded-xl border font-medium text-sm transition-all whitespace-nowrap flex items-center gap-2">
                             <span>Bỏ dở</span>
                             <span class="bg-dark-950/50 text-xs py-0.5 px-2 rounded-full">{{ $watchlists->get('dropped') ? $watchlists->get('dropped')->count() : 0 }}</span>
@@ -57,7 +57,7 @@
                                             <form action="{{ route('watchlist.toggle') }}" method="POST" class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                                                 @csrf
                                                 <input type="hidden" name="movie_id" value="{{ $item->movie_id }}">
-                                                <button type="submit" class="w-8 h-8 rounded-full bg-dark-900/80 backdrop-blur-sm border border-dark-600 text-dark-300 hover:text-rose-500 hover:border-rose-500/50 hover:bg-rose-500/10 flex items-center justify-center transition-all shadow-lg" title="Gỡ khỏi danh sách">
+                                                <button type="submit" class="w-8 h-8 rounded-full bg-dark-900/80 backdrop-blur-sm border border-dark-600 text-dark-300 hover:text-sky-500 hover:border-sky-500/50 hover:bg-sky-500/10 flex items-center justify-center transition-all shadow-lg" title="Gỡ khỏi danh sách">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                                 </button>
                                             </form>

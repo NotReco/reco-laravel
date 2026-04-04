@@ -70,7 +70,7 @@
 
             <div class="flex items-center justify-between pt-4 border-t border-dark-700">
                 <a href="{{ route('admin.movies.index') }}" class="text-sm text-dark-400 hover:text-white transition-colors">← Quay lại</a>
-                <button type="submit" class="btn-rose text-sm py-2.5 px-6">Lưu thay đổi</button>
+                <button type="submit" class="btn-sky text-sm py-2.5 px-6">Lưu thay đổi</button>
             </div>
         </form>
     </div>

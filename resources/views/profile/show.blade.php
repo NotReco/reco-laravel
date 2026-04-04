@@ -4,11 +4,11 @@
             {{-- Profile Header Card --}}
             <div class="card p-6 md:p-10 mb-8 relative overflow-hidden">
                 {{-- Background decorative elements --}}
-                <div class="absolute top-0 right-0 w-64 h-64 bg-rose-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+                <div class="absolute top-0 right-0 w-64 h-64 bg-sky-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
                 
                 <div class="relative z-10 flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-10">
                     {{-- Avatar --}}
-                    <div class="w-32 h-32 md:w-40 md:h-40 shrink-0 rounded-full border-4 border-dark-700 bg-gradient-to-br from-rose-500 to-rose-700 flex items-center justify-center overflow-hidden shadow-2xl">
+                    <div class="w-32 h-32 md:w-40 md:h-40 shrink-0 rounded-full border-4 border-dark-700 bg-gradient-to-br from-sky-500 to-sky-700 flex items-center justify-center overflow-hidden shadow-2xl">
                         @if($user->avatar)
                             <img src="{{ $user->avatar }}" alt="{{ $user->name }}" class="w-full h-full object-cover">
                         @else
@@ -102,7 +102,7 @@
                         <div class="flex items-center justify-between mb-4">
                             <h3 class="text-lg font-bold text-white">Yêu thích gần đây</h3>
                             @if($isOwnProfile)
-                                <a href="#" class="text-xs text-rose-500 hover:text-rose-400">Xem tất cả</a>
+                                <a href="#" class="text-xs text-sky-500 hover:text-sky-400">Xem tất cả</a>
                             @endif
                         </div>
                         @if($user->favorites->isEmpty())
@@ -127,7 +127,7 @@
                 {{-- Right Column: Recent Reviews --}}
                 <div class="lg:col-span-2 space-y-6">
                     <h2 class="text-xl font-display font-bold text-white flex items-center gap-2">
-                        <svg class="w-5 h-5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                        <svg class="w-5 h-5 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
                         Review gần đây
                     </h2>
 
@@ -142,7 +142,7 @@
                                 <div class="flex items-start justify-between gap-4 mb-2">
                                     <div>
                                         <h3 class="font-bold text-white text-lg line-clamp-1 mb-1">
-                                            <a href="{{ route('movies.show', $review->movie) }}" class="hover:text-rose-400 transition-colors">{{ $review->title ?? 'Review phim ' . $review->movie->title }}</a>
+                                            <a href="{{ route('movies.show', $review->movie) }}" class="hover:text-sky-400 transition-colors">{{ $review->title ?? 'Review phim ' . $review->movie->title }}</a>
                                         </h3>
                                         @if($review->rating)
                                             <x-star-rating :rating="$review->rating" />

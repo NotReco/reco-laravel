@@ -42,7 +42,7 @@
                         </span>
                     @else
                         <a href="{{ $paginator->url(1) }}" rel="first"
-                            class="relative flex items-center justify-center w-auto px-3 h-10 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl leading-5 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-200 focus:z-10 focus:outline-none transition ease-in-out duration-200 shadow-sm"
+                            class="relative flex items-center justify-center w-auto px-3 h-10 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl leading-5 hover:text-sky-600 hover:bg-sky-50 hover:border-sky-200 focus:z-10 focus:outline-none transition ease-in-out duration-200 shadow-sm"
                             aria-label="First">
                             &lt;&lt;
                         </a>
@@ -62,7 +62,7 @@
                         </span>
                     @else
                         <a href="{{ $paginator->previousPageUrl() }}" rel="prev"
-                            class="relative flex items-center justify-center w-10 h-10 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl leading-5 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-200 focus:z-10 focus:outline-none transition ease-in-out duration-200 shadow-sm"
+                            class="relative flex items-center justify-center w-10 h-10 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl leading-5 hover:text-sky-600 hover:bg-sky-50 hover:border-sky-200 focus:z-10 focus:outline-none transition ease-in-out duration-200 shadow-sm"
                             aria-label="Previous">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -87,11 +87,11 @@
                                 @if ($page == $paginator->currentPage())
                                     <span aria-current="page">
                                         <span
-                                            class="relative flex items-center justify-center w-10 h-10 text-sm font-bold text-white bg-rose-600 border border-rose-600 cursor-default leading-5 rounded-xl shadow-md shadow-rose-600/30">{{ $page }}</span>
+                                            class="relative flex items-center justify-center w-10 h-10 text-sm font-bold text-white bg-sky-600 border border-sky-600 cursor-default leading-5 rounded-xl shadow-md shadow-sky-600/30">{{ $page }}</span>
                                     </span>
                                 @else
                                     <a href="{{ $url }}"
-                                        class="relative flex items-center justify-center w-10 h-10 text-sm font-medium text-gray-700 bg-white border border-gray-200 leading-5 rounded-xl hover:text-rose-600 hover:bg-rose-50 hover:border-rose-200 focus:z-10 focus:outline-none transition ease-in-out duration-200 shadow-sm"
+                                        class="relative flex items-center justify-center w-10 h-10 text-sm font-medium text-gray-700 bg-white border border-gray-200 leading-5 rounded-xl hover:text-sky-600 hover:bg-sky-50 hover:border-sky-200 focus:z-10 focus:outline-none transition ease-in-out duration-200 shadow-sm"
                                         aria-label="{{ __('Go to page :page', ['page' => $page]) }}">
                                         {{ $page }}
                                     </a>
@@ -103,7 +103,7 @@
                     {{-- Next Page Link --}}
                     @if ($paginator->hasMorePages())
                         <a href="{{ $paginator->nextPageUrl() }}" rel="next"
-                            class="relative flex items-center justify-center w-10 h-10 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl leading-5 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-200 focus:z-10 focus:outline-none transition ease-in-out duration-200 shadow-sm"
+                            class="relative flex items-center justify-center w-10 h-10 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl leading-5 hover:text-sky-600 hover:bg-sky-50 hover:border-sky-200 focus:z-10 focus:outline-none transition ease-in-out duration-200 shadow-sm"
                             aria-label="Next">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -112,7 +112,7 @@
                         </a>
                         {{-- Last Page Link --}}
                         <a href="{{ $paginator->url($paginator->lastPage()) }}" rel="last"
-                            class="relative flex items-center justify-center w-auto px-3 h-10 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl leading-5 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-200 focus:z-10 focus:outline-none transition ease-in-out duration-200 shadow-sm"
+                            class="relative flex items-center justify-center w-auto px-3 h-10 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl leading-5 hover:text-sky-600 hover:bg-sky-50 hover:border-sky-200 focus:z-10 focus:outline-none transition ease-in-out duration-200 shadow-sm"
                             aria-label="Last">
                             &gt;&gt;
                         </a>

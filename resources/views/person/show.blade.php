@@ -58,12 +58,12 @@
                                         @endif
                                     </div>
                                     <div class="py-2.5 pr-2.5 flex-1 min-w-0 flex flex-col justify-center">
-                                        <h4 class="text-sm font-semibold text-white group-hover:text-rose-400 transition-colors line-clamp-2 leading-tight mb-1">
+                                        <h4 class="text-sm font-semibold text-white group-hover:text-sky-400 transition-colors line-clamp-2 leading-tight mb-1">
                                             {{ $movie->title }}
                                         </h4>
                                         <p class="text-xs text-dark-400 mb-1">{{ $movie->release_date ? $movie->release_date->format('Y') : 'Chưa rõ' }}</p>
                                         @if($movie->pivot->character_name)
-                                            <p class="text-xs font-medium text-rose-300 line-clamp-1">vai {{ $movie->pivot->character_name }}</p>
+                                            <p class="text-xs font-medium text-sky-300 line-clamp-1">vai {{ $movie->pivot->character_name }}</p>
                                         @endif
                                     </div>
                                 </a>
@@ -87,7 +87,7 @@
                                         @endif
                                     </div>
                                     <div class="py-2.5 pr-2.5 flex-1 min-w-0 flex flex-col justify-center">
-                                        <h4 class="text-sm font-semibold text-white group-hover:text-rose-400 transition-colors line-clamp-2 leading-tight mb-1">
+                                        <h4 class="text-sm font-semibold text-white group-hover:text-sky-400 transition-colors line-clamp-2 leading-tight mb-1">
                                             {{ $movie->title }}
                                         </h4>
                                         <p class="text-xs text-dark-400 mb-1">{{ $movie->release_date ? $movie->release_date->format('Y') : 'Chưa rõ' }}</p>

@@ -11,7 +11,7 @@
                 <span x-show="expanded" x-cloak>{{ $text }}</span>
             </p>
             <button @click="expanded = !expanded"
-                class="text-rose-400 hover:text-rose-300 text-sm font-medium mt-1 transition-colors">
+                class="text-sky-400 hover:text-sky-300 text-sm font-medium mt-1 transition-colors">
                 <span x-text="expanded ? '← Thu gọn' : 'Xem thêm →'"></span>
             </button>
         </div>

@@ -1,4 +1,4 @@
-<x-admin-layout :title="'Quản lý Reviews'" pageTitle="Quản lý Reviews">
+<x-admin-layout :title="'Quản lý đánh giá'" pageTitle="Quản lý đánh giá">
 
 {{-- ── Filters ───────────────────────────────────────────────── --}}
 <div class="mb-6 flex flex-col sm:flex-row gap-3">

@@ -70,7 +70,7 @@
                         </div>
 
                         @if($movie->tagline)
-                            <p class="text-rose-300 font-medium italic text-base mb-4 drop-shadow">"{{ $movie->tagline }}"</p>
+                            <p class="text-sky-300 font-medium italic text-base mb-4 drop-shadow">"{{ $movie->tagline }}"</p>
                         @endif
 
                         {{-- Meta Info --}}
@@ -99,7 +99,7 @@
                             <div class="flex flex-wrap gap-2 mb-6">
                                 @foreach($movie->genres as $genre)
                                     <a href="{{ route('explore', ['genre' => $genre->id]) }}"
-                                        class="px-3 py-1 text-sm font-medium bg-rose-50 text-rose-600 border border-rose-200 rounded-full hover:bg-rose-100 transition-colors">
+                                        class="px-3 py-1 text-sm font-medium bg-sky-50 text-sky-600 border border-sky-200 rounded-full hover:bg-sky-100 transition-colors">
                                         {{ $genre->name }}
                                     </a>
                                 @endforeach
@@ -133,7 +133,7 @@
                             {{-- Actions --}}
                             @if($movie->trailer_url)
                                 <button @click="openTrailer('{{ $movie->trailer_url }}')"
-                                    class="inline-flex items-center gap-2 px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-rose-600/30">
+                                    class="inline-flex items-center gap-2 px-5 py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-sky-600/30">
                                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
                                     Trailer
                                 </button>
@@ -173,7 +173,7 @@
                                 {{-- Favorite --}}
                                 <button @click="toggleFavorite()" title="Yêu thích"
                                     class="p-2.5 rounded-xl border transition-all"
-                                    :class="isFavorited ? 'bg-rose-50 border-rose-300 text-rose-500' : 'bg-white border-gray-200 text-gray-400 hover:text-rose-500 hover:border-rose-300'">
+                                    :class="isFavorited ? 'bg-sky-50 border-sky-300 text-sky-500' : 'bg-white border-gray-200 text-gray-400 hover:text-sky-500 hover:border-sky-300'">
                                     <svg class="w-5 h-5" :fill="isFavorited ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
                                 </button>
 
@@ -195,7 +195,7 @@
                                         <button @click="updateWatchlist('watching'); open = false" class="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition" :class="{'text-blue-600 bg-blue-50': watchlistStatus === 'watching'}">Đang xem</button>
                                         <button @click="updateWatchlist('watched'); open = false" class="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition" :class="{'text-blue-600 bg-blue-50': watchlistStatus === 'watched'}">Đã xem</button>
                                         <button @click="updateWatchlist('dropped'); open = false" class="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition" :class="{'text-blue-600 bg-blue-50': watchlistStatus === 'dropped'}">Bỏ dở</button>
-                                        <button x-show="watchlistStatus" @click="updateWatchlist(watchlistStatus); open = false" class="w-full text-left px-4 py-2.5 text-sm text-rose-500 hover:bg-rose-50 transition border-t border-gray-100">Gỡ khỏi danh sách</button>
+                                        <button x-show="watchlistStatus" @click="updateWatchlist(watchlistStatus); open = false" class="w-full text-left px-4 py-2.5 text-sm text-sky-500 hover:bg-sky-50 transition border-t border-gray-100">Gỡ khỏi danh sách</button>
                                     </div>
                                 </div>
                             </div>
@@ -216,7 +216,7 @@
                         @if($movie->synopsis)
                             <section>
                                 <h2 class="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
-                                    <span class="w-1 h-5 bg-rose-500 rounded-full inline-block"></span>
+                                    <span class="w-1 h-5 bg-sky-500 rounded-full inline-block"></span>
                                     Nội dung
                                 </h2>
                                 <div class="text-gray-600 leading-relaxed text-sm">
@@ -229,13 +229,13 @@
                         @if($directors->isNotEmpty() || $writers->isNotEmpty())
                             <section>
                                 <h2 class="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
-                                    <span class="w-1 h-5 bg-rose-500 rounded-full inline-block"></span>
+                                    <span class="w-1 h-5 bg-sky-500 rounded-full inline-block"></span>
                                     Đội ngũ sản xuất
                                 </h2>
                                 <div class="grid sm:grid-cols-2 gap-4">
                                     @if($directors->isNotEmpty())
                                         <div class="bg-gray-50 border border-gray-100 rounded-2xl p-4">
-                                            <p class="text-xs font-semibold text-rose-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                                            <p class="text-xs font-semibold text-sky-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.069A1 1 0 0121 8.82v6.36a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                                                 Đạo diễn
                                             </p>
@@ -244,7 +244,7 @@
                                     @endif
                                     @if($writers->isNotEmpty())
                                         <div class="bg-gray-50 border border-gray-100 rounded-2xl p-4">
-                                            <p class="text-xs font-semibold text-rose-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                                            <p class="text-xs font-semibold text-sky-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
                                                 Biên kịch
                                             </p>
@@ -259,14 +259,14 @@
                         @if($cast->isNotEmpty())
                             <section>
                                 <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                    <span class="w-1 h-5 bg-rose-500 rounded-full inline-block"></span>
+                                    <span class="w-1 h-5 bg-sky-500 rounded-full inline-block"></span>
                                     Diễn viên
                                 </h2>
                                 <div class="flex gap-4 overflow-x-auto pb-3 scrollbar-hide snap-x -mx-1 px-1">
                                     @foreach($cast as $person)
                                         <a href="{{ route('person.show', $person) }}"
                                             class="shrink-0 w-24 text-center snap-start group">
-                                            <div class="w-20 h-20 mx-auto rounded-full overflow-hidden mb-2 ring-2 ring-transparent group-hover:ring-rose-400 transition-all duration-200 shadow-md">
+                                            <div class="w-20 h-20 mx-auto rounded-full overflow-hidden mb-2 ring-2 ring-transparent group-hover:ring-sky-400 transition-all duration-200 shadow-md">
                                                 @if($person->photo)
                                                     <img src="{{ $person->photo }}" alt="{{ $person->name }}"
                                                         class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" loading="lazy">
@@ -276,7 +276,7 @@
                                                     </div>
                                                 @endif
                                             </div>
-                                            <p class="text-xs font-semibold text-gray-800 line-clamp-1 group-hover:text-rose-500 transition-colors">{{ $person->name }}</p>
+                                            <p class="text-xs font-semibold text-gray-800 line-clamp-1 group-hover:text-sky-500 transition-colors">{{ $person->name }}</p>
                                             @if($person->pivot->character_name)
                                                 <p class="text-[10px] text-gray-400 line-clamp-1 mt-0.5">{{ $person->pivot->character_name }}</p>
                                             @endif
@@ -291,7 +291,7 @@
                             <section>
                                 <div class="flex items-center justify-between mb-4">
                                     <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
-                                        <span class="w-1 h-5 bg-rose-500 rounded-full inline-block"></span>
+                                        <span class="w-1 h-5 bg-sky-500 rounded-full inline-block"></span>
                                         Đánh giá cộng đồng
                                     </h2>
                                     <span class="text-xs font-semibold text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full">{{ count($movie->reviews) }} reviews</span>
@@ -307,7 +307,7 @@
                         {{-- Review Form --}}
                         <section id="review-form">
                             <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                <span class="w-1 h-5 bg-rose-500 rounded-full inline-block"></span>
+                                <span class="w-1 h-5 bg-sky-500 rounded-full inline-block"></span>
                                 Viết đánh giá
                             </h2>
                             <x-review-form :movieId="$movie->id" />
@@ -347,7 +347,7 @@
                                             <div class="flex flex-wrap gap-1 justify-end">
                                                 @foreach($movie->genres as $genre)
                                                     <a href="{{ route('explore', ['genre' => $genre->id]) }}"
-                                                        class="text-xs text-rose-600 hover:text-rose-700 font-medium">{{ $genre->name }}</a>
+                                                        class="text-xs text-sky-600 hover:text-sky-700 font-medium">{{ $genre->name }}</a>
                                                     @if(!$loop->last)<span class="text-gray-300 text-xs">·</span>@endif
                                                 @endforeach
                                             </div>
@@ -374,7 +374,7 @@
                                 $scoreBg = match(true) {
                                     $avgRating >= 9 => 'from-yellow-400 to-amber-500',
                                     $avgRating >= 7 => 'from-teal-400 to-emerald-500',
-                                    $avgRating >= 5 => 'from-orange-400 to-rose-400',
+                                    $avgRating >= 5 => 'from-orange-400 to-sky-400',
                                     default         => 'from-red-400 to-red-600',
                                 };
                             @endphp

@@ -28,7 +28,7 @@
                     name="two_factor_enabled"
                     value="1"
                     @checked(old('two_factor_enabled', $user->two_factor_enabled))
-                    class="mt-1 rounded border-dark-700 bg-dark-900 text-rose-500 focus:ring-rose-500"
+                    class="mt-1 rounded border-dark-700 bg-dark-900 text-sky-500 focus:ring-sky-500"
                 />
                 <span>
                     <span class="block font-semibold text-white">Bảo mật 2 lớp (2FA)</span>
@@ -43,7 +43,7 @@
                     name="two_factor_remember_enabled"
                     value="1"
                     @checked(old('two_factor_remember_enabled', $user->two_factor_remember_enabled))
-                    class="mt-1 rounded border-dark-700 bg-dark-900 text-rose-500 focus:ring-rose-500"
+                    class="mt-1 rounded border-dark-700 bg-dark-900 text-sky-500 focus:ring-sky-500"
                 />
                 <span>
                     <span class="block font-semibold text-white">Cho phép lưu đăng nhập</span>

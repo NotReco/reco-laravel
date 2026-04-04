@@ -97,7 +97,7 @@
             class="article-body mt-8 prose prose-lg prose-gray max-w-none
                 prose-headings:font-outfit prose-headings:text-gray-900
                 prose-p:text-gray-700 prose-p:leading-relaxed
-                prose-a:text-rose-600 prose-a:no-underline hover:prose-a:underline">
+                prose-a:text-sky-600 prose-a:no-underline hover:prose-a:underline">
             {!! $article->content !!}
         </div>
 
@@ -114,7 +114,7 @@
                 <span class="font-bold">Từ khóa:</span>
                 @foreach ($article->tags as $tag)
                     <a href="{{ route('news.index', ['tag' => $tag->slug]) }}"
-                        class="uppercase hover:text-rose-600 transition-colors">
+                        class="uppercase hover:text-sky-600 transition-colors">
                         {{ $tag->name }}
                     </a>{{ !$loop->last ? ',' : '' }}
                 @endforeach

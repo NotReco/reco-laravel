@@ -3,7 +3,7 @@
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between mb-8">
                 <div class="flex items-center gap-3">
-                    <svg class="w-8 h-8 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-8 h-8 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                     </svg>
                     <h1 class="text-3xl font-display font-bold text-white">Thông báo</h1>
@@ -15,7 +15,7 @@
                             fetch($el.action, { method: 'POST', headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'} })
                             .then(() => window.location.reload())
                           ">
-                        <button type="submit" class="text-sm font-medium text-rose-400 hover:text-rose-300 bg-rose-500/10 hover:bg-rose-500/20 px-4 py-2 rounded-xl transition-all">
+                        <button type="submit" class="text-sm font-medium text-sky-400 hover:text-sky-300 bg-sky-500/10 hover:bg-sky-500/20 px-4 py-2 rounded-xl transition-all">
                             Đánh dấu tất cả đã đọc
                         </button>
                     </form>
@@ -52,10 +52,10 @@
                                 }">
                                 
                                 {{-- Unread indicator --}}
-                                <div x-show="!read" class="absolute left-0 top-0 bottom-0 w-1 bg-rose-500 rounded-r"></div>
+                                <div x-show="!read" class="absolute left-0 top-0 bottom-0 w-1 bg-sky-500 rounded-r"></div>
 
                                 {{-- Icon --}}
-                                <div class="w-12 h-12 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-500 flex items-center justify-center shrink-0">
+                                <div class="w-12 h-12 rounded-full bg-sky-500/10 border border-sky-500/20 text-sky-500 flex items-center justify-center shrink-0">
                                     {!! $data['icon'] ?? '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>' !!}
                                 </div>
 
@@ -71,7 +71,7 @@
                                                 {{ $notification->created_at->diffForHumans() }}
                                             </span>
                                             @if(!$isRead)
-                                                <span x-show="!read" class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                                                <span x-show="!read" class="w-1.5 h-1.5 rounded-full bg-sky-500"></span>
                                             @endif
                                         </div>
                                     </div>

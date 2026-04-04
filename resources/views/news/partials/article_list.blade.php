@@ -50,7 +50,7 @@
 
                     {{-- Title --}}
                     <h2
-                        class="text-lg font-bold text-gray-900 line-clamp-2 group-hover:text-rose-600 transition-colors leading-snug">
+                        class="text-lg font-bold text-gray-900 line-clamp-2 group-hover:text-sky-600 transition-colors leading-snug">
                         {{ $article->title }}
                     </h2>
 

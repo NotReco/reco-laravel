@@ -8,7 +8,7 @@
     <div class="mb-5">
         <div class="flex items-center gap-3">
             {{-- Accent bar (TMDB-style) --}}
-            <div class="w-1 h-9 bg-rose-500 rounded-full shrink-0"></div>
+            <div class="w-1 h-9 bg-sky-500 rounded-full shrink-0"></div>
             <div>
                 <h2 class="text-xl lg:text-2xl font-heading font-bold text-gray-900 leading-tight">
                     {{ $title }}</h2>
@@ -60,7 +60,7 @@
                 @if ($totalPages > 1)
                     {{-- Nút trái --}}
                     <button x-show="canGoPrev" @click="goPrev()"
-                        class="absolute left-0 top-[40%] -translate-y-1/2 -translate-x-1/2 z-10 w-11 h-11 border-2 border-gray-600 bg-white text-gray-700 rounded-full flex items-center justify-center opacity-0 group-hover/slider:opacity-100 hover:text-rose-600 transition-all duration-300 shadow-lg hidden sm:flex">
+                        class="absolute left-0 top-[40%] -translate-y-1/2 -translate-x-1/2 z-10 w-11 h-11 border-2 border-gray-600 bg-white text-gray-700 rounded-full flex items-center justify-center opacity-0 group-hover/slider:opacity-100 hover:text-sky-600 transition-all duration-300 shadow-lg hidden sm:flex">
                         <svg class="w-6 h-6 pr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                                 d="M15 19l-7-7 7-7" />
@@ -69,7 +69,7 @@
 
                     {{-- Nút phải --}}
                     <button x-show="canGoNext" @click="goNext()"
-                        class="absolute right-0 top-[40%] -translate-y-1/2 translate-x-1/2 z-10 w-11 h-11 border-2 border-gray-600 bg-white text-gray-700 rounded-full flex items-center justify-center opacity-0 group-hover/slider:opacity-100 hover:text-rose-600 transition-all duration-300 shadow-lg hidden sm:flex">
+                        class="absolute right-0 top-[40%] -translate-y-1/2 translate-x-1/2 z-10 w-11 h-11 border-2 border-gray-600 bg-white text-gray-700 rounded-full flex items-center justify-center opacity-0 group-hover/slider:opacity-100 hover:text-sky-600 transition-all duration-300 shadow-lg hidden sm:flex">
                         <svg class="w-6 h-6 pl-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
                         </svg>
@@ -80,7 +80,7 @@
                         @for ($p = 0; $p < $totalPages; $p++)
                             <button @click="currentPage = {{ $p }}"
                                 :class="currentPage === {{ $p }} ?
-                                    'bg-rose-500 w-6' :
+                                    'bg-sky-500 w-6' :
                                     'bg-gray-300 hover:bg-gray-400 w-2'"
                                 class="h-2 rounded-full transition-all duration-300">
                             </button>

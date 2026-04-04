@@ -44,7 +44,7 @@
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {{-- Header --}}
                 <div class="flex items-center gap-3 mb-6">
-                    <div class="w-1 h-8 bg-rose-500 rounded-full"></div>
+                    <div class="w-1 h-8 bg-sky-500 rounded-full"></div>
                     <h2 class="text-xl lg:text-2xl font-heading font-bold text-gray-900">Khám Phá Theo Thể Loại</h2>
                 </div>
 
@@ -52,7 +52,7 @@
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
                     @php
                         $genreColors = [
-                            '#e11d48',
+                            '#0284c7',
                             '#7c3aed',
                             '#0891b2',
                             '#059669',
@@ -91,7 +91,7 @@
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {{-- Header --}}
                 <div class="flex items-center gap-3 mb-5">
-                    <div class="w-1 h-8 bg-rose-500 rounded-full"></div>
+                    <div class="w-1 h-8 bg-sky-500 rounded-full"></div>
                     <div>
                         <h2 class="text-xl lg:text-2xl font-heading font-bold text-gray-900">Cộng Đồng Đánh Giá</h2>
                         <p class="text-gray-500 text-sm mt-0.5">Những bài đánh giá mới nhất từ cộng đồng RecoDB</p>

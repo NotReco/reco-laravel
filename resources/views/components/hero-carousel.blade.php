@@ -76,7 +76,7 @@
                             x-transition:enter-end="opacity-100 translate-y-0"
                         >
                             {{-- Badge --}}
-                            <span class="badge-rose mb-3">
+                            <span class="badge-sky mb-3">
                                 <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"/></svg>
                                 PHIM ĐIỆN ẢNH
                             </span>
@@ -131,7 +131,7 @@
                             {{-- CTA Buttons --}}
                             <div class="flex items-center gap-3 mt-5">
                                 @if($movie->trailer_url)
-                                    <button @click="openTrailer('{{ $movie->trailer_url }}')" class="px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-rose-600 hover:bg-rose-500 transition-colors shadow-md shadow-rose-200 flex items-center">
+                                    <button @click="openTrailer('{{ $movie->trailer_url }}')" class="px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-sky-600 hover:bg-sky-500 transition-colors shadow-md shadow-sky-200 flex items-center">
                                         <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
                                         Xem trailer
                                     </button>
@@ -150,9 +150,9 @@
                     @foreach($movies as $i => $movie)
                         @if($movie->poster)
                             <button @click="current = {{ $i }}"
-                                class="shrink-0 rounded-xl overflow-hidden transition-all duration-300 shadow-xl bg-gray-100 {{ $i === 0 ? 'ring-4 ring-rose-500 ring-offset-4 ring-offset-white scale-105 opacity-100 w-28 h-40' : 'opacity-70 hover:opacity-100 w-20 h-28' }}"
+                                class="shrink-0 rounded-xl overflow-hidden transition-all duration-300 shadow-xl bg-gray-100 {{ $i === 0 ? 'ring-4 ring-sky-500 ring-offset-4 ring-offset-white scale-105 opacity-100 w-28 h-40' : 'opacity-70 hover:opacity-100 w-20 h-28' }}"
                                 :class="{
-                                    'ring-4 ring-rose-500 ring-offset-4 ring-offset-white scale-105 opacity-100 w-28 h-40': current === {{ $i }},
+                                    'ring-4 ring-sky-500 ring-offset-4 ring-offset-white scale-105 opacity-100 w-28 h-40': current === {{ $i }},
                                     'opacity-70 hover:opacity-100 w-20 h-28': current !== {{ $i }}
                                 }"
                             >
@@ -181,8 +181,8 @@
     <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-10">
         @for($i = 0; $i < $movies->count(); $i++)
             <button @click="current = {{ $i }}; stopAutoplay(); startAutoplay()"
-                class="h-2 rounded-full transition-all duration-300 {{ $i === 0 ? 'bg-rose-500 w-8' : 'bg-gray-300 w-2 hover:bg-gray-400' }}"
-                :class="{ 'bg-rose-500 w-8': current === {{ $i }}, 'bg-gray-300 w-2 hover:bg-gray-400': current !== {{ $i }} }"></button>
+                class="h-2 rounded-full transition-all duration-300 {{ $i === 0 ? 'bg-sky-500 w-8' : 'bg-gray-300 w-2 hover:bg-gray-400' }}"
+                :class="{ 'bg-sky-500 w-8': current === {{ $i }}, 'bg-gray-300 w-2 hover:bg-gray-400': current !== {{ $i }} }"></button>
         @endfor
     </div>
 

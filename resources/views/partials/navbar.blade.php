@@ -144,7 +144,7 @@
                             <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                             </svg>
-                            <span x-show="unreadCount > 0" x-text="unreadCount > 9 ? '9+' : unreadCount" style="display: none;" class="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 bg-rose-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center px-1"></span>
+                            <span x-show="unreadCount > 0" x-text="unreadCount > 9 ? '9+' : unreadCount" style="display: none;" class="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 bg-sky-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center px-1"></span>
                         </button>
 
                         {{-- Notification Dropdown Panel --}}
@@ -152,7 +152,7 @@
                              class="absolute right-0 mt-3 w-80 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden z-50">
                             <div class="p-3 border-b border-gray-100 flex items-center justify-between">
                                 <h3 class="font-bold text-gray-900 text-sm">Thông báo</h3>
-                                <button x-show="unreadCount > 0" @click="markAllAsRead()" class="text-xs text-rose-500 hover:text-rose-600 font-medium">Đánh dấu đã đọc</button>
+                                <button x-show="unreadCount > 0" @click="markAllAsRead()" class="text-xs text-sky-500 hover:text-sky-600 font-medium">Đánh dấu đã đọc</button>
                             </div>
                             
                             <div class="max-h-[300px] overflow-y-auto">
@@ -164,20 +164,20 @@
                                 <template x-for="item in notifications" :key="item.id">
                                     <div @click="if(!item.read_at) markAsRead(item.id); if(item.data.url) window.location.href = item.data.url;" 
                                          class="p-3 border-b border-gray-50 hover:bg-gray-50 transition cursor-pointer flex gap-3"
-                                         :class="!item.read_at ? 'bg-rose-50/30' : 'bg-transparent'">
-                                        <div class="w-8 h-8 rounded-full bg-rose-100 text-rose-500 flex items-center justify-center shrink-0 mt-0.5">
+                                         :class="!item.read_at ? 'bg-sky-50/30' : 'bg-transparent'">
+                                        <div class="w-8 h-8 rounded-full bg-sky-100 text-sky-500 flex items-center justify-center shrink-0 mt-0.5">
                                             <svg class='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'/></svg>
                                         </div>
                                         <div class="min-w-0 flex-1">
                                             <p class="text-sm text-gray-700 leading-snug break-words" x-text="item.data.message"></p>
                                             <p class="text-xs text-gray-400 mt-1" x-text="item.created_at"></p>
                                         </div>
-                                        <div x-show="!item.read_at" class="w-2 h-2 rounded-full bg-rose-500 shrink-0 mt-1.5"></div>
+                                        <div x-show="!item.read_at" class="w-2 h-2 rounded-full bg-sky-500 shrink-0 mt-1.5"></div>
                                     </div>
                                 </template>
                             </div>
 
-                            <a href="{{ route('notifications.all') }}" class="block p-2.5 text-center text-xs font-medium text-gray-500 hover:text-rose-600 hover:bg-gray-50 transition border-t border-gray-100">
+                            <a href="{{ route('notifications.all') }}" class="block p-2.5 text-center text-xs font-medium text-gray-500 hover:text-sky-600 hover:bg-gray-50 transition border-t border-gray-100">
                                 Xem tất cả thông báo
                             </a>
                         </div>
@@ -188,7 +188,7 @@
                         <button @click="open = !open" @click.outside="open = false" class="w-10 h-10 rounded-full overflow-hidden
                                            flex items-center justify-center transition-all duration-300"
                                 :class="darkHero ? 'ring-2 ring-white/30 hover:ring-white/50' : 'ring-2 ring-gray-200 hover:ring-gray-300'">
-                            <div class="w-full h-full rounded-full bg-gradient-to-br from-rose-400 to-rose-600
+                            <div class="w-full h-full rounded-full bg-gradient-to-br from-sky-400 to-sky-600
                                             flex items-center justify-center overflow-hidden">
                                 @if(Auth::user()->avatar)
                                     <img src="{{ Auth::user()->avatar }}" alt="" class="w-full h-full object-cover">
@@ -212,7 +212,7 @@
                             {{-- Header user info --}}
                             <div class="px-3 py-2.5 mb-1 border-b border-gray-100">
                                 <div class="flex items-center gap-2.5">
-                                    <div class="w-9 h-9 rounded-full bg-gradient-to-br from-rose-400 to-rose-600
+                                    <div class="w-9 h-9 rounded-full bg-gradient-to-br from-sky-400 to-sky-600
                                                     flex items-center justify-center overflow-hidden shrink-0">
                                         @if(Auth::user()->avatar)
                                             <img src="{{ Auth::user()->avatar }}" alt="" class="w-full h-full object-cover">
@@ -232,7 +232,7 @@
                             {{-- Menu items --}}
                             <a href="{{ route('profile.edit') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-gray-600
                                           hover:text-gray-900 hover:bg-gray-50 transition-colors group">
-                                <svg class="w-4 h-4 text-gray-400 group-hover:text-rose-500 transition-colors shrink-0"
+                                <svg class="w-4 h-4 text-gray-400 group-hover:text-sky-500 transition-colors shrink-0"
                                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -242,7 +242,7 @@
 
                             <a href="{{ route('messages.index') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-gray-600
                                           hover:text-gray-900 hover:bg-gray-50 transition-colors group">
-                                <svg class="w-4 h-4 text-gray-400 group-hover:text-rose-500 transition-colors shrink-0"
+                                <svg class="w-4 h-4 text-gray-400 group-hover:text-sky-500 transition-colors shrink-0"
                                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
@@ -252,7 +252,7 @@
 
                             <a href="{{ route('mylist') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-gray-600
                                           hover:text-gray-900 hover:bg-gray-50 transition-colors group">
-                                <svg class="w-4 h-4 text-gray-400 group-hover:text-rose-500 transition-colors shrink-0"
+                                <svg class="w-4 h-4 text-gray-400 group-hover:text-sky-500 transition-colors shrink-0"
                                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
@@ -262,7 +262,7 @@
 
                             <a href="{{ route('settings.index') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-gray-600
                                           hover:text-gray-900 hover:bg-gray-50 transition-colors group">
-                                <svg class="w-4 h-4 text-gray-400 group-hover:text-rose-500 transition-colors shrink-0"
+                                <svg class="w-4 h-4 text-gray-400 group-hover:text-sky-500 transition-colors shrink-0"
                                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -274,7 +274,7 @@
                             @if(Auth::user()->isStaff())
                                 <div class="mt-1 pt-1 border-t border-gray-100">
                                     <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm
-                                                  text-rose-500 hover:text-rose-600 hover:bg-rose-50 transition-colors">
+                                                  text-sky-500 hover:text-sky-600 hover:bg-sky-50 transition-colors">
                                         <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                                         </svg>
@@ -308,8 +308,8 @@
                             Đăng nhập
                         </a>
                         <a href="{{ route('register') }}" class="inline-flex items-center text-[13px] font-semibold px-4 py-2 rounded-full text-white
-                                      bg-rose-500 hover:bg-rose-600 transition-all duration-200
-                                      shadow-sm hover:shadow-md hover:shadow-rose-200/50">
+                                      bg-sky-500 hover:bg-sky-600 transition-all duration-200
+                                      shadow-sm hover:shadow-md hover:shadow-sky-200/50">
                             Đăng ký
                         </a>
                     </div>
@@ -337,22 +337,22 @@
             {{-- Mobile nav links --}}
             <a href="{{ route('home') }}"
                 class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
-                      {{ request()->routeIs('home') ? 'bg-rose-50 text-rose-600' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50' }}">
+                      {{ request()->routeIs('home') ? 'bg-sky-50 text-sky-600' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50' }}">
                 Trang chủ
             </a>
             <a href="{{ route('explore') }}"
                 class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
-                      {{ request()->routeIs('explore') ? 'bg-rose-50 text-rose-600' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50' }}">
+                      {{ request()->routeIs('explore') ? 'bg-sky-50 text-sky-600' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50' }}">
                 Khám phá
             </a>
             <a href="{{ route('news.index') }}"
                 class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
-                      {{ request()->routeIs('news.*') ? 'bg-rose-50 text-rose-600' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50' }}">
+                      {{ request()->routeIs('news.*') ? 'bg-sky-50 text-sky-600' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50' }}">
                 Tin tức
             </a>
             <a href="{{ route('forum.index') }}"
                 class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
-                      {{ request()->routeIs('forum.*') ? 'bg-rose-50 text-rose-600' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50' }}">
+                      {{ request()->routeIs('forum.*') ? 'bg-sky-50 text-sky-600' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50' }}">
                 Diễn đàn
             </a>
 
@@ -360,7 +360,7 @@
             <div class="pt-3 border-t border-gray-100 space-y-1">
                 @auth
                     <div class="flex items-center gap-3 px-3 py-3 mb-2 bg-gray-50 rounded-xl">
-                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-rose-400 to-rose-600
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-sky-400 to-sky-600
                                         flex items-center justify-center overflow-hidden ring-2 ring-white shrink-0">
                             @if(Auth::user()->avatar)
                                 <img src="{{ Auth::user()->avatar }}" alt="" class="w-full h-full object-cover">
@@ -394,7 +394,7 @@
                     <a href="{{ route('login') }}"
                         class="block px-3 py-2.5 rounded-xl text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors">Đăng nhập</a>
                     <a href="{{ route('register') }}"
-                        class="block text-center px-3 py-2.5 rounded-xl text-sm font-semibold text-white bg-rose-500 hover:bg-rose-600 transition-colors">Đăng ký</a>
+                        class="block text-center px-3 py-2.5 rounded-xl text-sm font-semibold text-white bg-sky-500 hover:bg-sky-600 transition-colors">Đăng ký</a>
                 @endauth
             </div>
         </div>
@@ -472,7 +472,7 @@
                     
                     {{-- Loading spinner --}}
                     <div x-show="loading" class="shrink-0">
-                        <svg class="animate-spin h-5 w-5 text-rose-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <svg class="animate-spin h-5 w-5 text-sky-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
@@ -498,7 +498,7 @@
                             </template>
                         </div>
                         <div class="min-w-0 flex-1">
-                            <p class="text-sm font-semibold text-gray-900 truncate group-hover:text-rose-600 transition-colors" x-text="movie.title"></p>
+                            <p class="text-sm font-semibold text-gray-900 truncate group-hover:text-sky-600 transition-colors" x-text="movie.title"></p>
                             <p class="text-xs text-gray-400 mt-0.5" x-text="movie.release_date ? movie.release_date.substring(0, 4) : ''"></p>
                         </div>
                         <svg class="w-4 h-4 text-gray-300 group-hover:text-gray-500 shrink-0 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -522,7 +522,7 @@
                 <span class="text-xs text-gray-400">
                     Nhấn <kbd class="px-1.5 py-0.5 bg-white border border-gray-200 shadow-sm rounded text-[10px] font-medium text-gray-600">Enter</kbd> để tìm chi tiết
                 </span>
-                <a :href="'{{ route("explore") }}?q=' + encodeURIComponent(query)" @click="reset()" class="inline-flex items-center gap-1.5 text-[13px] font-medium text-rose-600 hover:text-rose-700 transition-colors">
+                <a :href="'{{ route("explore") }}?q=' + encodeURIComponent(query)" @click="reset()" class="inline-flex items-center gap-1.5 text-[13px] font-medium text-sky-600 hover:text-sky-700 transition-colors">
                     Tìm kiếm nâng cao
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
                 </a>

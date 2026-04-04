@@ -30,7 +30,7 @@
                                 <div class="w-10 h-14 rounded bg-dark-700 bg-cover bg-center shrink-0"
                                      style="background-image: url('{{ $movie->poster }}')"></div>
                                 <div class="min-w-0">
-                                    <a href="{{ route('movies.show', $movie) }}" class="font-medium text-white hover:text-rose-400 transition-colors truncate block" target="_blank">
+                                    <a href="{{ route('movies.show', $movie) }}" class="font-medium text-white hover:text-sky-400 transition-colors truncate block" target="_blank">
                                         {{ $movie->title }}
                                     </a>
                                     @if($movie->original_title && $movie->original_title !== $movie->title)

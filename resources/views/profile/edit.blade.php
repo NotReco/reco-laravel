@@ -5,7 +5,7 @@
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
             
             <div class="flex items-center gap-3 mb-8">
-                <svg class="w-8 h-8 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-8 h-8 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
@@ -20,7 +20,7 @@
                 @include('profile.partials.update-password-form')
             </div>
 
-            <div class="card p-6 sm:p-8 border-rose-900 border-2">
+            <div class="card p-6 sm:p-8 border-sky-900 border-2">
                 @include('profile.partials.delete-user-form')
             </div>
             

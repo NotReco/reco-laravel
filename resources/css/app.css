@@ -37,8 +37,12 @@
         @apply inline-flex items-center justify-center px-6 py-3 bg-dark-700 text-dark-100 font-semibold rounded-xl border border-dark-600 hover:bg-dark-600 hover:border-dark-500 focus:outline-none focus:ring-2 focus:ring-dark-500 focus:ring-offset-2 focus:ring-offset-dark-900 transition-all duration-200 ease-out;
     }
 
-    .btn-rose {
-        @apply inline-flex items-center justify-center px-6 py-3 bg-rose-600 text-white font-semibold rounded-xl hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 focus:ring-offset-dark-900 transition-all duration-200 ease-out shadow-lg shadow-rose-600/25;
+    .btn-sky {
+        @apply inline-flex items-center justify-center px-6 py-3 bg-sky-600 text-white font-semibold rounded-xl hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-dark-900 transition-all duration-200 ease-out shadow-lg shadow-sky-600/25;
+    }
+
+    .btn-danger {
+        @apply inline-flex items-center justify-center px-6 py-3 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-dark-900 transition-all duration-200 ease-out shadow-lg shadow-red-600/25;
     }
 
     .btn-ghost {
@@ -51,7 +55,7 @@
     }
 
     .card-hover {
-        @apply card hover:border-rose-500/30 transition-all duration-300;
+        @apply card hover:border-sky-500/30 transition-all duration-300;
     }
 
     /* ── Inputs ── */
@@ -133,8 +137,8 @@
         @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold;
     }
 
-    .badge-rose {
-        @apply badge bg-rose-600 text-white;
+    .badge-sky {
+        @apply badge bg-sky-600 text-white;
     }
 
     .badge-dark {
@@ -147,7 +151,7 @@
     }
 
     .genre-pill-active {
-        @apply px-5 py-2.5 rounded-full text-sm font-medium bg-rose-600 text-white hover:bg-rose-700 transition-colors shadow-md;
+        @apply px-5 py-2.5 rounded-full text-sm font-medium bg-sky-600 text-white hover:bg-sky-700 transition-colors shadow-md;
     }
 }
 
@@ -156,8 +160,8 @@
         @apply bg-gradient-to-r from-accent-400 to-accent-600 bg-clip-text text-transparent;
     }
 
-    .text-gradient-rose {
-        @apply bg-gradient-to-r from-rose-400 to-rose-600 bg-clip-text text-transparent;
+    .text-gradient-sky {
+        @apply bg-gradient-to-r from-sky-400 to-sky-600 bg-clip-text text-transparent;
     }
 
     .animate-fade-in {

@@ -29,7 +29,7 @@
     <div class="flex items-center justify-between mb-3">
         <div class="flex items-center gap-3 min-w-0">
             {{-- Avatar --}}
-            <a href="{{ route('profile.show', $review->user->id) }}" class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden shrink-0 ring-2 ring-white hover:ring-rose-200 transition-colors">
+            <a href="{{ route('profile.show', $review->user->id) }}" class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden shrink-0 ring-2 ring-white hover:ring-sky-200 transition-colors">
                 @if($review->user?->avatar)
                     <img src="{{ $review->user->avatar }}" class="w-full h-full object-cover" alt="" loading="lazy">
                 @else
@@ -37,7 +37,7 @@
                 @endif
             </a>
             <div class="min-w-0">
-                <a href="{{ route('profile.show', $review->user->id) }}" class="block text-sm font-semibold text-gray-900 truncate hover:text-rose-500 transition-colors">{{ $review->user?->name ?? 'Ẩn danh' }}</a>
+                <a href="{{ route('profile.show', $review->user->id) }}" class="block text-sm font-semibold text-gray-900 truncate hover:text-sky-500 transition-colors">{{ $review->user?->name ?? 'Ẩn danh' }}</a>
                 <p class="text-xs text-gray-400">{{ $review->published_at?->diffForHumans() }}</p>
             </div>
         </div>
@@ -55,7 +55,7 @@
     {{-- Movie link --}}
     @if($showMovie && $review->movie)
         <a href="{{ route('movies.show', $review->movie) }}"
-            class="flex items-center gap-2 text-xs font-medium text-rose-500 hover:text-rose-600 transition-colors mb-2 bg-rose-50 w-fit px-2 py-1 rounded-md">
+            class="flex items-center gap-2 text-xs font-medium text-sky-500 hover:text-sky-600 transition-colors mb-2 bg-sky-50 w-fit px-2 py-1 rounded-md">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"/></svg>
             {{ $review->movie->title }}
         </a>
@@ -63,7 +63,7 @@
 
     {{-- Review title --}}
     @if($review->title)
-        <h4 class="font-heading font-bold text-gray-900 text-sm mb-1 group-hover:text-rose-500 transition-colors">{{ $review->title }}</h4>
+        <h4 class="font-heading font-bold text-gray-900 text-sm mb-1 group-hover:text-sky-500 transition-colors">{{ $review->title }}</h4>
     @endif
 
     {{-- Review content --}}
@@ -117,7 +117,7 @@
         <div class="flex items-center gap-4">
             {{-- Like Button --}}
             <button @click="toggleLike()" class="flex items-center gap-1.5 text-sm font-medium transition-colors group"
-                :class="liked ? 'text-rose-500' : 'text-gray-500 hover:text-gray-900'">
+                :class="liked ? 'text-sky-500' : 'text-gray-500 hover:text-gray-900'">
                 <svg class="w-4 h-4 transition-transform group-active:scale-75" :fill="liked ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                 </svg>
@@ -172,12 +172,12 @@
                         @endif
                     </div>
                     <div class="flex-1 flex gap-2">
-                        <input type="text" name="content" required placeholder="Viết bình luận..." class="w-full bg-gray-50 border border-gray-200 rounded-xl py-1.5 px-3 text-sm flex-1 focus:border-rose-300 focus:ring-1 focus:ring-rose-300 outline-none transition-colors">
+                        <input type="text" name="content" required placeholder="Viết bình luận..." class="w-full bg-gray-50 border border-gray-200 rounded-xl py-1.5 px-3 text-sm flex-1 focus:border-sky-300 focus:ring-1 focus:ring-sky-300 outline-none transition-colors">
                         <button type="submit" class="shrink-0 px-3 py-1.5 rounded-xl bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium transition-colors">Gửi</button>
                     </div>
                 </form>
             @else
-                <p class="text-xs text-center text-gray-500">Vui lòng <a href="{{ route('login') }}" class="text-rose-500 hover:underline font-medium">đăng nhập</a> để bình luận.</p>
+                <p class="text-xs text-center text-gray-500">Vui lòng <a href="{{ route('login') }}" class="text-sky-500 hover:underline font-medium">đăng nhập</a> để bình luận.</p>
             @endauth
         </div>
     </div>
