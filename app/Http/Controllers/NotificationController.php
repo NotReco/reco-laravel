@@ -10,16 +10,22 @@ class NotificationController extends Controller
     /**
      * Lấy danh sách thông báo qua API (dùng cho dropdown).
      */
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
+        $query = $user->notifications();
         
-        $notifications = $user->notifications()->take(10)->get()->map(function ($notification) {
+        if ($request->query('filter') === 'unread') {
+            $query->whereNull('read_at');
+        }
+
+        $notifications = $query->take(20)->get()->map(function ($notification) {
             return [
                 'id' => $notification->id,
                 'data' => $notification->data, // [message => '', url => '']
                 'read_at' => $notification->read_at,
                 'created_at' => $notification->created_at->diffForHumans(),
+                'is_new' => $notification->created_at >= now()->subDay(),
             ];
         });
 
