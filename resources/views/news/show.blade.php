@@ -713,7 +713,7 @@
                             @endif
                         </div>
                         <div class="flex-1">
-                            <textarea x-model="newComment" rows="3" required maxlength="1000" placeholder="Viết bình luận của bạn..."
+                            <textarea x-model="newComment" @keydown.enter="if(!$event.shiftKey) { $event.preventDefault(); submitComment($event); }" rows="3" required maxlength="1000" placeholder="Viết bình luận của bạn..."
                                 class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm text-gray-800 placeholder-gray-400
                                          focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all resize-none"></textarea>
                             <div class="mt-2 flex justify-end">
@@ -1015,7 +1015,7 @@
             <div x-show="replyTo === {{ $comment->id }}" x-cloak style="display: none"
                 class="mt-3 ml-2 pl-4 border-l-2 border-blue-200">
                 <form @submit.prevent="submitReply($event)">
-                    <textarea x-model="replyContent" id="reply-input-{{ $comment->id }}" rows="2" required maxlength="1000"
+                    <textarea x-model="replyContent" @keydown.enter="if(!$event.shiftKey) { $event.preventDefault(); submitReply($event); }" id="reply-input-{{ $comment->id }}" rows="2" required maxlength="1000"
                         placeholder="Trả lời {{ $comment->user->name ?? '' }}..."
                         class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-800
                                                      focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all resize-none"></textarea>

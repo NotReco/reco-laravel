@@ -42,6 +42,7 @@ class ArticleCommentMentioned extends Notification
         return [
             'message' => $this->mentionerName . ' đã nhắc đến bạn trong một bình luận.',
             'url' => route('news.show', ['article' => $this->comment->article]) . '#comment-' . $this->comment->id,
+            'avatar' => $this->comment->user->avatar ?? null,
         ];
     }
 }

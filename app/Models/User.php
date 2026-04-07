@@ -32,6 +32,7 @@ class User extends Authenticatable
         'two_factor_remember_enabled',
         'two_factor_trusted_token_hash',
         'two_factor_trusted_until',
+        'notification_preferences',
     ];
 
     protected $hidden = [
@@ -52,7 +53,22 @@ class User extends Authenticatable
             'two_factor_enabled' => 'boolean',
             'two_factor_remember_enabled' => 'boolean',
             'two_factor_trusted_until' => 'datetime',
+            'notification_preferences' => 'array',
         ];
+    }
+
+    // ── Notifications ──
+
+    public function notify($instance)
+    {
+        $type = get_class($instance);
+        $preferences = $this->notification_preferences ?? [];
+        
+        if (in_array($type, $preferences['disabled_types'] ?? [])) {
+            return;
+        }
+
+        app(\Illuminate\Contracts\Notifications\Dispatcher::class)->send($this, $instance);
     }
 
     // ── Relationships ──

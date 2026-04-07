@@ -15,6 +15,10 @@
             <div class="card p-6 sm:p-8">
                 @include('profile.partials.security-settings-form')
             </div>
+
+            <div class="card p-6 sm:p-8">
+                @include('profile.partials.notification-settings-form')
+            </div>
         </div>
 
         <div

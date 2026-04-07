@@ -117,6 +117,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // ── Notifications ──
     Route::get('/api/notifications', [\App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/api/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
+    Route::post('/api/notifications/{id}/unread', [\App\Http\Controllers\NotificationController::class, 'markAsUnread'])->name('notifications.markAsUnread');
+    Route::delete('/api/notifications/{id}', [\App\Http\Controllers\NotificationController::class, 'destroy'])->name('notifications.destroy');
+    Route::post('/api/notifications/{id}/turn-off', [\App\Http\Controllers\NotificationController::class, 'turnOff'])->name('notifications.turnOff');
+    Route::post('/api/notifications/turn-on', [\App\Http\Controllers\NotificationController::class, 'turnOn'])->name('notifications.turnOn');
     Route::post('/api/notifications/read-all', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.markAllAsRead');
     Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'all'])->name('notifications.all');
 

@@ -66,7 +66,7 @@
         {{-- Content --}}
         <div class="mb-4">
             <label class="block text-sm font-medium text-dark-200 mb-2">Nội dung review <span class="text-dark-500">(tuỳ chọn)</span></label>
-            <textarea name="content" rows="4" class="input-dark resize-none" x-model="content"
+            <textarea name="content" rows="4" class="input-dark resize-none" x-model="content" @keydown.enter="if(!$event.shiftKey) { $event.preventDefault(); $el.closest('form').submit(); }"
                 :maxlength="maxLength"
                 placeholder="Chia sẻ cảm nhận của bạn về bộ phim..."></textarea>
             <div class="flex items-center justify-between mt-1">

@@ -3,7 +3,10 @@
 namespace App\Providers;
 
 use App\Enums\UserRole;
+use App\Listeners\BroadcastNotification;
 use App\Models\User;
+use Illuminate\Notifications\Events\NotificationSent;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
@@ -23,6 +26,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->defineGates();
+
+        // Broadcast mọi database notification qua Reverb WebSocket
+        Event::listen(NotificationSent::class, BroadcastNotification::class);
     }
 
     /**

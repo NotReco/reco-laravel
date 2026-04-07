@@ -127,7 +127,7 @@
                     <h3 class="text-base font-semibold text-gray-900 mb-4">Viết trả lời</h3>
                     <form action="{{ route('forum.reply', $thread) }}" method="POST">
                         @csrf
-                        <textarea name="content" rows="4" required
+                        <textarea name="content" rows="4" required onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); this.form.submit(); }"
                                   placeholder="Chia sẻ ý kiến của bạn..."
                                   class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm text-gray-800
                                          placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-400
