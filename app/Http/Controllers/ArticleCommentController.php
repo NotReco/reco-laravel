@@ -51,6 +51,8 @@ class ArticleCommentController extends Controller
             'content'    => $request->input('content'),
         ]);
 
+        Auth::user()->increment('reputation_score', 1);
+
         $comment->load(['user', 'article']);
 
         // Xử lý gửi thông báo khi có @tên (mention)
@@ -113,15 +115,42 @@ class ArticleCommentController extends Controller
     }
 
     /**
-     * Xóa bình luận (chỉ staff: admin/mod).
+     * Cập nhật bình luận (chủ bình luận).
+     */
+    public function update(Request $request, ArticleComment $comment)
+    {
+        if ($comment->user_id !== Auth::id()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Bạn không có quyền sửa bình luận này.',
+            ], 403);
+        }
+
+        $request->validate([
+            'content' => ['required', 'string', 'max:1000'],
+        ]);
+
+        $comment->update([
+            'content' => $request->input('content'),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Đã cập nhật bình luận.',
+            'content' => $comment->content,
+        ]);
+    }
+
+    /**
+     * Xóa bình luận (chủ bình luận hoặc staff).
      */
     public function destroy(ArticleComment $comment)
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
 
-        if (!$user->isStaff()) {
-            abort(403, 'Chỉ quản trị viên mới có thể xóa bình luận.');
+        if ($comment->user_id !== $user->id && !$user->isStaff()) {
+            abort(403, 'Bạn không có quyền xóa bình luận này.');
         }
 
         $comment->delete();

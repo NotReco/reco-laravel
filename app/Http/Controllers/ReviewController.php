@@ -43,9 +43,12 @@ class ReviewController extends Controller
             'published_at' => now(),
         ]);
 
-        return back()->with('success', $isFullReview
-            ? 'Review đã được đăng thành công! 🎬'
-            : 'Đã chấm điểm thành công! ⭐');
+        $score = $isFullReview ? 5 : 1;
+        Auth::user()->increment('reputation_score', $score);
+
+        return redirect()->route('movies.show', $movie)->with('success', $isFullReview
+            ? 'Review đã được đăng thành công!'
+            : 'Đã chấm điểm thành công!');
     }
 
     /**

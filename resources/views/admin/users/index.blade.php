@@ -49,25 +49,10 @@
                                 </div>
                             </div>
                         </td>
-                        <td class="px-5 py-3" x-data="{ editing: false }">
-                            <template x-if="!editing">
-                                <span @click="editing = true" class="badge text-[10px] cursor-pointer hover:opacity-80 transition-opacity bg-{{ $user->role->color() }}-500/20 text-{{ $user->role->color() }}-400">
-                                    {{ $user->role->label() }}
-                                </span>
-                            </template>
-                            <template x-if="editing">
-                                <form action="{{ route('admin.users.update', $user) }}" method="POST" class="inline-flex gap-1">
-                                    @csrf @method('PUT')
-                                    <select name="role" class="bg-dark-800 border border-dark-600 text-white text-xs rounded px-2 py-1"
-                                            onchange="this.form.submit()">
-                                        @foreach(\App\Enums\UserRole::cases() as $role)
-                                            <option value="{{ $role->value }}" {{ $user->role === $role ? 'selected' : '' }}>
-                                                {{ $role->label() }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </form>
-                            </template>
+                        <td class="px-5 py-3">
+                            <span class="badge text-[10px] bg-{{ $user->role->color() }}-500/20 text-{{ $user->role->color() }}-400">
+                                {{ $user->role->label() }}
+                            </span>
                         </td>
                         <td class="px-5 py-3 text-dark-400">{{ $user->reviews_count }}</td>
                         <td class="px-5 py-3">
@@ -80,6 +65,9 @@
                         <td class="px-5 py-3 text-dark-500 text-xs">{{ $user->created_at->format('d/m/Y') }}</td>
                         <td class="px-5 py-3">
                             <div class="flex items-center justify-end gap-1">
+                                <a href="{{ route('admin.users.edit', $user) }}" class="text-dark-400 hover:text-sky-400 transition-colors p-1" title="Chỉnh sửa">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                </a>
                                 @if($user->id !== auth()->id())
                                     <form action="{{ route('admin.users.toggleBan', $user) }}" method="POST"
                                           onsubmit="return confirm('{{ $user->is_active ? 'Khóa' : 'Mở khóa' }} tài khoản «{{ $user->name }}»?')">

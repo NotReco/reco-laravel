@@ -184,6 +184,17 @@
                         @endforeach
                     @endforeach
                 },
+                commentData: {
+                    @foreach ($article->comments as $c)
+                        {{ $c->id }}: @json($c->content),
+                        @foreach ($c->replies as $r)
+                            {{ $r->id }}: @json($r->content),
+                            @foreach ($r->replies as $rr)
+                                {{ $rr->id }}: @json($rr->content),
+                            @endforeach
+                        @endforeach
+                    @endforeach
+                },
 
                 participantNames: [
                     @foreach ($article->comments as $c)
@@ -217,11 +228,16 @@
                 ],
 
                 currentUser: {
+                    id: @json(auth()->user()->id),
                     name: @json(auth()->user()->name),
                     avatar: @json(auth()->user()->avatar),
                     initial: @json(strtoupper(substr(auth()->user()->name, 0, 1))),
                     isStaff: {{ auth()->user()->isStaff() ? 'true' : 'false' }},
                 },
+
+                editingCommentId: null,
+                editingContent: '',
+                submittingEdit: false,
 
                 csrfToken: document.querySelector('meta[name="csrf-token"]')?.content || '',
                 baseUrl: '{{ url('/') }}',
@@ -251,6 +267,52 @@
                             return 'Dữ liệu không hợp lệ. Vui lòng kiểm tra lại nội dung.';
                         default:
                             return 'Đã có lỗi xảy ra. Vui lòng thử lại.';
+                    }
+                },
+
+                startEdit(id) {
+                    this.editingCommentId = id;
+                    this.editingContent = this.commentData[id] || '';
+                    this.$nextTick(() => {
+                        const el = document.getElementById('edit-input-' + id);
+                        if (el) {
+                            el.focus();
+                            el.setSelectionRange(el.value.length, el.value.length);
+                        }
+                    });
+                },
+
+                cancelEdit() {
+                    this.editingCommentId = null;
+                    this.editingContent = '';
+                },
+
+                async submitEdit() {
+                    if (this.submittingEdit || !this.editingContent.trim() || !this.editingCommentId) return;
+                    this.submittingEdit = true;
+                    try {
+                        const res = await fetch(this.baseUrl + '/article-comments/' + this.editingCommentId, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': this.csrfToken,
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({ content: this.editingContent })
+                        });
+                        if (!res.ok) throw new Error(await this.parseApiError(res));
+                        const data = await res.json();
+                        if (data.success) {
+                            this.commentData[this.editingCommentId] = data.content;
+                            const textEl = document.getElementById('comment-text-' + this.editingCommentId);
+                            if (textEl) textEl.innerHTML = this.formatMentions(data.content);
+                            this.editingCommentId = null;
+                            this.editingContent = '';
+                        }
+                    } catch(err) {
+                        alert(err?.message || 'Không thể cập nhật bình luận.');
+                    } finally {
+                        this.submittingEdit = false;
                     }
                 },
 
@@ -458,10 +520,14 @@
                         '<img src="' + comment.user.avatar +
                         '" alt="" class="w-full h-full rounded-full object-cover" loading="lazy">' :
                         '<span class="text-xs font-bold text-white">' + comment.user.initial + '</span>';
-                    const deleteBtn = this.currentUser.isStaff ?
+                    const deleteBtn = (this.currentUser.isStaff || this.currentUser.id === comment.user.id) ?
                         '<button @click="openDeleteModal(' + comment.id +
                         ')" class="text-[13px] font-semibold text-gray-500 hover:text-red-500 hover:underline transition-colors whitespace-nowrap">Xóa</button>' :
                         '';
+                    const editBtn = (this.currentUser.id === comment.user.id) ?
+                        '<button @click="startEdit(' + comment.id + ')" class="text-[13px] font-semibold text-gray-500 hover:text-gray-700 hover:underline transition-colors whitespace-nowrap">Sửa</button>' :
+                        '';
+
                     const html = '<div class="flex gap-3" id="comment-' + comment.id +
                         '" data-depth="0" style="opacity:0;transform:translateY(10px);transition:all 0.3s">' +
                         '<div class="w-9 h-9 rounded-full bg-gradient-to-br from-gray-300 to-gray-500 flex items-center justify-center shrink-0">' +
@@ -471,8 +537,12 @@
                         comment.id + ' ? \'!bg-blue-50 !border-blue-200\' : \'\'">' +
                         '<div class="flex items-center gap-2 mb-0.5"><span class="text-[15px] font-bold text-gray-900">' +
                         this.escapeHtml(comment.user.name) + '</span></div>' +
-                        '<p class="text-[15px] text-gray-800 leading-relaxed whitespace-pre-line break-words">' +
-                        this.formatMentions(comment.content) + '</p>' +
+                        '<div x-show="editingCommentId !== ' + comment.id + '"><p id="comment-text-' + comment.id + '" class="text-[15px] text-gray-800 leading-relaxed whitespace-pre-line break-words">' +
+                        this.formatMentions(comment.content) + '</p></div>' +
+                        '<div x-show="editingCommentId === ' + comment.id + '" x-cloak style="display:none">' +
+                        '<textarea id="edit-input-' + comment.id + '" x-model="editingContent" @keydown.enter="if(!$event.shiftKey) { $event.preventDefault(); submitEdit(); }" class="w-full px-3 py-2 bg-white border border-blue-300 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all resize-none mt-1" rows="2"></textarea>' +
+                        '<div class="flex gap-2 justify-end mt-1.5"><button @click="cancelEdit()" class="text-xs text-gray-500 hover:underline px-2 py-1">Hủy</button><button @click="submitEdit()" class="text-xs font-semibold bg-blue-500 text-white rounded px-3 py-1.5 mt-1 hover:bg-blue-600 disabled:opacity-50" :disabled="submittingEdit || !editingContent.trim()">Lưu</button></div>' +
+                        '</div>' +
                         '</div>' +
                         '<div class="mt-1 flex items-center justify-between pl-3 pr-2 flex-nowrap">' +
                         '<div class="flex items-center gap-4">' +
@@ -489,6 +559,7 @@
                         '\')" class="text-[13px] font-semibold text-gray-500 hover:text-gray-700 hover:underline transition-colors whitespace-nowrap">Trả lời</button>' +
                         '<button @click="openReport(' + comment.id +
                         ')" class="text-[13px] font-semibold text-gray-500 hover:text-gray-700 hover:underline transition-colors whitespace-nowrap">Báo cáo</button>' +
+                        editBtn +
                         deleteBtn +
                         '</div>' +
                         '<div x-show="likeCounts[' + comment.id +
@@ -498,6 +569,7 @@
                         '<div class="w-4 h-4 rounded-full bg-blue-500 flex items-center justify-center shadow-sm"><svg class="w-2.5 h-2.5 text-white fill-current" viewBox="0 0 24 24"><path d="M4 21h1V8H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2zM20.28 8H14V4.11a2.11 2.11 0 0 0-2.11-2.11c-.48 0-.94.19-1.29.54L5 8.12v12.76l6.83 1.13c.44.07.89.11 1.34.11H19a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2z"></path></svg></div>' +
                         '</div></div></div></div>';
                     list.insertAdjacentHTML('afterbegin', html);
+                    this.commentData[comment.id] = comment.content;
                     this.likedComments[comment.id] = false;
                     this.likeCounts[comment.id] = 0;
                     requestAnimationFrame(() => {
@@ -568,10 +640,12 @@
                         '<img src="' + reply.user.avatar +
                         '" alt="" class="w-full h-full rounded-full object-cover" loading="lazy">' :
                         '<span class="text-[10px] font-bold text-white">' + reply.user.initial + '</span>';
-                    const deleteBtn = this.currentUser.isStaff ?
+                    const deleteBtn = (this.currentUser.isStaff || this.currentUser.id === reply.user.id) ?
                         '<button @click="openDeleteModal(' + reply.id +
                         ')" class="text-[13px] font-semibold text-gray-500 hover:text-red-500 hover:underline transition-colors whitespace-nowrap">Xóa</button>' :
                         '';
+                    const editBtn = (this.currentUser.id === reply.user.id) ? '<button @click="startEdit(' + reply.id + ')" class="text-[13px] font-semibold text-gray-500 hover:text-gray-700 hover:underline transition-colors whitespace-nowrap">Sửa</button>' : '';
+
                     const replyBtn = depth < 2 ?
                         '<button @click="focusReply(' + rootCommentId + ', ' + reply.id + ', \'' + this
                         .escapeHtml(reply.user.name) +
@@ -586,8 +660,12 @@
                         reply.id + ' ? \'!bg-blue-50 !border-blue-100\' : \'\'">' +
                         '<div class="flex items-center gap-2 mb-0.5"><span class="text-sm font-bold text-gray-900">' +
                         this.escapeHtml(reply.user.name) + '</span></div>' +
-                        '<p class="text-[15px] text-gray-800 leading-relaxed whitespace-pre-line break-words">' +
-                        this.formatMentions(reply.content) + '</p>' +
+                        '<div x-show="editingCommentId !== ' + reply.id + '"><p id="comment-text-' + reply.id + '" class="text-[15px] text-gray-800 leading-relaxed whitespace-pre-line break-words">' +
+                        this.formatMentions(reply.content) + '</p></div>' +
+                        '<div x-show="editingCommentId === ' + reply.id + '" x-cloak style="display:none">' +
+                        '<textarea id="edit-input-' + reply.id + '" x-model="editingContent" @keydown.enter="if(!$event.shiftKey) { $event.preventDefault(); submitEdit(); }" class="w-full px-3 py-2 bg-white border border-blue-300 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all resize-none mt-1" rows="2"></textarea>' +
+                        '<div class="flex gap-2 justify-end mt-1.5"><button @click="cancelEdit()" class="text-xs text-gray-500 hover:underline px-2 py-1">Hủy</button><button @click="submitEdit()" class="text-xs font-semibold bg-blue-500 text-white rounded px-3 py-1.5 mt-1 hover:bg-blue-600 disabled:opacity-50" :disabled="submittingEdit || !editingContent.trim()">Lưu</button></div>' +
+                        '</div>' +
                         '</div>' +
                         '<div class="mt-1 flex items-center justify-between pl-2 pr-2 flex-nowrap">' +
                         '<div class="flex items-center gap-3">' +
@@ -600,6 +678,7 @@
                         '] ? \'text-blue-600\' : \'text-gray-500 hover:text-gray-700 hover:underline\'" id="like-btn-' +
                         reply.id + '"><span>Thích</span></button>' +
                         replyBtn +
+                        editBtn +
                         '<button @click="openReport(' + reply.id +
                         ')" class="text-[13px] font-semibold text-gray-500 hover:text-gray-700 hover:underline transition-colors whitespace-nowrap">Báo cáo</button>' +
                         deleteBtn +
@@ -611,6 +690,7 @@
                         '<div class="w-[14px] h-[14px] rounded-full bg-blue-500 flex items-center justify-center shadow-sm"><svg class="w-2 h-2 text-white fill-current" viewBox="0 0 24 24"><path d="M4 21h1V8H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2zM20.28 8H14V4.11a2.11 2.11 0 0 0-2.11-2.11c-.48 0-.94.19-1.29.54L5 8.12v12.76l6.83 1.13c.44.07.89.11 1.34.11H19a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2z"></path></svg></div>' +
                         '</div></div></div></div>';
                     rc.insertAdjacentHTML('beforeend', html);
+                    this.commentData[reply.id] = reply.content;
                     this.likedComments[reply.id] = false;
                     this.likeCounts[reply.id] = 0;
                     requestAnimationFrame(() => {
@@ -755,7 +835,16 @@
                                     <div class="flex items-center gap-2 mb-0.5">
                                         <span class="text-[15px] font-bold text-gray-900">{{ $comment->user->name ?? 'Ẩn danh' }}</span>
                                     </div>
-                                    <p class="text-[15px] text-gray-800 leading-relaxed whitespace-pre-line break-words" x-html='formatMentions(@json($comment->content))'>{{ $comment->content }}</p>
+                                    <div x-show="editingCommentId !== {{ $comment->id }}">
+                                        <p id="comment-text-{{ $comment->id }}" class="text-[15px] text-gray-800 leading-relaxed whitespace-pre-line break-words" x-html='formatMentions(commentData[{{ $comment->id }}])'></p>
+                                    </div>
+                                    <div x-show="editingCommentId === {{ $comment->id }}" x-cloak style="display: none">
+                                        <textarea id="edit-input-{{ $comment->id }}" x-model="editingContent" @keydown.enter="if(!$event.shiftKey) { $event.preventDefault(); submitEdit(); }" class="w-full px-3 py-2 bg-white border border-blue-300 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all resize-none mt-1" rows="2"></textarea>
+                                        <div class="flex gap-2 justify-end mt-1.5">
+                                            <button @click="cancelEdit()" class="text-xs text-gray-500 hover:underline px-2 py-1">Hủy</button>
+                                            <button @click="submitEdit()" class="text-xs font-semibold bg-blue-500 text-white rounded px-3 py-1.5 hover:bg-blue-600 disabled:opacity-50" :disabled="submittingEdit || !editingContent.trim()">Lưu</button>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 {{-- Action Buttons --}}
@@ -789,8 +878,16 @@
                                             Báo cáo
                                         </button>
 
-                                        {{-- Delete (staff only) --}}
-                                        @if (auth()->user()->isStaff())
+                                        {{-- Edit (owner) --}}
+                                        @if (auth()->id() === $comment->user_id)
+                                            <button @click="startEdit({{ $comment->id }})"
+                                                class="text-[13px] font-semibold text-gray-500 hover:text-gray-700 hover:underline transition-colors whitespace-nowrap">
+                                                Sửa
+                                            </button>
+                                        @endif
+
+                                        {{-- Delete (owner or staff) --}}
+                                        @if (auth()->id() === $comment->user_id || auth()->user()->isStaff())
                                             <button @click="openDeleteModal({{ $comment->id }})"
                                                 class="text-[13px] font-semibold text-gray-500 hover:text-red-500 hover:underline transition-colors whitespace-nowrap">
                                                 Xóa
@@ -871,7 +968,16 @@
                                             <div class="flex items-center gap-2 mb-0.5">
                                                 <span class="text-sm font-bold text-gray-900">{{ $reply->user->name ?? 'Ẩn danh' }}</span>
                                             </div>
-                                            <p x-html='formatMentions(@json($reply->content))' class="text-[15px] text-gray-800 leading-relaxed whitespace-pre-line break-words">{{ $reply->content }}</p>
+                                            <div x-show="editingCommentId !== {{ $reply->id }}">
+                                                <p id="comment-text-{{ $reply->id }}" x-html='formatMentions(commentData[{{ $reply->id }}])' class="text-[15px] text-gray-800 leading-relaxed whitespace-pre-line break-words"></p>
+                                            </div>
+                                            <div x-show="editingCommentId === {{ $reply->id }}" x-cloak style="display: none">
+                                                <textarea id="edit-input-{{ $reply->id }}" x-model="editingContent" @keydown.enter="if(!$event.shiftKey) { $event.preventDefault(); submitEdit(); }" class="w-full px-3 py-2 bg-white border border-blue-300 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all resize-none mt-1" rows="2"></textarea>
+                                                <div class="flex gap-2 justify-end mt-1.5">
+                                                    <button @click="cancelEdit()" class="text-xs text-gray-500 hover:underline px-2 py-1">Hủy</button>
+                                                    <button @click="submitEdit()" class="text-xs font-semibold bg-blue-500 text-white rounded px-3 py-1.5 mt-1 hover:bg-blue-600 disabled:opacity-50" :disabled="submittingEdit || !editingContent.trim()">Lưu</button>
+                                                </div>
+                                            </div>
                                         </div>
 
                                         {{-- Reply actions --}}
@@ -906,8 +1012,16 @@
                                                     Báo cáo
                                                 </button>
 
-                                                {{-- Delete (staff only) --}}
-                                                @if (auth()->user()->isStaff())
+                                                {{-- Edit (owner) --}}
+                                                @if (auth()->id() === $reply->user_id)
+                                                    <button @click="startEdit({{ $reply->id }})"
+                                                        class="text-[13px] font-semibold text-gray-500 hover:text-gray-700 hover:underline transition-colors whitespace-nowrap">
+                                                        Sửa
+                                                    </button>
+                                                @endif
+
+                                                {{-- Delete (owner or staff) --}}
+                                                @if (auth()->id() === $reply->user_id || auth()->user()->isStaff())
                                                     <button @click="openDeleteModal({{ $reply->id }})"
                                                         class="text-[13px] font-semibold text-gray-500 hover:text-red-500 hover:underline transition-colors whitespace-nowrap">
                                                         Xóa
@@ -953,7 +1067,16 @@
                                             <div class="flex items-center gap-2 mb-0.5">
                                                 <span class="text-sm font-bold text-gray-900">{{ $nestedReply->user->name ?? 'Ẩn danh' }}</span>
                                             </div>
-                                            <p x-html='formatMentions(@json($nestedReply->content))' class="text-[15px] text-gray-800 leading-relaxed whitespace-pre-line break-words">{{ $nestedReply->content }}</p>
+                                            <div x-show="editingCommentId !== {{ $nestedReply->id }}">
+                                                <p id="comment-text-{{ $nestedReply->id }}" x-html='formatMentions(commentData[{{ $nestedReply->id }}])' class="text-[15px] text-gray-800 leading-relaxed whitespace-pre-line break-words"></p>
+                                            </div>
+                                            <div x-show="editingCommentId === {{ $nestedReply->id }}" x-cloak style="display: none">
+                                                <textarea id="edit-input-{{ $nestedReply->id }}" x-model="editingContent" @keydown.enter="if(!$event.shiftKey) { $event.preventDefault(); submitEdit(); }" class="w-full px-3 py-2 bg-white border border-blue-300 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all resize-none mt-1" rows="2"></textarea>
+                                                <div class="flex gap-2 justify-end mt-1.5">
+                                                    <button @click="cancelEdit()" class="text-xs text-gray-500 hover:underline px-2 py-1">Hủy</button>
+                                                    <button @click="submitEdit()" class="text-xs font-semibold bg-blue-500 text-white rounded px-3 py-1.5 mt-1 hover:bg-blue-600 disabled:opacity-50" :disabled="submittingEdit || !editingContent.trim()">Lưu</button>
+                                                </div>
+                                            </div>
                                         </div>
                                         <div class="mt-1 flex items-center justify-between pl-2 pr-2">
                                             <div class="flex items-center gap-3">
@@ -973,7 +1096,13 @@
                                                     class="text-[13px] font-semibold text-gray-500 hover:text-gray-700 hover:underline transition-colors whitespace-nowrap">
                                                     Báo cáo
                                                 </button>
-                                                @if (auth()->user()->isStaff())
+                                                @if (auth()->id() === $nestedReply->user_id)
+                                                    <button @click="startEdit({{ $nestedReply->id }})"
+                                                        class="text-[13px] font-semibold text-gray-500 hover:text-gray-700 hover:underline transition-colors whitespace-nowrap">
+                                                        Sửa
+                                                    </button>
+                                                @endif
+                                                @if (auth()->id() === $nestedReply->user_id || auth()->user()->isStaff())
                                                     <button @click="openDeleteModal({{ $nestedReply->id }})"
                                                         class="text-[13px] font-semibold text-gray-500 hover:text-red-500 hover:underline transition-colors whitespace-nowrap">
                                                         Xóa

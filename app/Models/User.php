@@ -33,6 +33,10 @@ class User extends Authenticatable
         'two_factor_trusted_token_hash',
         'two_factor_trusted_until',
         'notification_preferences',
+        'movie_quote',
+        'reputation_score',
+        'active_title_id',
+        'active_frame_id',
     ];
 
     protected $hidden = [
@@ -108,7 +112,30 @@ class User extends Authenticatable
         return $this->belongsToMany(Movie::class, 'watchlists')->withPivot('status')->withTimestamps();
     }
 
+    public function activeTitle()
+    {
+        return $this->belongsTo(UserTitle::class, 'active_title_id');
+    }
 
+    public function activeFrame()
+    {
+        return $this->belongsTo(AvatarFrame::class, 'active_frame_id');
+    }
+
+    public function titles()
+    {
+        return $this->belongsToMany(UserTitle::class, 'user_title_inventory', 'user_id', 'title_id')->withTimestamps();
+    }
+
+    public function frames()
+    {
+        return $this->belongsToMany(AvatarFrame::class, 'user_frame_inventory', 'user_id', 'frame_id')->withTimestamps();
+    }
+
+    public function topMovies()
+    {
+        return $this->belongsToMany(Movie::class, 'user_top_movies')->withPivot('order')->orderBy('user_top_movies.order')->withTimestamps();
+    }
     public function articles()
     {
         return $this->hasMany(Article::class);

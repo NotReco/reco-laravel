@@ -7,12 +7,21 @@
                 <div class="absolute top-0 right-0 w-64 h-64 bg-sky-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
                 
                 <div class="relative z-10 flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-10">
-                    {{-- Avatar --}}
-                    <div class="w-32 h-32 md:w-40 md:h-40 shrink-0 rounded-full border-4 border-dark-700 bg-gradient-to-br from-sky-500 to-sky-700 flex items-center justify-center overflow-hidden shadow-2xl">
-                        @if($user->avatar)
-                            <img src="{{ $user->avatar }}" alt="{{ $user->name }}" class="w-full h-full object-cover">
-                        @else
-                            <span class="text-4xl md:text-5xl font-bold text-white">{{ strtoupper(substr($user->name, 0, 1)) }}</span>
+                    {{-- Avatar with Frame overlay --}}
+                    <div class="relative w-32 h-32 md:w-40 md:h-40 shrink-0">
+                        {{-- Avatar image --}}
+                        <div class="w-full h-full rounded-full border-4 border-dark-700 bg-gradient-to-br from-sky-500 to-sky-700 flex items-center justify-center overflow-hidden shadow-2xl">
+                            @if($user->avatar)
+                                <img src="{{ $user->avatar }}" alt="{{ $user->name }}" class="w-full h-full object-cover">
+                            @else
+                                <span class="text-4xl md:text-5xl font-bold text-white">{{ strtoupper(substr($user->name, 0, 1)) }}</span>
+                            @endif
+                        </div>
+                        {{-- Frame overlay --}}
+                        @if($user->activeFrame)
+                            <img src="{{ Storage::url($user->activeFrame->image_path) }}" 
+                                 alt="" 
+                                 class="absolute inset-[-12%] w-[124%] h-[124%] object-contain pointer-events-none drop-shadow-lg z-10">
                         @endif
                     </div>
 
@@ -20,8 +29,29 @@
                     <div class="flex-1 text-center md:text-left">
                         <div class="flex flex-col md:flex-row md:items-center gap-4 mb-4 justify-between">
                             <div>
-                                <h1 class="text-3xl font-display font-bold text-white mb-1">{{ $user->name }}</h1>
-                                <p class="text-dark-400 text-sm">Thành viên từ {{ $user->created_at->format('M Y') }}</p>
+                                <div class="flex items-center justify-center md:justify-start gap-3 flex-wrap">
+                                    <h1 class="text-3xl font-display font-bold text-white">{{ $user->name }}</h1>
+                                    {{-- Active Title Badge --}}
+                                    @if($user->activeTitle)
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border shadow-sm"
+                                              style="color: {{ $user->activeTitle->color_hex }}; border-color: {{ $user->activeTitle->color_hex }}40; background-color: {{ $user->activeTitle->color_hex }}15;">
+                                            {{ $user->activeTitle->name }}
+                                        </span>
+                                    @endif
+                                </div>
+                                @php
+                                    $months = ['01'=>'Tháng 1','02'=>'Tháng 2','03'=>'Tháng 3','04'=>'Tháng 4','05'=>'Tháng 5','06'=>'Tháng 6','07'=>'Tháng 7','08'=>'Tháng 8','09'=>'Tháng 9','10'=>'Tháng 10','11'=>'Tháng 11','12'=>'Tháng 12'];
+                                @endphp
+                                <p class="text-dark-200 text-sm mt-1">Thành viên từ {{ $months[$user->created_at->format('m')] }}, {{ $user->created_at->format('Y') }}</p>
+                                {{-- Movie Quote --}}
+                                @if($user->movie_quote)
+                                    <div class="mt-3 max-w-lg pl-4 border-l-2 border-sky-500/40">
+                                        <p class="text-dark-100/90 italic text-sm leading-relaxed">
+                                            <svg class="inline-block w-3.5 h-3.5 text-sky-400/70 mr-0.5 -mt-1" fill="currentColor" viewBox="0 0 24 24"><path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10H14.017zM0 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151C7.546 6.068 5.983 8.789 5.983 11h4v10H0z"/></svg>
+                                            {{ $user->movie_quote }}
+                                        </p>
+                                    </div>
+                                @endif
                             </div>
                             
                             {{-- Interactive Buttons --}}
@@ -64,27 +94,62 @@
                         </div>
 
                         {{-- Stats Grid --}}
-                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
+                        <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mt-8">
                             <div class="bg-dark-900/50 rounded-xl p-4 border border-dark-700/50">
                                 <div class="text-2xl font-display font-bold text-white mb-1">{{ $stats['reviews_count'] }}</div>
-                                <div class="text-xs font-medium text-dark-400 uppercase tracking-wider">Review</div>
+                                <div class="text-xs font-medium text-dark-200 uppercase tracking-wider">Review</div>
                             </div>
                             <div class="bg-dark-900/50 rounded-xl p-4 border border-dark-700/50">
                                 <div class="text-2xl font-display font-bold text-white mb-1">{{ $stats['favorites_count'] }}</div>
-                                <div class="text-xs font-medium text-dark-400 uppercase tracking-wider">Phim Yêu Thích</div>
+                                <div class="text-xs font-medium text-dark-200 uppercase tracking-wider">Phim Yêu Thích</div>
                             </div>
                             <div class="bg-dark-900/50 rounded-xl p-4 border border-dark-700/50">
                                 <div class="text-2xl font-display font-bold text-white mb-1" id="display_followers_count">{{ $stats['followers_count'] }}</div>
-                                <div class="text-xs font-medium text-dark-400 uppercase tracking-wider">Người theo dõi</div>
+                                <div class="text-xs font-medium text-dark-200 uppercase tracking-wider">Người theo dõi</div>
                             </div>
                             <div class="bg-dark-900/50 rounded-xl p-4 border border-dark-700/50">
                                 <div class="text-2xl font-display font-bold text-white mb-1">{{ $stats['following_count'] }}</div>
-                                <div class="text-xs font-medium text-dark-400 uppercase tracking-wider">Đang theo dõi</div>
+                                <div class="text-xs font-medium text-dark-200 uppercase tracking-wider">Đang theo dõi</div>
+                            </div>
+                            {{-- Reputation Score --}}
+                            <div class="bg-gradient-to-br from-amber-500/10 to-orange-500/10 rounded-xl p-4 border border-amber-500/20">
+                                <div class="text-2xl font-display font-bold text-amber-400 mb-1">{{ number_format($user->reputation_score) }}</div>
+                                <div class="text-xs font-medium text-amber-500/70 uppercase tracking-wider flex items-center gap-1">
+                                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                    Uy tín
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            {{-- Top 4 Phim Tâm Đắc --}}
+            @if($user->topMovies->isNotEmpty())
+                <div class="mb-8">
+                    <h2 class="text-xl font-display font-bold text-white flex items-center gap-2 mb-4">
+                        <svg class="w-5 h-5 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                        Top Phim Tâm Đắc
+                    </h2>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        @foreach($user->topMovies as $index => $movie)
+                            <a href="{{ route('movies.show', $movie) }}" class="group relative aspect-[2/3] rounded-xl overflow-hidden border border-dark-700/50 shadow-lg">
+                                <img src="{{ $movie->poster }}" alt="{{ $movie->title }}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy">
+                                <div class="absolute inset-0 bg-gradient-to-t from-dark-950 via-transparent to-transparent"></div>
+                                <div class="absolute bottom-0 left-0 right-0 p-3">
+                                    <p class="text-white font-bold text-sm line-clamp-2 drop-shadow-lg">{{ $movie->title }}</p>
+                                    @if($movie->release_date)
+                                        <p class="text-dark-300 text-xs mt-0.5">{{ \Carbon\Carbon::parse($movie->release_date)->format('Y') }}</p>
+                                    @endif
+                                </div>
+                                <div class="absolute top-2 left-2 w-7 h-7 bg-dark-950/80 backdrop-blur text-white text-xs font-bold rounded-lg flex items-center justify-center border border-dark-700/50">
+                                    {{ $index + 1 }}
+                                </div>
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
 
             {{-- Body Content: Favorites & Recent Reviews --}}
             <div class="grid lg:grid-cols-3 gap-8">

@@ -110,6 +110,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // ── Article Comments ──
     Route::post('/article-comments', [ArticleCommentController::class, 'store'])->name('article-comments.store');
+    Route::put('/article-comments/{comment}', [ArticleCommentController::class, 'update'])->name('article-comments.update');
     Route::post('/article-comments/{comment}/like', [ArticleCommentController::class, 'toggleLike'])->name('article-comments.like');
     Route::post('/article-comments/{comment}/report', [ArticleCommentController::class, 'report'])->name('article-comments.report');
     Route::delete('/article-comments/{comment}', [ArticleCommentController::class, 'destroy'])->name('article-comments.destroy');
@@ -127,8 +128,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // ── Forum (auth actions) ──
     Route::get('/forum/create', [ForumController::class, 'create'])->name('forum.create');
     Route::post('/forum/threads', [ForumController::class, 'storeThread'])->name('forum.storeThread');
+    Route::get('/forum/threads/{thread:slug}/edit', [ForumController::class, 'editThread'])->name('forum.editThread');
+    Route::put('/forum/threads/{thread:slug}', [ForumController::class, 'updateThread'])->name('forum.updateThread');
     Route::post('/forum/threads/{thread:slug}/reply', [ForumController::class, 'storeReply'])->name('forum.reply');
     Route::delete('/forum/threads/{thread:slug}', [ForumController::class, 'destroy'])->name('forum.destroy');
+    
+    Route::get('/forum/replies/{reply}/edit', [ForumController::class, 'editReply'])->name('forum.editReply');
+    Route::put('/forum/replies/{reply}', [ForumController::class, 'updateReply'])->name('forum.updateReply');
+    Route::delete('/forum/replies/{reply}', [ForumController::class, 'destroyReply'])->name('forum.destroyReply');
 
     // ── Messages ──
     Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
@@ -161,6 +168,7 @@ Route::middleware(['auth', 'role:staff'])->prefix('admin')->name('admin.')->grou
 
     // Users
     Route::get('/users', [\App\Http\Controllers\Admin\UserController::class, 'index'])->name('users.index');
+    Route::get('/users/{user}/edit', [\App\Http\Controllers\Admin\UserController::class, 'edit'])->name('users.edit');
     Route::put('/users/{user}', [\App\Http\Controllers\Admin\UserController::class, 'update'])->name('users.update');
     Route::post('/users/{user}/toggle-ban', [\App\Http\Controllers\Admin\UserController::class, 'toggleBan'])->name('users.toggleBan');
 
@@ -171,4 +179,8 @@ Route::middleware(['auth', 'role:staff'])->prefix('admin')->name('admin.')->grou
 
     // Forum Categories
     Route::resource('forum-categories', \App\Http\Controllers\Admin\ForumCategoryController::class)->except(['show']);
+
+    // User Titles & Avatar Frames
+    Route::resource('user-titles', \App\Http\Controllers\Admin\UserTitleController::class)->except(['show']);
+    Route::resource('avatar-frames', \App\Http\Controllers\Admin\AvatarFrameController::class)->except(['show']);
 });

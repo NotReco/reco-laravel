@@ -21,7 +21,10 @@ class ProfileController extends Controller
         $user = User::withCount(['followers', 'following', 'reviews'])
             ->with([
                 'favorites' => fn($q) => $q->latest()->take(6),
-                'reviews' => fn($q) => $q->with('movie')->latest()->take(5)
+                'reviews' => fn($q) => $q->with('movie')->latest()->take(5),
+                'activeTitle',
+                'activeFrame',
+                'topMovies' => fn($q) => $q->orderBy('user_top_movies.order'),
             ])
             ->findOrFail($id);
 
@@ -48,8 +51,11 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): View
     {
+        $user = $request->user();
+        $user->load(['titles', 'frames', 'topMovies' => fn($q) => $q->orderBy('user_top_movies.order')]);
+
         return view('profile.edit', [
-            'user' => $request->user(),
+            'user' => $user,
         ]);
     }
 
@@ -83,6 +89,23 @@ class ProfileController extends Controller
         }
 
         $request->user()->save();
+
+        // Sync Top 4 Movies
+        if ($request->has('top_movies')) {
+            $syncData = [];
+            foreach ($request->top_movies as $index => $movieId) {
+                if ($movieId) {
+                    $syncData[$movieId] = ['order' => $index + 1];
+                }
+            }
+            $request->user()->topMovies()->sync($syncData);
+        } else {
+            // Nếu không gửi top_movies, có thể người dùng đã clear (trống array)
+            // Hoặc form không chứa, cần check
+            if ($request->exists('top_movies_submitted')) {
+                $request->user()->topMovies()->sync([]);
+            }
+        }
 
         return Redirect::route('profile.edit')->with('success', 'Hồ sơ đã được cập nhật.');
     }

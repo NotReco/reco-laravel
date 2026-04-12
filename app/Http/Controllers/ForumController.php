@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\ForumCategory;
 use App\Models\ForumThread;
+use App\Models\ForumReply;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Notifications\ForumReplyNotification;
+use Stevebauman\Purify\Facades\Purify;
+use Illuminate\Support\Facades\Auth;
 
 class ForumController extends Controller
 {
@@ -20,7 +23,7 @@ class ForumController extends Controller
             ->withCount('threads')
             ->get();
 
-        $query = ForumThread::with(['category', 'user', 'latestReply.user'])
+        $query = ForumThread::with(['category', 'user.activeTitle', 'latestReply.user'])
             ->withCount('replies')
             ->recent();
 
@@ -39,6 +42,42 @@ class ForumController extends Controller
 
         $threads = $query->paginate(15)->withQueryString();
 
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'threads' => $threads->through(function ($thread) {
+                    return [
+                        'id' => $thread->id,
+                        'title' => $thread->title,
+                        'slug' => $thread->slug,
+                        'url' => route('forum.show', $thread),
+                        'is_pinned' => $thread->is_pinned,
+                        'is_locked' => $thread->is_locked,
+                        'views_count' => $thread->views_count,
+                        'replies_count' => $thread->replies_count,
+                        'created_at' => $thread->created_at->diffForHumans(),
+                        'user' => [
+                            'id' => $thread->user->id,
+                            'name' => $thread->user->name,
+                            'avatar' => $thread->user->avatar,
+                            'initial' => strtoupper(substr($thread->user->name, 0, 1)),
+                            'active_title' => $thread->user->activeTitle ? [
+                                'name' => $thread->user->activeTitle->name,
+                                'color_hex' => $thread->user->activeTitle->color_hex,
+                            ] : null,
+                        ],
+                        'category' => [
+                            'name' => $thread->category->name,
+                        ],
+                        'latest_reply' => $thread->latestReply ? [
+                            'user_name' => $thread->latestReply->user->name ?? '—',
+                            'created_at' => $thread->latestReply->created_at->diffForHumans(),
+                        ] : null,
+                    ];
+                }),
+                'total' => $threads->total(),
+            ]);
+        }
+
         return view('forum.index', compact('categories', 'threads'));
     }
 
@@ -49,9 +88,9 @@ class ForumController extends Controller
     {
         $thread->incrementViews();
 
-        $thread->load(['category', 'user']);
+        $thread->load(['category', 'user.activeTitle']);
         $replies = $thread->replies()
-            ->with('user')
+            ->with('user.activeTitle')
             ->orderBy('created_at')
             ->paginate(20);
 
@@ -80,11 +119,12 @@ class ForumController extends Controller
 
         $thread = ForumThread::create([
             'forum_category_id' => $validated['forum_category_id'],
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(),
             'title' => $validated['title'],
-            'slug' => Str::slug($validated['title']) . '-' . Str::random(5),
-            'content' => $validated['content'],
+            'content' => Purify::clean($validated['content']),
         ]);
+
+        Auth::user()->increment('reputation_score', 2);
 
         return redirect()
             ->route('forum.show', $thread)
@@ -105,14 +145,16 @@ class ForumController extends Controller
         ]);
 
         $reply = $thread->replies()->create([
-            'user_id' => auth()->id(),
-            'content' => $validated['content'],
+            'user_id' => Auth::id(),
+            'content' => Purify::clean($validated['content']),
         ]);
 
         // Gửi thông báo cho chủ sở hữu thread nếu người trả lời khác với chủ thread
-        if ($thread->user_id !== auth()->id()) {
-            $thread->user->notify(new ForumReplyNotification($thread, auth()->user()));
+        if ($thread->user_id !== Auth::id()) {
+            $thread->user->notify(new ForumReplyNotification($thread, Auth::user()));
         }
+
+        Auth::user()->increment('reputation_score', 1);
 
         // Cập nhật updated_at để thread nổi lên đầu
         $thread->touch();
@@ -125,7 +167,8 @@ class ForumController extends Controller
      */
     public function destroy(ForumThread $thread)
     {
-        $user = auth()->user();
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
 
         if ($thread->user_id !== $user->id && !$user->isStaff()) {
             abort(403, 'Bạn không có quyền xóa bài viết này.');
@@ -136,5 +179,92 @@ class ForumController extends Controller
         return redirect()
             ->route('forum.index')
             ->with('success', 'Bài viết đã được xóa.');
+    }
+
+    /**
+     * Sửa thread.
+     */
+    public function editThread(ForumThread $thread)
+    {
+        if ($thread->user_id !== Auth::id()) {
+            abort(403, 'Bạn không có quyền sửa bài viết này.');
+        }
+
+        $categories = ForumCategory::active()->ordered()->get();
+        return view('forum.edit', compact('thread', 'categories'));
+    }
+
+    /**
+     * Cập nhật thread.
+     */
+    public function updateThread(Request $request, ForumThread $thread)
+    {
+        if ($thread->user_id !== Auth::id()) {
+            abort(403, 'Bạn không có quyền sửa bài viết này.');
+        }
+
+        $validated = $request->validate([
+            'forum_category_id' => 'required|exists:forum_categories,id',
+            'title' => 'required|string|min:5|max:255',
+            'content' => 'required|string|min:10',
+        ]);
+
+        $thread->update([
+            'forum_category_id' => $validated['forum_category_id'],
+            'title' => $validated['title'],
+            'content' => Purify::clean($validated['content']),
+        ]);
+
+        return redirect()->route('forum.show', $thread)->with('success', 'Bài viết đã được cập nhật.');
+    }
+
+    /**
+     * Sửa Reply.
+     */
+    public function editReply(ForumReply $reply)
+    {
+        if ($reply->user_id !== Auth::id()) {
+            abort(403, 'Bạn không có quyền sửa phản hồi này.');
+        }
+
+        return view('forum.edit-reply', compact('reply'));
+    }
+
+    /**
+     * Cập nhật Reply.
+     */
+    public function updateReply(Request $request, ForumReply $reply)
+    {
+        if ($reply->user_id !== Auth::id()) {
+            abort(403, 'Bạn không có quyền sửa phản hồi này.');
+        }
+
+        $validated = $request->validate([
+            'content' => 'required|string|min:3',
+        ]);
+
+        $reply->update([
+            'content' => Purify::clean($validated['content']),
+        ]);
+
+        return redirect()->route('forum.show', $reply->thread)->with('success', 'Đã cập nhật phản hồi.');
+    }
+
+    /**
+     * Xóa Reply (chủ hoặc staff).
+     */
+    public function destroyReply(ForumReply $reply)
+    {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        if ($reply->user_id !== $user->id && !$user->isStaff()) {
+            abort(403, 'Bạn không có quyền xóa phản hồi này.');
+        }
+
+        $thread = $reply->thread;
+        $reply->delete();
+
+        return redirect()->route('forum.show', $thread)->with('success', 'Đã xóa phản hồi.');
     }
 }

@@ -27,6 +27,8 @@ class CommentController extends Controller
             'content' => $request->input('content'),
         ]);
 
+        Auth::user()->increment('reputation_score', 1);
+
         return back()->with('success', 'Bình luận của bạn đã được đăng thành công.');
     }
 

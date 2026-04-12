@@ -44,6 +44,12 @@
                     </div>
                     <div class="flex items-center gap-3 mt-1.5 text-sm text-gray-500">
                         <a href="{{ route('profile.show', $thread->user->id) }}" class="font-medium text-gray-700 hover:text-sky-600 transition-colors">{{ $thread->user->name }}</a>
+                        @if($thread->user->activeTitle)
+                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold border"
+                                  style="color: {{ $thread->user->activeTitle->color_hex }}; border-color: {{ $thread->user->activeTitle->color_hex }}40; background-color: {{ $thread->user->activeTitle->color_hex }}15;">
+                                {{ $thread->user->activeTitle->name }}
+                            </span>
+                        @endif
                         <span>·</span>
                         <span>{{ $thread->created_at->format('d/m/Y H:i') }}</span>
                         <span>·</span>
@@ -51,25 +57,35 @@
                     </div>
                 </div>
 
-                {{-- Delete button --}}
+                {{-- Actions (Edit / Delete) --}}
                 @auth
                     @if(auth()->id() === $thread->user_id || auth()->user()->isStaff())
-                        <form action="{{ route('forum.destroy', $thread) }}" method="POST"
-                              onsubmit="return confirm('Bạn có chắc muốn xóa bài viết này?')">
-                            @csrf @method('DELETE')
-                            <button type="submit" class="text-gray-400 hover:text-red-500 transition-colors p-2 rounded-lg hover:bg-red-50" title="Xóa bài viết">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                </svg>
-                            </button>
-                        </form>
+                        <div class="flex items-center gap-1 shrink-0">
+                            @if(auth()->id() === $thread->user_id)
+                                <a href="{{ route('forum.editThread', $thread) }}"
+                                   class="text-gray-400 hover:text-sky-500 transition-colors p-2 rounded-lg hover:bg-sky-50" title="Sửa bài viết">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                                    </svg>
+                                </a>
+                            @endif
+                            <form action="{{ route('forum.destroy', $thread) }}" method="POST"
+                                  onsubmit="return confirm('Bạn có chắc muốn xóa bài viết này?')">
+                                @csrf @method('DELETE')
+                                <button type="submit" class="text-gray-400 hover:text-red-500 transition-colors p-2 rounded-lg hover:bg-red-50" title="Xóa bài viết">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    </svg>
+                                </button>
+                            </form>
+                        </div>
                     @endif
                 @endauth
             </div>
 
             {{-- Body --}}
-            <div class="mt-6 prose prose-sm prose-gray max-w-none text-gray-700 leading-relaxed whitespace-pre-line">
-                {{ $thread->content }}
+            <div class="mt-6 prose prose-sm prose-gray max-w-none text-gray-700 leading-relaxed">
+                {!! $thread->content !!}
             </div>
         </article>
 
@@ -96,13 +112,44 @@
                                 </div>
                             </a>
                             <div class="flex-1 min-w-0">
-                                <div class="flex items-center gap-2 text-sm">
-                                    <a href="{{ route('profile.show', $reply->user->id) }}" class="font-semibold text-gray-900 hover:text-sky-600 transition-colors">{{ $reply->user->name }}</a>
-                                    <span class="text-gray-300">·</span>
-                                    <span class="text-gray-400">{{ $reply->created_at->diffForHumans() }}</span>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2 text-sm">
+                                        <a href="{{ route('profile.show', $reply->user->id) }}" class="font-semibold text-gray-900 hover:text-sky-600 transition-colors">{{ $reply->user->name }}</a>
+                                        @if($reply->user->activeTitle)
+                                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold border"
+                                                  style="color: {{ $reply->user->activeTitle->color_hex }}; border-color: {{ $reply->user->activeTitle->color_hex }}40; background-color: {{ $reply->user->activeTitle->color_hex }}15;">
+                                                {{ $reply->user->activeTitle->name }}
+                                            </span>
+                                        @endif
+                                        <span class="text-gray-300">·</span>
+                                        <span class="text-gray-400">{{ $reply->created_at->diffForHumans() }}</span>
+                                    </div>
+                                    @auth
+                                        @if(auth()->id() === $reply->user_id || auth()->user()->isStaff())
+                                            <div class="flex items-center gap-1">
+                                                @if(auth()->id() === $reply->user_id)
+                                                    <a href="{{ route('forum.editReply', $reply) }}"
+                                                       class="text-gray-400 hover:text-sky-500 transition-colors p-1.5 rounded-lg hover:bg-sky-50" title="Sửa">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                                                        </svg>
+                                                    </a>
+                                                @endif
+                                                <form action="{{ route('forum.destroyReply', $reply) }}" method="POST"
+                                                      onsubmit="return confirm('Bạn có chắc muốn xóa phản hồi này?')">
+                                                    @csrf @method('DELETE')
+                                                    <button type="submit" class="text-gray-400 hover:text-red-500 transition-colors p-1.5 rounded-lg hover:bg-red-50" title="Xóa">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                        </svg>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        @endif
+                                    @endauth
                                 </div>
-                                <div class="mt-2 text-sm text-gray-700 leading-relaxed whitespace-pre-line">
-                                    {{ $reply->content }}
+                                <div class="mt-2 text-sm text-gray-700 leading-relaxed prose prose-sm prose-gray max-w-none">
+                                    {!! $reply->content !!}
                                 </div>
                             </div>
                         </div>
@@ -127,21 +174,17 @@
                     <h3 class="text-base font-semibold text-gray-900 mb-4">Viết trả lời</h3>
                     <form action="{{ route('forum.reply', $thread) }}" method="POST">
                         @csrf
-                        <textarea name="content" rows="4" required onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); this.form.submit(); }"
-                                  placeholder="Chia sẻ ý kiến của bạn..."
-                                  class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm text-gray-800
-                                         placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-400
-                                         transition-all resize-none">{{ old('content') }}</textarea>
+                        <textarea name="content" rows="4" required
+                              class="js-richtext-simple w-full"
+                              data-richtext-height="200"
+                              placeholder="Chia sẻ ý kiến của bạn...">{!! old('content') !!}</textarea>
                         @error('content')
                             <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                         @enderror
                         <div class="mt-3 flex justify-end">
                             <button type="submit"
-                                    class="inline-flex items-center justify-center gap-1.5 px-6 py-2.5 bg-sky-500 text-white text-sm font-semibold rounded-xl
+                                    class="px-6 py-2.5 bg-sky-500 text-white text-sm font-semibold rounded-xl
                                            hover:bg-sky-600 transition-all duration-200 shadow-sm hover:shadow-md">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
-                                </svg>
                                 Gửi trả lời
                             </button>
                         </div>
@@ -164,4 +207,5 @@
     </div>
 </div>
 
+@include('partials.tinymce-simple')
 </x-app-layout>

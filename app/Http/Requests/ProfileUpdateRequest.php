@@ -16,8 +16,9 @@ class ProfileUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
+            'name' => ['sometimes', 'required', 'string', 'max:255'],
             'email' => [
+                'sometimes',
                 'required',
                 'string',
                 'lowercase',
@@ -31,6 +32,11 @@ class ProfileUpdateRequest extends FormRequest
             'location' => ['nullable', 'string', 'max:255'],
             'website' => ['nullable', 'string', 'url', 'max:255'],
             'gender' => ['nullable', Rule::in(['male', 'female', 'other'])],
+            'movie_quote' => ['nullable', 'string', 'max:255'],
+            'active_title_id' => ['nullable', 'exists:user_title_inventory,title_id,user_id,' . $this->user()->id], 
+            'active_frame_id' => ['nullable', 'exists:user_frame_inventory,frame_id,user_id,' . $this->user()->id],
+            'top_movies' => ['nullable', 'array', 'max:4'],
+            'top_movies.*' => ['nullable', 'exists:movies,id'],
         ];
     }
 }

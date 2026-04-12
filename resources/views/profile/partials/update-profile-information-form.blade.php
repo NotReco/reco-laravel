@@ -84,10 +84,17 @@
             </div>
 
             {{-- Bio --}}
-            <div class="md:col-span-2">
+            <div class="md:col-span-1">
                 <x-input-label for="bio" value="Giới thiệu bản thân" class="text-dark-300" />
                 <textarea id="bio" name="bio" rows="4" class="mt-1 block w-full bg-dark-900 border-dark-700 text-white rounded-xl focus:border-sky-500 focus:ring-sky-500">{{ old('bio', $user->bio) }}</textarea>
                 <x-input-error class="mt-2 text-sky-500" :messages="$errors->get('bio')" />
+            </div>
+
+            {{-- Movie Quote --}}
+            <div class="md:col-span-1">
+                <x-input-label for="movie_quote" value="Câu Quote Yêu Thích" class="text-dark-300" />
+                <textarea id="movie_quote" name="movie_quote" rows="4" class="mt-1 block w-full bg-dark-900 border-dark-700 text-white rounded-xl focus:border-sky-500 focus:ring-sky-500" placeholder="May the Force be with you...">{{ old('movie_quote', $user->movie_quote) }}</textarea>
+                <x-input-error class="mt-2 text-sky-500" :messages="$errors->get('movie_quote')" />
             </div>
 
             {{-- Avatar & Cover --}}
