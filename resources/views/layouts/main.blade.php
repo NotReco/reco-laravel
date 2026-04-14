@@ -64,11 +64,53 @@
     {{-- Page Loading Overlay --}}
     <div id="page-loader"><div class="spinner"></div></div>
     <script>
+        // 1. Hide loader when page is fully loaded
         window.addEventListener('load', function() {
             var loader = document.getElementById('page-loader');
             if (loader) {
                 loader.classList.add('fade-out');
-                setTimeout(function() { loader.remove(); }, 350);
+                // Optional: completely remove it after fade out
+                setTimeout(function() { loader.style.display = 'none'; }, 350);
+            }
+        });
+
+        // 2. Show loader IMMEDIATELY when clicking internal navigation links 
+        // to prevent the "frozen" feeling while waiting for server response
+        document.addEventListener('click', function(e) {
+            var target = e.target.closest('a');
+            if (target && target.href && !target.hasAttribute('download') && target.target !== '_blank') {
+                try {
+                    var url = new URL(target.href);
+                    // Only trigger for internal links that are not hash links (#)
+                    if (url.origin === window.location.origin) {
+                        // Skip if it's just a hash/anchor link on the same page
+                        if (url.pathname === window.location.pathname && target.href.includes('#')) {
+                            return;
+                        }
+                        
+                        // Show the loader
+                        var loader = document.getElementById('page-loader');
+                        if (loader) {
+                            loader.style.display = 'flex';
+                            // Force reflow
+                            void loader.offsetWidth;
+                            loader.classList.remove('fade-out');
+                        }
+                    }
+                } catch(err) {
+                    // Ignore URL parsing errors
+                }
+            }
+        });
+        
+        // 3. Fallback: hide loader when user navigates back using browser buttons (BFCache)
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) { // If restored from Back-Forward Cache
+                var loader = document.getElementById('page-loader');
+                if (loader) {
+                    loader.classList.add('fade-out');
+                    setTimeout(function() { loader.style.display = 'none'; }, 350);
+                }
             }
         });
     </script>

@@ -637,9 +637,9 @@
 
                     {{-- Avatar / Profile button --}}
                     <div class="relative" x-data="{ open: false }" @mousedown.outside="open = false">
-                        <button @click="open = !open" class="relative group">
-                            <div class="relative group w-10 h-10 shrink-0">
-                                <div class="w-full h-full rounded-full bg-gradient-to-br from-sky-500 to-sky-700 flex items-center justify-center overflow-hidden transition-all duration-300 {{ Auth::user()->activeFrame ? 'scale-[1.02]' : '' }}">
+                        <button @click="open = !open" class="relative group flex items-center justify-center">
+                            <div class="relative w-10 h-10 shrink-0">
+                                <div class="w-full h-full rounded-full bg-gradient-to-br from-sky-500 to-sky-700 overflow-hidden flex items-center justify-center transition-all duration-300 {{ Auth::user()->activeFrame ? 'scale-[1.0475]' : '' }}">
                                     @if (Auth::user()->avatar)
                                         <img src="{{ Auth::user()->avatar }}" alt="{{ Auth::user()->name }}"
                                             class="w-full h-full object-cover">

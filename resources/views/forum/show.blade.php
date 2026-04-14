@@ -20,8 +20,8 @@
             {{-- Header --}}
             <div class="flex items-start gap-4">
                 {{-- Author avatar --}}
-                <a href="{{ route('profile.show', $thread->user) }}" class="shrink-0 relative group">
-                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-sky-400 to-sky-600 flex items-center justify-center overflow-hidden transition-all duration-300 {{ $thread->user->activeFrame ? 'scale-[1.02]' : 'ring-2 ring-white shadow-sm hover:ring-sky-200' }}">
+                <a href="{{ route('profile.show', $thread->user) }}" class="w-12 h-12 shrink-0 relative group">
+                    <div class="w-full h-full rounded-full bg-gradient-to-br from-sky-400 to-sky-600 flex items-center justify-center overflow-hidden transition-all duration-300 {{ $thread->user->activeFrame ? 'scale-[1.0475]' : 'ring-2 ring-white shadow-sm group-hover:ring-sky-200' }}">
                         @if($thread->user->avatar)
                             <img src="{{ $thread->user->avatar }}" alt="" class="w-full h-full object-cover" loading="lazy">
                         @else
@@ -106,8 +106,8 @@
                 @forelse($replies as $reply)
                     <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
                         <div class="flex items-start gap-3">
-                            <a href="{{ route('profile.show', $reply->user) }}" class="shrink-0 relative group">
-                                <div class="w-9 h-9 rounded-full bg-gradient-to-br from-gray-300 to-gray-500 flex items-center justify-center overflow-hidden transition-all duration-300 {{ $reply->user->activeFrame ? 'scale-[1.02]' : 'ring-2 ring-white shadow-sm' }}">
+                            <a href="{{ route('profile.show', $reply->user) }}" class="w-9 h-9 shrink-0 relative group">
+                                <div class="w-full h-full rounded-full bg-gradient-to-br from-gray-300 to-gray-500 flex items-center justify-center overflow-hidden transition-all duration-300 {{ $reply->user->activeFrame ? 'scale-[1.0475]' : 'ring-2 ring-white shadow-sm' }}">
                                     @if($reply->user->avatar)
                                         <img src="{{ $reply->user->avatar }}" alt="" class="w-full h-full object-cover" loading="lazy">
                                     @else

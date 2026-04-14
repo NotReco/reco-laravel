@@ -35,7 +35,7 @@
                     {{-- Avatar with Frame overlay --}}
                     <div class="relative w-32 h-32 md:w-40 md:h-40 shrink-0">
                         <div
-                            class="w-full h-full rounded-full bg-gradient-to-br from-sky-500 to-sky-700 flex items-center justify-center overflow-hidden transition-all duration-300 {{ $user->activeFrame ? 'scale-[1.02]' : 'border-4 border-white shadow-2xl' }}">
+                            class="w-full h-full rounded-full bg-gradient-to-br from-sky-500 to-sky-700 flex items-center justify-center overflow-hidden transition-all duration-300 {{ $user->activeFrame ? 'scale-[1.0475]' : 'border-4 border-white shadow-2xl' }}">
                             @if ($user->avatar)
                                 <img src="{{ $user->avatar }}" alt="{{ $user->name }}"
                                     class="w-full h-full object-cover">

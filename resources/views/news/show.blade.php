@@ -103,13 +103,18 @@
 
         {{-- Author --}}
         <div class="mt-8 flex justify-end">
-            @if($article->user)
-                <a href="{{ route('profile.show', $article->user->slug) }}" class="group flex items-center gap-2 hover:bg-gray-50 border border-transparent hover:border-gray-200 rounded-full pr-3 py-1 transition-all" title="Xem hồ sơ">
-                    <span class="text-base font-bold text-gray-900 group-hover:text-sky-600 transition-colors">{{ $article->user->name }}</span>
-                    @if($article->user->avatar)
-                        <img src="{{ $article->user->avatar }}" alt="{{ $article->user->name }}" class="w-8 h-8 rounded-full object-cover border border-gray-200 ml-1">
+            @if ($article->user)
+                <a href="{{ route('profile.show', $article->user->slug) }}"
+                    class="group flex items-center gap-2 hover:bg-gray-50 border border-transparent hover:border-gray-200 rounded-full pr-3 py-1 transition-all"
+                    title="Xem hồ sơ">
+                    <span
+                        class="text-base font-bold text-gray-900 group-hover:text-sky-600 transition-colors">{{ $article->user->name }}</span>
+                    @if ($article->user->avatar)
+                        <img src="{{ $article->user->avatar }}" alt="{{ $article->user->name }}"
+                            class="w-8 h-8 rounded-full object-cover border border-gray-200 ml-1">
                     @else
-                        <div class="w-8 h-8 flex items-center justify-center rounded-full bg-sky-100 text-sky-600 font-bold text-sm ml-1">
+                        <div
+                            class="w-8 h-8 flex items-center justify-center rounded-full bg-sky-100 text-sky-600 font-bold text-sm ml-1">
                             {{ strtoupper(substr($article->user->name, 0, 1)) }}
                         </div>
                     @endif
@@ -301,28 +306,33 @@
                 },
 
                 async submitEdit() {
-                    if (this.submittingEdit || !this.editingContent.trim() || !this.editingCommentId) return;
+                    if (this.submittingEdit || !this.editingContent.trim() || !this.editingCommentId)
+                        return;
                     this.submittingEdit = true;
                     try {
-                        const res = await fetch(this.baseUrl + '/article-comments/' + this.editingCommentId, {
-                            method: 'PUT',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': this.csrfToken,
-                                'Accept': 'application/json'
-                            },
-                            body: JSON.stringify({ content: this.editingContent })
-                        });
+                        const res = await fetch(this.baseUrl + '/article-comments/' + this
+                            .editingCommentId, {
+                                method: 'PUT',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': this.csrfToken,
+                                    'Accept': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    content: this.editingContent
+                                })
+                            });
                         if (!res.ok) throw new Error(await this.parseApiError(res));
                         const data = await res.json();
                         if (data.success) {
                             this.commentData[this.editingCommentId] = data.content;
-                            const textEl = document.getElementById('comment-text-' + this.editingCommentId);
+                            const textEl = document.getElementById('comment-text-' + this
+                                .editingCommentId);
                             if (textEl) textEl.innerHTML = this.formatMentions(data.content);
                             this.editingCommentId = null;
                             this.editingContent = '';
                         }
-                    } catch(err) {
+                    } catch (err) {
                         alert(err?.message || 'Không thể cập nhật bình luận.');
                     } finally {
                         this.submittingEdit = false;
@@ -433,9 +443,9 @@
 
                 async submitReport() {
                     if (!this.selectedReason || this.submittingReport) return;
-                    const finalReason = this.selectedReason === 'Khác'
-                        ? (this.customReason.trim() || 'Khác')
-                        : this.selectedReason;
+                    const finalReason = this.selectedReason === 'Khác' ?
+                        (this.customReason.trim() || 'Khác') :
+                        this.selectedReason;
                     if (this.selectedReason === 'Khác' && !this.customReason.trim()) return;
                     this.submittingReport = true;
                     try {
@@ -533,32 +543,50 @@
                         '<img src="' + comment.user.avatar +
                         '" alt="" class="w-full h-full rounded-full object-cover" loading="lazy">' :
                         '<span class="text-xs font-bold text-white">' + comment.user.initial + '</span>';
-                    const deleteBtn = (this.currentUser.isStaff || this.currentUser.id === comment.user.id) ?
+                    const deleteBtn = (this.currentUser.isStaff || this.currentUser.id === comment.user
+                            .id) ?
                         '<button @click="openDeleteModal(' + comment.uuid +
                         ')" class="text-[13px] font-semibold text-gray-500 hover:text-red-500 hover:underline transition-colors whitespace-nowrap">Xóa</button>' :
                         '';
                     const editBtn = (this.currentUser.id === comment.user.id) ?
-                        '<button @click="startEdit(' + comment.uuid + ')" class="text-[13px] font-semibold text-gray-500 hover:text-gray-700 hover:underline transition-colors whitespace-nowrap">Sửa</button>' :
+                        '<button @click="startEdit(' + comment.uuid +
+                        ')" class="text-[13px] font-semibold text-gray-500 hover:text-gray-700 hover:underline transition-colors whitespace-nowrap">Sửa</button>' :
                         '';
-                    const ringClass = (comment.user.active_frame && comment.user.active_frame.image_path) ? 'scale-[102%]' : 'ring-2 ring-sky-300';
+                    const ringClass = (comment.user.active_frame && comment.user.active_frame.image_path) ?
+                        'scale-[1.05]' : 'ring-2 ring-sky-300';
                     const frameHtml = (comment.user.active_frame && comment.user.active_frame.image_path) ?
-                        '<img src="' + comment.user.active_frame.image_path + '" alt="" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[126%] h-[126%] max-w-none object-contain pointer-events-none z-10 transition-all duration-300">' :
+                        '<img src="' + comment.user.active_frame.image_path +
+                        '" alt="" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[126%] h-[126%] max-w-none object-contain pointer-events-none z-10 transition-all duration-300">' :
+                        '';
+                    const profileUrl = this.baseUrl + '/profile/' + (comment.user.slug || comment.user.id);
+
+                    const ringClass = (comment.user.active_frame && comment.user.active_frame.image_path) ? 'scale-[1.0475]' : 'ring-2 ring-sky-300';
+                    const frameHtml = (comment.user.active_frame && comment.user.active_frame.image_path) ?
+                        '<img src="' + comment.user.active_frame.image_path +
+                        '" alt="" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[126%] h-[126%] max-w-none object-contain pointer-events-none z-10 transition-all duration-300">' :
                         '';
                     const profileUrl = this.baseUrl + '/profile/' + (comment.user.slug || comment.user.id);
 
                     const html = '<div class="flex gap-3" id="comment-' + comment.uuid +
                         '" data-depth="0" style="opacity:0;transform:translateY(10px);transition:all 0.3s">' +
-                        '<a href="' + profileUrl + '" class="relative group w-9 h-9 rounded-full bg-gradient-to-br from-gray-300 to-gray-500 flex items-center justify-center shrink-0 transition-all duration-300 ' + ringClass + '">' +
-                        avatarHtml + frameHtml + '</a>' +
+                        '<a href="' + profileUrl +
+                        '" class="relative group w-9 h-9 shrink-0 transition-all duration-300"><div class="w-full h-full rounded-full bg-gradient-to-br from-gray-300 to-gray-500 overflow-hidden flex items-center justify-center transition-all duration-300 ' +
+                        ringClass + '">' +
+                        avatarHtml + '</div>' + frameHtml + '</a>' +
                         '<div class="flex-1 min-w-0">' +
                         '<div class="bg-white rounded-xl px-3.5 py-2 border border-gray-200 transition-colors" :class="replyingToId === ' +
                         comment.uuid + ' ? \'!bg-blue-50 !border-blue-200\' : \'\'">' +
-                        '<div class="flex items-center gap-2 mb-0.5"><a href="' + profileUrl + '" class="text-[15px] font-bold text-gray-900 hover:text-sky-600 hover:underline transition-colors">' +
+                        '<div class="flex items-center gap-2 mb-0.5"><a href="' + profileUrl +
+                        '" class="text-[15px] font-bold text-gray-900 hover:text-sky-600 hover:underline transition-colors">' +
                         this.escapeHtml(comment.user.name) + '</a></div>' +
-                        '<div x-show="editingCommentId !== ' + comment.uuid + '"><p id="comment-text-' + comment.uuid + '" class="text-[15px] text-gray-800 leading-relaxed whitespace-pre-line break-words">' +
+                        '<div x-show="editingCommentId !== ' + comment.uuid + '"><p id="comment-text-' +
+                        comment.uuid +
+                        '" class="text-[15px] text-gray-800 leading-relaxed whitespace-pre-line break-words">' +
                         this.formatMentions(comment.content) + '</p></div>' +
-                        '<div x-show="editingCommentId === ' + comment.uuid + '" x-cloak style="display:none">' +
-                        '<textarea id="edit-input-' + comment.uuid + '" x-model="editingContent" @keydown.enter="if(!$event.shiftKey) { $event.preventDefault(); submitEdit(); }" class="w-full px-3 py-2 bg-white border border-blue-300 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all resize-none mt-1" rows="2"></textarea>' +
+                        '<div x-show="editingCommentId === ' + comment.uuid +
+                        '" x-cloak style="display:none">' +
+                        '<textarea id="edit-input-' + comment.uuid +
+                        '" x-model="editingContent" @keydown.enter="if(!$event.shiftKey) { $event.preventDefault(); submitEdit(); }" class="w-full px-3 py-2 bg-white border border-blue-300 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all resize-none mt-1" rows="2"></textarea>' +
                         '<div class="flex gap-2 justify-end mt-1.5"><button @click="cancelEdit()" class="text-xs text-gray-500 hover:underline px-2 py-1">Hủy</button><button @click="submitEdit()" class="text-xs font-semibold bg-blue-500 text-white rounded px-3 py-1.5 mt-1 hover:bg-blue-600 disabled:opacity-50" :disabled="submittingEdit || !editingContent.trim()">Lưu</button></div>' +
                         '</div>' +
                         '</div>' +
@@ -662,7 +690,10 @@
                         '<button @click="openDeleteModal(' + reply.uuid +
                         ')" class="text-[13px] font-semibold text-gray-500 hover:text-red-500 hover:underline transition-colors whitespace-nowrap">Xóa</button>' :
                         '';
-                    const editBtn = (this.currentUser.id === reply.user.id) ? '<button @click="startEdit(' + reply.uuid + ')" class="text-[13px] font-semibold text-gray-500 hover:text-gray-700 hover:underline transition-colors whitespace-nowrap">Sửa</button>' : '';
+                    const editBtn = (this.currentUser.id === reply.user.id) ? '<button @click="startEdit(' +
+                        reply.uuid +
+                        ')" class="text-[13px] font-semibold text-gray-500 hover:text-gray-700 hover:underline transition-colors whitespace-nowrap">Sửa</button>' :
+                        '';
 
                     const replyBtn = depth < 2 ?
                         '<button @click="focusReply(' + rootCommentId + ', ' + reply.uuid + ', \'' + this
@@ -670,23 +701,34 @@
                         '\')" class="text-[13px] font-semibold text-gray-500 hover:text-gray-700 hover:underline transition-colors whitespace-nowrap">Trả lời</button>' :
                         '';
                     const frameHtml = (reply.user.active_frame && reply.user.active_frame.image_path) ?
-                        '<img src="' + reply.user.active_frame.image_path + '" alt="" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[126%] h-[126%] max-w-none object-contain pointer-events-none z-10 transition-all duration-300">' :
+                        '<img src="' + reply.user.active_frame.image_path +
+                        '" alt="" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[126%] h-[126%] max-w-none object-contain pointer-events-none z-10 transition-all duration-300">' :
                         '';
                     const replyProfileUrl = this.baseUrl + '/profile/' + (reply.user.slug || reply.user.id);
-                    const ringClass = (reply.user.active_frame && reply.user.active_frame.image_path) ? 'scale-[102%]' : 'ring-2 ring-sky-300';
+                    const ringClass = (reply.user.active_frame && reply.user.active_frame.image_path) ?
+                        'scale-[1.05]' : 'ring-2 ring-sky-300';
+                    const ringClass = (reply.user.active_frame && reply.user.active_frame.image_path) ?
+                        'scale-[1.0475]' : 'ring-2 ring-sky-300';
                     const html = '<div class="flex gap-2.5" id="comment-' + reply.uuid + '" data-depth="' +
                         depth + '" style="opacity:0;transform:translateY(5px);transition:all 0.3s">' +
-                        '<a href="' + replyProfileUrl + '" class="relative group w-7 h-7 rounded-full bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center shrink-0 transition-all duration-300 ' + ringClass + '">' +
-                        avatarHtml + frameHtml + '</a>' +
+                        '<a href="' + replyProfileUrl +
+                        '" class="relative group w-7 h-7 shrink-0 transition-all duration-300"><div class="w-full h-full rounded-full bg-gradient-to-br from-gray-300 to-gray-400 overflow-hidden flex items-center justify-center transition-all duration-300 ' +
+                        ringClass + '">' +
+                        avatarHtml + '</div>' + frameHtml + '</a>' +
                         '<div class="flex-1 min-w-0">' +
                         '<div class="bg-gray-50 rounded-lg px-3 py-2 border border-gray-200 transition-colors" :class="replyingToId === ' +
                         reply.uuid + ' ? \'!bg-blue-50 !border-blue-100\' : \'\'">' +
-                        '<div class="flex items-center gap-2 mb-0.5"><a href="' + replyProfileUrl + '" class="text-sm font-bold text-gray-900 hover:text-sky-600 hover:underline transition-colors">' +
+                        '<div class="flex items-center gap-2 mb-0.5"><a href="' + replyProfileUrl +
+                        '" class="text-sm font-bold text-gray-900 hover:text-sky-600 hover:underline transition-colors">' +
                         this.escapeHtml(reply.user.name) + '</a></div>' +
-                        '<div x-show="editingCommentId !== ' + reply.uuid + '"><p id="comment-text-' + reply.uuid + '" class="text-[15px] text-gray-800 leading-relaxed whitespace-pre-line break-words">' +
+                        '<div x-show="editingCommentId !== ' + reply.uuid + '"><p id="comment-text-' + reply
+                        .uuid +
+                        '" class="text-[15px] text-gray-800 leading-relaxed whitespace-pre-line break-words">' +
                         this.formatMentions(reply.content) + '</p></div>' +
-                        '<div x-show="editingCommentId === ' + reply.uuid + '" x-cloak style="display:none">' +
-                        '<textarea id="edit-input-' + reply.uuid + '" x-model="editingContent" @keydown.enter="if(!$event.shiftKey) { $event.preventDefault(); submitEdit(); }" class="w-full px-3 py-2 bg-white border border-blue-300 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all resize-none mt-1" rows="2"></textarea>' +
+                        '<div x-show="editingCommentId === ' + reply.uuid +
+                        '" x-cloak style="display:none">' +
+                        '<textarea id="edit-input-' + reply.uuid +
+                        '" x-model="editingContent" @keydown.enter="if(!$event.shiftKey) { $event.preventDefault(); submitEdit(); }" class="w-full px-3 py-2 bg-white border border-blue-300 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all resize-none mt-1" rows="2"></textarea>' +
                         '<div class="flex gap-2 justify-end mt-1.5"><button @click="cancelEdit()" class="text-xs text-gray-500 hover:underline px-2 py-1">Hủy</button><button @click="submitEdit()" class="text-xs font-semibold bg-blue-500 text-white rounded px-3 py-1.5 mt-1 hover:bg-blue-600 disabled:opacity-50" :disabled="submittingEdit || !editingContent.trim()">Lưu</button></div>' +
                         '</div>' +
                         '</div>' +
@@ -806,33 +848,42 @@
                 <form @submit.prevent="submitComment($event)" class="mb-8">
                     <div class="flex gap-3">
                         <div
-                            class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center shrink-0 mt-0.5 relative group transition-all duration-300 {{ auth()->user()->activeFrame ? 'scale-[1.02]' : '' }}">
-                            @if (auth()->user()->avatar)
-                                <img src="{{ auth()->user()->avatar }}" alt=""
-                                    class="w-full h-full rounded-full object-cover" loading="lazy">
-                            @else
-                                <span
-                                    class="text-sm font-bold text-white">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
-                            @endif
+                            class="w-10 h-10 shrink-0 mt-0.5 relative group transition-all duration-300">
+                            <div class="w-full h-full rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center overflow-hidden transition-all duration-300 {{ auth()->user()->activeFrame ? 'scale-[1.0475]' : '' }}">
+                                @if (auth()->user()->avatar)
+                                    <img src="{{ auth()->user()->avatar }}" alt=""
+                                        class="w-full h-full object-cover" loading="lazy">
+                                @else
+                                    <span
+                                        class="text-sm font-bold text-white">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
+                                @endif
+                            </div>
                             @if (auth()->user()->activeFrame)
-                                <img src="{{ Storage::url(auth()->user()->activeFrame->image_path) }}" alt="" 
-                                     class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[126%] h-[126%] max-w-none object-contain pointer-events-none z-10 transition-all duration-300">
+                                <img src="{{ Storage::url(auth()->user()->activeFrame->image_path) }}" alt=""
+                                    class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[126%] h-[126%] max-w-none object-contain pointer-events-none z-10 transition-all duration-300">
                             @endif
                         </div>
                         <div class="flex-1">
-                            <textarea x-model="newComment" @keydown.enter="if(!$event.shiftKey) { $event.preventDefault(); submitComment($event); }" rows="3" required maxlength="1000" placeholder="Viết bình luận của bạn..."
+                            <textarea x-model="newComment" @keydown.enter="if(!$event.shiftKey) { $event.preventDefault(); submitComment($event); }"
+                                rows="3" required maxlength="1000" placeholder="Viết bình luận của bạn..."
                                 class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm text-gray-800 placeholder-gray-400
                                          focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all resize-none"></textarea>
                             <div class="mt-2 flex justify-end">
                                 <button type="submit" :disabled="submitting || !newComment.trim()" title="Bình luận"
                                     class="inline-flex items-center justify-center w-11 h-11 bg-blue-500 text-white rounded-xl shadow-sm shadow-blue-500/20
                                            hover:bg-blue-600 active:scale-[0.95] transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-                                    <svg x-show="!submitting" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-[22px] h-[22px] ml-1">
-                                        <path d="M3.478 2.404a.75.75 0 0 0-.926.941l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.404Z" />
+                                    <svg x-show="!submitting" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                        fill="currentColor" class="w-[22px] h-[22px] ml-1">
+                                        <path
+                                            d="M3.478 2.404a.75.75 0 0 0-.926.941l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.404Z" />
                                     </svg>
-                                    <svg x-show="submitting" x-cloak class="animate-spin w-5 h-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    <svg x-show="submitting" x-cloak class="animate-spin w-5 h-5 text-white"
+                                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10"
+                                            stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor"
+                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                        </path>
                                     </svg>
                                 </button>
                             </div>
@@ -846,17 +897,19 @@
                         <div class="flex gap-3" id="comment-{{ $comment->id }}" data-depth="0">
                             {{-- Avatar --}}
                             <a href="{{ route('profile.show', $comment->user) }}"
-                                class="w-9 h-9 rounded-full bg-gradient-to-br from-gray-300 to-gray-500 flex items-center justify-center shrink-0 transition-all duration-300 relative group {{ ($comment->user->activeFrame ?? false) ? 'scale-[1.02]' : 'hover:ring-2 hover:ring-sky-300' }}">
-                                @if ($comment->user->avatar ?? false)
-                                    <img src="{{ $comment->user->avatar }}" alt=""
-                                        class="w-full h-full rounded-full object-cover" loading="lazy">
-                                @else
-                                    <span
-                                        class="text-xs font-bold text-white">{{ strtoupper(substr($comment->user->name ?? '?', 0, 1)) }}</span>
-                                @endif
-                                @if (($comment->user->activeFrame ?? false))
-                                    <img src="{{ Storage::url($comment->user->activeFrame->image_path) }}" alt="" 
-                                         class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[126%] h-[126%] max-w-none object-contain pointer-events-none z-10 transition-all duration-300">
+                                class="w-9 h-9 shrink-0 relative group">
+                                <div class="w-full h-full rounded-full bg-gradient-to-br from-gray-300 to-gray-500 overflow-hidden flex items-center justify-center transition-all duration-300 {{ $comment->user->activeFrame ?? false ? 'scale-[1.0475]' : 'group-hover:ring-2 group-hover:ring-sky-300' }}">
+                                    @if ($comment->user->avatar ?? false)
+                                        <img src="{{ $comment->user->avatar }}" alt=""
+                                            class="w-full h-full object-cover" loading="lazy">
+                                    @else
+                                        <span
+                                            class="text-xs font-bold text-white">{{ strtoupper(substr($comment->user->name ?? '?', 0, 1)) }}</span>
+                                    @endif
+                                </div>
+                                @if ($comment->user->activeFrame ?? false)
+                                    <img src="{{ Storage::url($comment->user->activeFrame->image_path) }}" alt=""
+                                        class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[126%] h-[126%] max-w-none object-contain pointer-events-none z-10 transition-all duration-300">
                                 @endif
                             </a>
                             <div class="flex-1 min-w-0">
@@ -864,16 +917,25 @@
                                 <div class="bg-white rounded-xl px-3.5 py-2 border border-gray-200 transition-colors"
                                     :class="replyingToId === {{ $comment->id }} ? '!bg-blue-50 !border-blue-200' : ''">
                                     <div class="flex items-center gap-2 mb-0.5">
-                                        <a href="{{ route('profile.show', $comment->user) }}" class="text-[15px] font-bold text-gray-900 hover:text-sky-600 hover:underline transition-colors">{{ $comment->user->name ?? 'Ẩn danh' }}</a>
+                                        <a href="{{ route('profile.show', $comment->user) }}"
+                                            class="text-[15px] font-bold text-gray-900 hover:text-sky-600 hover:underline transition-colors">{{ $comment->user->name ?? 'Ẩn danh' }}</a>
                                     </div>
                                     <div x-show="editingCommentId !== {{ $comment->id }}">
-                                        <p id="comment-text-{{ $comment->id }}" class="text-[15px] text-gray-800 leading-relaxed whitespace-pre-line break-words" x-html='formatMentions(commentData[{{ $comment->id }}])'></p>
+                                        <p id="comment-text-{{ $comment->id }}"
+                                            class="text-[15px] text-gray-800 leading-relaxed whitespace-pre-line break-words"
+                                            x-html='formatMentions(commentData[{{ $comment->id }}])'></p>
                                     </div>
                                     <div x-show="editingCommentId === {{ $comment->id }}" x-cloak style="display: none">
-                                        <textarea id="edit-input-{{ $comment->id }}" x-model="editingContent" @keydown.enter="if(!$event.shiftKey) { $event.preventDefault(); submitEdit(); }" class="w-full px-3 py-2 bg-white border border-blue-300 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all resize-none mt-1" rows="2"></textarea>
+                                        <textarea id="edit-input-{{ $comment->id }}" x-model="editingContent"
+                                            @keydown.enter="if(!$event.shiftKey) { $event.preventDefault(); submitEdit(); }"
+                                            class="w-full px-3 py-2 bg-white border border-blue-300 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all resize-none mt-1"
+                                            rows="2"></textarea>
                                         <div class="flex gap-2 justify-end mt-1.5">
-                                            <button @click="cancelEdit()" class="text-xs text-gray-500 hover:underline px-2 py-1">Hủy</button>
-                                            <button @click="submitEdit()" class="text-xs font-semibold bg-blue-500 text-white rounded px-3 py-1.5 hover:bg-blue-600 disabled:opacity-50" :disabled="submittingEdit || !editingContent.trim()">Lưu</button>
+                                            <button @click="cancelEdit()"
+                                                class="text-xs text-gray-500 hover:underline px-2 py-1">Hủy</button>
+                                            <button @click="submitEdit()"
+                                                class="text-xs font-semibold bg-blue-500 text-white rounded px-3 py-1.5 hover:bg-blue-600 disabled:opacity-50"
+                                                :disabled="submittingEdit || !editingContent.trim()">Lưu</button>
                                         </div>
                                     </div>
                                 </div>
@@ -956,9 +1018,13 @@
                         </div>
                         <button @click="expandedReplies = true"
                             class="flex items-center gap-2 text-[14px] font-bold text-gray-700 hover:text-gray-900 group transition-colors relative z-10 pt-[3px] ml-[26px] focus:outline-none">
-                            @php 
-                                $firstReplyUser = $comment->replies->first()->user; 
-                                $totalReplies = $comment->replies->count() + $comment->replies->sum(function($r) { return $r->replies ? $r->replies->count() : 0; });
+                            @php
+                                $firstReplyUser = $comment->replies->first()->user;
+                                $totalReplies =
+                                    $comment->replies->count() +
+                                    $comment->replies->sum(function ($r) {
+                                        return $r->replies ? $r->replies->count() : 0;
+                                    });
                             @endphp
                             <div
                                 class="w-[24px] h-[24px] rounded-full bg-gray-200 flex items-center justify-center shrink-0 border border-white">
@@ -984,33 +1050,47 @@
                             @foreach ($comment->replies as $reply)
                                 <div class="flex gap-2.5" id="comment-{{ $reply->id }}" data-depth="1">
                                     <a href="{{ route('profile.show', $reply->user) }}"
-                                        class="w-7 h-7 rounded-full bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center shrink-0 transition-all duration-300 relative group {{ ($reply->user->activeFrame ?? false) ? 'scale-[1.02]' : 'hover:ring-2 hover:ring-sky-300' }}">
-                                        @if ($reply->user->avatar ?? false)
-                                            <img src="{{ $reply->user->avatar }}" alt=""
-                                                class="w-full h-full rounded-full object-cover" loading="lazy">
-                                        @else
-                                            <span
-                                                class="text-[10px] font-bold text-white">{{ strtoupper(substr($reply->user->name ?? '?', 0, 1)) }}</span>
-                                        @endif
-                                        @if (($reply->user->activeFrame ?? false))
-                                            <img src="{{ Storage::url($reply->user->activeFrame->image_path) }}" alt="" 
-                                                 class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[126%] h-[126%] max-w-none object-contain pointer-events-none z-10 transition-all duration-300">
+                                        class="w-7 h-7 shrink-0 relative group">
+                                        <div class="w-full h-full rounded-full bg-gradient-to-br from-gray-300 to-gray-400 overflow-hidden flex items-center justify-center transition-all duration-300 {{ $reply->user->activeFrame ?? false ? 'scale-[1.0475]' : 'group-hover:ring-2 group-hover:ring-sky-300' }}">
+                                            @if ($reply->user->avatar ?? false)
+                                                <img src="{{ $reply->user->avatar }}" alt=""
+                                                    class="w-full h-full object-cover" loading="lazy">
+                                            @else
+                                                <span
+                                                    class="text-[10px] font-bold text-white">{{ strtoupper(substr($reply->user->name ?? '?', 0, 1)) }}</span>
+                                            @endif
+                                        </div>
+                                        @if ($reply->user->activeFrame ?? false)
+                                            <img src="{{ Storage::url($reply->user->activeFrame->image_path) }}"
+                                                alt=""
+                                                class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[126%] h-[126%] max-w-none object-contain pointer-events-none z-10 transition-all duration-300">
                                         @endif
                                     </a>
                                     <div class="flex-1 min-w-0">
                                         <div class="bg-gray-50 rounded-lg px-3 py-2 border border-gray-200 transition-colors"
                                             :class="replyingToId === {{ $reply->id }} ? '!bg-blue-50 !border-blue-100' : ''">
                                             <div class="flex items-center gap-2 mb-0.5">
-                                                <a href="{{ route('profile.show', $reply->user) }}" class="text-sm font-bold text-gray-900 hover:text-sky-600 hover:underline transition-colors">{{ $reply->user->name ?? 'Ẩn danh' }}</a>
+                                                <a href="{{ route('profile.show', $reply->user) }}"
+                                                    class="text-sm font-bold text-gray-900 hover:text-sky-600 hover:underline transition-colors">{{ $reply->user->name ?? 'Ẩn danh' }}</a>
                                             </div>
                                             <div x-show="editingCommentId !== {{ $reply->id }}">
-                                                <p id="comment-text-{{ $reply->id }}" x-html='formatMentions(commentData[{{ $reply->id }}])' class="text-[15px] text-gray-800 leading-relaxed whitespace-pre-line break-words"></p>
+                                                <p id="comment-text-{{ $reply->id }}"
+                                                    x-html='formatMentions(commentData[{{ $reply->id }}])'
+                                                    class="text-[15px] text-gray-800 leading-relaxed whitespace-pre-line break-words">
+                                                </p>
                                             </div>
-                                            <div x-show="editingCommentId === {{ $reply->id }}" x-cloak style="display: none">
-                                                <textarea id="edit-input-{{ $reply->id }}" x-model="editingContent" @keydown.enter="if(!$event.shiftKey) { $event.preventDefault(); submitEdit(); }" class="w-full px-3 py-2 bg-white border border-blue-300 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all resize-none mt-1" rows="2"></textarea>
+                                            <div x-show="editingCommentId === {{ $reply->id }}" x-cloak
+                                                style="display: none">
+                                                <textarea id="edit-input-{{ $reply->id }}" x-model="editingContent"
+                                                    @keydown.enter="if(!$event.shiftKey) { $event.preventDefault(); submitEdit(); }"
+                                                    class="w-full px-3 py-2 bg-white border border-blue-300 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all resize-none mt-1"
+                                                    rows="2"></textarea>
                                                 <div class="flex gap-2 justify-end mt-1.5">
-                                                    <button @click="cancelEdit()" class="text-xs text-gray-500 hover:underline px-2 py-1">Hủy</button>
-                                                    <button @click="submitEdit()" class="text-xs font-semibold bg-blue-500 text-white rounded px-3 py-1.5 mt-1 hover:bg-blue-600 disabled:opacity-50" :disabled="submittingEdit || !editingContent.trim()">Lưu</button>
+                                                    <button @click="cancelEdit()"
+                                                        class="text-xs text-gray-500 hover:underline px-2 py-1">Hủy</button>
+                                                    <button @click="submitEdit()"
+                                                        class="text-xs font-semibold bg-blue-500 text-white rounded px-3 py-1.5 mt-1 hover:bg-blue-600 disabled:opacity-50"
+                                                        :disabled="submittingEdit || !editingContent.trim()">Lưu</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -1088,32 +1168,46 @@
                             @foreach ($reply->replies as $nestedReply)
                                 <div class="flex gap-2.5" id="comment-{{ $nestedReply->id }}" data-depth="2">
                                     <a href="{{ route('profile.show', $nestedReply->user) }}"
-                                        class="w-7 h-7 rounded-full bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center shrink-0 transition-all duration-300 relative group {{ ($nestedReply->user->activeFrame ?? false) ? 'scale-[1.02]' : 'hover:ring-2 hover:ring-sky-300' }}">
-                                        @if ($nestedReply->user->avatar ?? false)
-                                            <img src="{{ $nestedReply->user->avatar }}" alt=""
-                                                class="w-full h-full rounded-full object-cover" loading="lazy">
-                                        @else
-                                            <span
-                                                class="text-[10px] font-bold text-white">{{ strtoupper(substr($nestedReply->user->name ?? '?', 0, 1)) }}</span>
-                                        @endif
-                                        @if (($nestedReply->user->activeFrame ?? false))
-                                            <img src="{{ Storage::url($nestedReply->user->activeFrame->image_path) }}" alt="" 
-                                                 class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[126%] h-[126%] max-w-none object-contain pointer-events-none z-10 transition-all duration-300">
+                                        class="w-7 h-7 shrink-0 relative group">
+                                        <div class="w-full h-full rounded-full bg-gradient-to-br from-gray-300 to-gray-400 overflow-hidden flex items-center justify-center transition-all duration-300 {{ $nestedReply->user->activeFrame ?? false ? 'scale-[1.0475]' : 'group-hover:ring-2 group-hover:ring-sky-300' }}">
+                                            @if ($nestedReply->user->avatar ?? false)
+                                                <img src="{{ $nestedReply->user->avatar }}" alt=""
+                                                    class="w-full h-full object-cover" loading="lazy">
+                                            @else
+                                                <span
+                                                    class="text-[10px] font-bold text-white">{{ strtoupper(substr($nestedReply->user->name ?? '?', 0, 1)) }}</span>
+                                            @endif
+                                        </div>
+                                        @if ($nestedReply->user->activeFrame ?? false)
+                                            <img src="{{ Storage::url($nestedReply->user->activeFrame->image_path) }}"
+                                                alt=""
+                                                class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[126%] h-[126%] max-w-none object-contain pointer-events-none z-10 transition-all duration-300">
                                         @endif
                                     </a>
                                     <div class="flex-1 min-w-0">
                                         <div class="bg-gray-50 rounded-lg px-3 py-2 border border-gray-200">
                                             <div class="flex items-center gap-2 mb-0.5">
-                                                <a href="{{ route('profile.show', $nestedReply->user) }}" class="text-sm font-bold text-gray-900 hover:text-sky-600 hover:underline transition-colors">{{ $nestedReply->user->name ?? 'Ẩn danh' }}</a>
+                                                <a href="{{ route('profile.show', $nestedReply->user) }}"
+                                                    class="text-sm font-bold text-gray-900 hover:text-sky-600 hover:underline transition-colors">{{ $nestedReply->user->name ?? 'Ẩn danh' }}</a>
                                             </div>
                                             <div x-show="editingCommentId !== {{ $nestedReply->id }}">
-                                                <p id="comment-text-{{ $nestedReply->id }}" x-html='formatMentions(commentData[{{ $nestedReply->id }}])' class="text-[15px] text-gray-800 leading-relaxed whitespace-pre-line break-words"></p>
+                                                <p id="comment-text-{{ $nestedReply->id }}"
+                                                    x-html='formatMentions(commentData[{{ $nestedReply->id }}])'
+                                                    class="text-[15px] text-gray-800 leading-relaxed whitespace-pre-line break-words">
+                                                </p>
                                             </div>
-                                            <div x-show="editingCommentId === {{ $nestedReply->id }}" x-cloak style="display: none">
-                                                <textarea id="edit-input-{{ $nestedReply->id }}" x-model="editingContent" @keydown.enter="if(!$event.shiftKey) { $event.preventDefault(); submitEdit(); }" class="w-full px-3 py-2 bg-white border border-blue-300 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all resize-none mt-1" rows="2"></textarea>
+                                            <div x-show="editingCommentId === {{ $nestedReply->id }}" x-cloak
+                                                style="display: none">
+                                                <textarea id="edit-input-{{ $nestedReply->id }}" x-model="editingContent"
+                                                    @keydown.enter="if(!$event.shiftKey) { $event.preventDefault(); submitEdit(); }"
+                                                    class="w-full px-3 py-2 bg-white border border-blue-300 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all resize-none mt-1"
+                                                    rows="2"></textarea>
                                                 <div class="flex gap-2 justify-end mt-1.5">
-                                                    <button @click="cancelEdit()" class="text-xs text-gray-500 hover:underline px-2 py-1">Hủy</button>
-                                                    <button @click="submitEdit()" class="text-xs font-semibold bg-blue-500 text-white rounded px-3 py-1.5 mt-1 hover:bg-blue-600 disabled:opacity-50" :disabled="submittingEdit || !editingContent.trim()">Lưu</button>
+                                                    <button @click="cancelEdit()"
+                                                        class="text-xs text-gray-500 hover:underline px-2 py-1">Hủy</button>
+                                                    <button @click="submitEdit()"
+                                                        class="text-xs font-semibold bg-blue-500 text-white rounded px-3 py-1.5 mt-1 hover:bg-blue-600 disabled:opacity-50"
+                                                        :disabled="submittingEdit || !editingContent.trim()">Lưu</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -1183,7 +1277,9 @@
             <div x-show="replyTo === {{ $comment->id }}" x-cloak style="display: none"
                 class="mt-3 ml-2 pl-4 border-l-2 border-blue-200">
                 <form @submit.prevent="submitReply($event)">
-                    <textarea x-model="replyContent" @keydown.enter="if(!$event.shiftKey) { $event.preventDefault(); submitReply($event); }" id="reply-input-{{ $comment->id }}" rows="2" required maxlength="1000"
+                    <textarea x-model="replyContent"
+                        @keydown.enter="if(!$event.shiftKey) { $event.preventDefault(); submitReply($event); }"
+                        id="reply-input-{{ $comment->id }}" rows="2" required maxlength="1000"
                         placeholder="Trả lời {{ $comment->user->name ?? '' }}..."
                         class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-800
                                                      focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all resize-none"></textarea>
@@ -1193,12 +1289,18 @@
                             class="px-3 py-1 text-xs text-gray-500 hover:text-gray-700 transition-colors">Hủy</button>
                         <button type="submit" :disabled="submittingReply || !replyContent.trim()" title="Trả lời"
                             class="inline-flex items-center justify-center w-8 h-8 bg-blue-500 text-white rounded-lg shadow-sm hover:bg-blue-600 active:scale-[0.95] transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-                            <svg x-show="!submittingReply" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-[18px] h-[18px] ml-0.5">
-                                <path d="M3.478 2.404a.75.75 0 0 0-.926.941l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.404Z" />
+                            <svg x-show="!submittingReply" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                fill="currentColor" class="w-[18px] h-[18px] ml-0.5">
+                                <path
+                                    d="M3.478 2.404a.75.75 0 0 0-.926.941l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.404Z" />
                             </svg>
-                            <svg x-show="submittingReply" x-cloak class="animate-spin w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            <svg x-show="submittingReply" x-cloak class="animate-spin w-4 h-4 text-white"
+                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                    stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                </path>
                             </svg>
                         </button>
                     </div>
@@ -1257,17 +1359,18 @@
                     </template>
                     {{-- Custom reason input (shown when "Khác" is selected) --}}
                     <div x-show="selectedReason === 'Khác'" x-transition x-cloak class="px-3 pt-1 pb-2">
-                        <textarea x-model="customReason" rows="3" maxlength="500"
-                            placeholder="Nhập lý do báo cáo của bạn..."
+                        <textarea x-model="customReason" rows="3" maxlength="500" placeholder="Nhập lý do báo cáo của bạn..."
                             class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-800 placeholder-gray-400
                                    focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all resize-none"></textarea>
-                        <p class="text-[11px] text-gray-400 mt-1 text-right" x-text="customReason.length + '/500'"></p>
+                        <p class="text-[11px] text-gray-400 mt-1 text-right" x-text="customReason.length + '/500'">
+                        </p>
                     </div>
                 </div>
                 <div class="px-5 py-4 border-t border-gray-100 flex gap-2 justify-end">
                     <button @click="reportModal = false; selectedReason = ''; customReason = ''"
                         class="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">Hủy</button>
-                    <button @click="submitReport()" :disabled="!selectedReason || (selectedReason === 'Khác' && !customReason.trim()) || submittingReport"
+                    <button @click="submitReport()"
+                        :disabled="!selectedReason || (selectedReason === 'Khác' && !customReason.trim()) || submittingReport"
                         class="px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50">
                         <span x-text="submittingReport ? 'Đang gửi...' : 'Gửi báo cáo'"></span>
                     </button>

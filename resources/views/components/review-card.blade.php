@@ -29,7 +29,7 @@
     <div class="flex items-center justify-between mb-3">
         <div class="flex items-center gap-3 min-w-0">
             <div class="relative group w-10 h-10 shrink-0">
-                <div class="w-full h-full rounded-full bg-gray-100 flex items-center justify-center overflow-hidden transition-all duration-300 {{ $review->user?->activeFrame ? 'scale-[1.02]' : 'ring-2 ring-white hover:ring-sky-200' }}">
+                <div class="w-full h-full rounded-full bg-gray-100 flex items-center justify-center overflow-hidden transition-all duration-300 {{ $review->user?->activeFrame ? 'scale-[1.0475]' : 'ring-2 ring-white hover:ring-sky-200' }}">
                     @if($review->user?->avatar)
                         <img src="{{ $review->user->avatar }}" class="w-full h-full object-cover" alt="" loading="lazy">
                     @else
@@ -146,7 +146,7 @@
                     @foreach($review->comments as $comment)
                         <div class="flex gap-3">
                             <div class="relative group w-8 h-8 shrink-0">
-                                <div class="w-full h-full rounded-full bg-gray-100 flex items-center justify-center overflow-hidden text-center leading-8 text-[10px] font-bold text-gray-500 transition-all duration-300 {{ $comment->user->activeFrame ? 'scale-[1.02]' : 'ring-1 ring-gray-200 hover:ring-sky-300' }}">
+                                <div class="w-full h-full rounded-full bg-gray-100 flex items-center justify-center overflow-hidden text-center leading-8 text-[10px] font-bold text-gray-500 transition-all duration-300 {{ $comment->user->activeFrame ? 'scale-[1.0475]' : 'ring-1 ring-gray-200 hover:ring-sky-300' }}">
                                     @if($comment->user->avatar)
                                         <img src="{{ $comment->user->avatar }}" class="w-full h-full object-cover" loading="lazy">
                                     @else
@@ -176,7 +176,7 @@
                     @csrf
                     <input type="hidden" name="review_id" value="{{ $review->id }}">
                     <div class="relative group w-8 h-8 shrink-0">
-                        <div class="w-full h-full rounded-full bg-gray-100 flex items-center justify-center overflow-hidden text-center leading-8 text-[10px] font-bold text-gray-500 transition-all duration-300 {{ Auth::user()->activeFrame ? 'scale-[1.02]' : 'ring-1 ring-gray-200' }}">
+                        <div class="w-full h-full rounded-full bg-gray-100 flex items-center justify-center overflow-hidden text-center leading-8 text-[10px] font-bold text-gray-500 transition-all duration-300 {{ Auth::user()->activeFrame ? 'scale-[1.0475]' : 'ring-1 ring-gray-200' }}">
                             @if(Auth::user()->avatar)
                                 <img src="{{ Auth::user()->avatar }}" class="w-full h-full object-cover" loading="lazy">
                             @else

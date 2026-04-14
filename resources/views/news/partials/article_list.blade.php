@@ -64,7 +64,7 @@
                         @if($article->user)
                             <a href="{{ route('profile.show', $article->user->slug) }}" class="relative z-20 group/author flex items-center gap-1.5 transition-colors" title="Xem hồ sơ">
                                 <div class="relative group w-5 h-5 shrink-0">
-                                    <div class="w-full h-full rounded-full flex items-center justify-center overflow-hidden transition-all duration-300 {{ $article->user->activeFrame ? 'scale-[1.02]' : 'bg-sky-100 text-sky-600 font-bold text-[10px]' }}">
+                                    <div class="w-full h-full rounded-full flex items-center justify-center overflow-hidden transition-all duration-300 {{ $article->user->activeFrame ? 'scale-[1.0475]' : 'bg-sky-100 text-sky-600 font-bold text-[10px]' }}">
                                         @if($article->user->avatar)
                                             <img src="{{ $article->user->avatar }}" alt="{{ $article->user->name }}" class="w-full h-full object-cover shadow-sm">
                                         @else
