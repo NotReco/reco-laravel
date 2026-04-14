@@ -28,91 +28,93 @@
     {{-- Vite Assets --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-    {{-- Alpine.js Cloak --}}
+    {{-- Alpine.js Cloak & Top Progress Bar --}}
     <style>
         [x-cloak] { display: none !important; }
 
-        /* Page Loading Overlay – masks ALL FOUC until window.onload */
-        #page-loader {
+        /* Modern Top Progress Bar (NProgress style) */
+        #top-progress-bar {
             position: fixed;
-            inset: 0;
-            z-index: 9999;
-            background: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: opacity .3s ease;
-        }
-        #page-loader.fade-out {
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 3px;
+            background: #0ea5e9; /* Sky 500 */
+            z-index: 99999;
+            transition: width 0.4s ease, opacity 0.4s ease;
             opacity: 0;
             pointer-events: none;
+            box-shadow: 0 0 10px #0ea5e9, 0 0 5px #0ea5e9;
         }
-        #page-loader .spinner {
-            width: 28px;
-            height: 28px;
-            border: 3px solid #e5e7eb;
-            border-top-color: #0ea5e9;
-            border-radius: 50%;
-            animation: spin .6s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 
 <body class="font-sans antialiased bg-white text-gray-800">
 
-    {{-- Page Loading Overlay --}}
-    <div id="page-loader"><div class="spinner"></div></div>
+    {{-- Top Progress Bar --}}
+    <div id="top-progress-bar"></div>
     <script>
-        // 1. Hide loader when page is fully loaded
-        window.addEventListener('load', function() {
-            var loader = document.getElementById('page-loader');
-            if (loader) {
-                loader.classList.add('fade-out');
-                // Optional: completely remove it after fade out
-                setTimeout(function() { loader.style.display = 'none'; }, 350);
-            }
-        });
+        (function() {
+            var progressBar = document.getElementById('top-progress-bar');
+            var progressInterval;
 
-        // 2. Show loader IMMEDIATELY when clicking internal navigation links 
-        // to prevent the "frozen" feeling while waiting for server response
-        document.addEventListener('click', function(e) {
-            var target = e.target.closest('a');
-            if (target && target.href && !target.hasAttribute('download') && target.target !== '_blank') {
-                try {
-                    var url = new URL(target.href);
-                    // Only trigger for internal links that are not hash links (#)
-                    if (url.origin === window.location.origin) {
-                        // Skip if it's just a hash/anchor link on the same page
-                        if (url.pathname === window.location.pathname && target.href.includes('#')) {
-                            return;
-                        }
-                        
-                        // Show the loader
-                        var loader = document.getElementById('page-loader');
-                        if (loader) {
-                            loader.style.display = 'flex';
+            // 1. Finish and hide the progress bar when the new page is finally loaded or restored
+            function finishProgress() {
+                if (!progressBar) return;
+                clearInterval(progressInterval);
+                progressBar.style.width = '100%';
+                setTimeout(function() {
+                    progressBar.style.opacity = '0';
+                    setTimeout(function() {
+                        progressBar.style.width = '0%';
+                    }, 400); // Wait for opacity transition
+                }, 200);
+            }
+
+            window.addEventListener('load', finishProgress);
+            window.addEventListener('pageshow', function(event) {
+                if (event.persisted) finishProgress();
+            });
+
+            // 2. Start the progress bar when clicking internal links
+            document.addEventListener('click', function(e) {
+                var target = e.target.closest('a');
+                if (target && target.href && !target.hasAttribute('download') && target.target !== '_blank') {
+                    try {
+                        var url = new URL(target.href);
+                        if (url.origin === window.location.origin) {
+                            if (url.pathname === window.location.pathname && target.href.includes('#')) {
+                                return;
+                            }
+                            
+                            // Start animation
+                            clearInterval(progressInterval);
+                            progressBar.style.opacity = '1';
+                            progressBar.style.width = '0%';
+                            
                             // Force reflow
-                            void loader.offsetWidth;
-                            loader.classList.remove('fade-out');
+                            void progressBar.offsetWidth;
+                            
+                            // Slowly animate to 85%
+                            var width = 10;
+                            progressBar.style.width = width + '%';
+                            
+                            progressInterval = setInterval(function() {
+                                if (width >= 85) {
+                                    clearInterval(progressInterval);
+                                    return;
+                                }
+                                // Slower increment as it gets closer to 85%
+                                var increment = Math.random() * 5 + 1;
+                                if (width > 60) increment = Math.random() * 2;
+                                width += increment;
+                                progressBar.style.width = width + '%';
+                            }, 300);
                         }
-                    }
-                } catch(err) {
-                    // Ignore URL parsing errors
+                    } catch(err) {}
                 }
-            }
-        });
-        
-        // 3. Fallback: hide loader when user navigates back using browser buttons (BFCache)
-        window.addEventListener('pageshow', function(event) {
-            if (event.persisted) { // If restored from Back-Forward Cache
-                var loader = document.getElementById('page-loader');
-                if (loader) {
-                    loader.classList.add('fade-out');
-                    setTimeout(function() { loader.style.display = 'none'; }, 350);
-                }
-            }
-        });
+            });
+        })();
     </script>
 
     {{-- ── Navbar ─────────────────────────────────────── --}}
