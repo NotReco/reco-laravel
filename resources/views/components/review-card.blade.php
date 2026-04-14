@@ -28,16 +28,21 @@
     {{-- Header: User + Rating --}}
     <div class="flex items-center justify-between mb-3">
         <div class="flex items-center gap-3 min-w-0">
-            {{-- Avatar --}}
-            <a href="{{ route('profile.show', $review->user->id) }}" class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden shrink-0 ring-2 ring-white hover:ring-sky-200 transition-colors">
-                @if($review->user?->avatar)
-                    <img src="{{ $review->user->avatar }}" class="w-full h-full object-cover" alt="" loading="lazy">
-                @else
-                    <span class="text-sm font-bold text-gray-500">{{ strtoupper(substr($review->user?->name ?? '?', 0, 1)) }}</span>
+            <div class="relative group w-10 h-10 shrink-0">
+                <div class="w-full h-full rounded-full bg-gray-100 flex items-center justify-center overflow-hidden transition-all duration-300 {{ $review->user?->activeFrame ? 'scale-[1.02]' : 'ring-2 ring-white hover:ring-sky-200' }}">
+                    @if($review->user?->avatar)
+                        <img src="{{ $review->user->avatar }}" class="w-full h-full object-cover" alt="" loading="lazy">
+                    @else
+                        <span class="text-sm font-bold text-gray-500">{{ strtoupper(substr($review->user?->name ?? '?', 0, 1)) }}</span>
+                    @endif
+                </div>
+                @if($review->user?->activeFrame)
+                    <img src="{{ Storage::url($review->user->activeFrame->image_path) }}" alt="" 
+                         class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[126%] h-[126%] max-w-none object-contain pointer-events-none z-10 transition-all duration-300">
                 @endif
-            </a>
+            </div>
             <div class="min-w-0">
-                <a href="{{ route('profile.show', $review->user->id) }}" class="block text-sm font-semibold text-gray-900 truncate hover:text-sky-500 transition-colors">{{ $review->user?->name ?? 'Ẩn danh' }}</a>
+                <a href="{{ route('profile.show', $review->user) }}" class="block text-sm font-semibold text-gray-900 truncate hover:text-sky-500 transition-colors">{{ $review->user?->name ?? 'Ẩn danh' }}</a>
                 <p class="text-xs text-gray-400">{{ $review->published_at?->diffForHumans() }}</p>
             </div>
         </div>
@@ -140,16 +145,22 @@
                 <div class="space-y-4 mb-4">
                     @foreach($review->comments as $comment)
                         <div class="flex gap-3">
-                            <div class="w-8 h-8 rounded-full bg-gray-100 shrink-0 overflow-hidden text-center leading-8 text-xs font-bold text-gray-500 ring-1 ring-gray-200">
-                                @if($comment->user->avatar)
-                                    <img src="{{ $comment->user->avatar }}" class="w-full h-full object-cover" loading="lazy">
-                                @else
-                                    {{ strtoupper(substr($comment->user->name, 0, 1)) }}
+                            <div class="relative group w-8 h-8 shrink-0">
+                                <div class="w-full h-full rounded-full bg-gray-100 flex items-center justify-center overflow-hidden text-center leading-8 text-[10px] font-bold text-gray-500 transition-all duration-300 {{ $comment->user->activeFrame ? 'scale-[1.02]' : 'ring-1 ring-gray-200 hover:ring-sky-300' }}">
+                                    @if($comment->user->avatar)
+                                        <img src="{{ $comment->user->avatar }}" class="w-full h-full object-cover" loading="lazy">
+                                    @else
+                                        {{ strtoupper(substr($comment->user->name, 0, 1)) }}
+                                    @endif
+                                </div>
+                                @if($comment->user->activeFrame)
+                                    <img src="{{ Storage::url($comment->user->activeFrame->image_path) }}" alt="" 
+                                         class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[126%] h-[126%] max-w-none object-contain pointer-events-none z-10 transition-all duration-300">
                                 @endif
                             </div>
                             <div class="flex-1 bg-gray-50 border border-gray-100 rounded-xl p-3">
                                 <div class="flex items-center justify-between mb-1">
-                                    <span class="text-xs font-bold text-gray-900">{{ $comment->user->name }}</span>
+                                    <a href="{{ route('profile.show', $comment->user) }}" class="text-xs font-bold text-gray-900 hover:text-sky-600 hover:underline transition-colors">{{ $comment->user->name }}</a>
                                     <span class="text-[10px] text-gray-400">{{ $comment->created_at->diffForHumans() }}</span>
                                 </div>
                                 <p class="text-sm text-gray-700">{{ $comment->content }}</p>
@@ -164,11 +175,17 @@
                 <form action="{{ route('comments.store') }}" method="POST" class="flex gap-3">
                     @csrf
                     <input type="hidden" name="review_id" value="{{ $review->id }}">
-                    <div class="w-8 h-8 rounded-full bg-gray-100 shrink-0 overflow-hidden text-center leading-8 text-xs font-bold text-gray-500 ring-1 ring-gray-200">
-                        @if(Auth::user()->avatar)
-                            <img src="{{ Auth::user()->avatar }}" class="w-full h-full object-cover" loading="lazy">
-                        @else
-                            {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                    <div class="relative group w-8 h-8 shrink-0">
+                        <div class="w-full h-full rounded-full bg-gray-100 flex items-center justify-center overflow-hidden text-center leading-8 text-[10px] font-bold text-gray-500 transition-all duration-300 {{ Auth::user()->activeFrame ? 'scale-[1.02]' : 'ring-1 ring-gray-200' }}">
+                            @if(Auth::user()->avatar)
+                                <img src="{{ Auth::user()->avatar }}" class="w-full h-full object-cover" loading="lazy">
+                            @else
+                                {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                            @endif
+                        </div>
+                        @if(Auth::user()->activeFrame)
+                            <img src="{{ Storage::url(Auth::user()->activeFrame->image_path) }}" alt="" 
+                                 class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[126%] h-[126%] max-w-none object-contain pointer-events-none z-10 transition-all duration-300">
                         @endif
                     </div>
                     <div class="flex-1 flex gap-2">

@@ -106,6 +106,7 @@ class ArticleCommentController extends Controller
                         'name'   => $comment->user->name,
                         'avatar' => $comment->user->avatar,
                         'initial' => strtoupper(substr($comment->user->name, 0, 1)),
+                        'slug'   => $comment->user->slug,
                     ],
                 ],
             ]);

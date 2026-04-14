@@ -23,7 +23,7 @@ class ForumController extends Controller
             ->withCount('threads')
             ->get();
 
-        $query = ForumThread::with(['category', 'user.activeTitle', 'latestReply.user'])
+        $query = ForumThread::with(['category', 'user.activeTitle', 'user.activeFrame', 'latestReply.user.activeFrame'])
             ->withCount('replies')
             ->recent();
 
@@ -59,6 +59,9 @@ class ForumController extends Controller
                             'id' => $thread->user->id,
                             'name' => $thread->user->name,
                             'avatar' => $thread->user->avatar,
+                            'active_frame' => $thread->user->activeFrame ? [
+                                'image_path' => \Illuminate\Support\Facades\Storage::url($thread->user->activeFrame->image_path),
+                            ] : null,
                             'initial' => strtoupper(substr($thread->user->name, 0, 1)),
                             'active_title' => $thread->user->activeTitle ? [
                                 'name' => $thread->user->activeTitle->name,
@@ -88,9 +91,9 @@ class ForumController extends Controller
     {
         $thread->incrementViews();
 
-        $thread->load(['category', 'user.activeTitle']);
+        $thread->load(['category', 'user.activeTitle', 'user.activeFrame']);
         $replies = $thread->replies()
-            ->with('user.activeTitle')
+            ->with(['user.activeTitle', 'user.activeFrame'])
             ->orderBy('created_at')
             ->paginate(20);
 

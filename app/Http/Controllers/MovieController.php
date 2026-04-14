@@ -147,7 +147,7 @@ class MovieController extends Controller
             'people' => fn($q) => $q->orderBy('display_order'),
             'reviews' => fn($q) => $q->published()
                 ->fullReview()
-                ->with(['user', 'likes', 'comments.user'])
+                ->with(['user.activeFrame', 'likes', 'comments.user.activeFrame'])
                 ->latest('published_at')
                 ->take(10),
         ]);

@@ -310,7 +310,7 @@
                                 <span class="w-1 h-5 bg-sky-500 rounded-full inline-block"></span>
                                 Viết đánh giá
                             </h2>
-                            <x-review-form :movieId="$movie->id" />
+                            <x-review-form :movie="$movie" />
                         </section>
 
                     </div>

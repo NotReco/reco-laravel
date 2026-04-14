@@ -1,4 +1,4 @@
-<x-admin-layout :title="'Quản lý người dùng'" pageTitle="Quản lý người dùng">
+<x-admin-layout title="Người dùng" pageTitle="Quản lý người dùng">
 
 {{-- ── Filters ───────────────────────────────────────────────── --}}
 <div class="mb-6">

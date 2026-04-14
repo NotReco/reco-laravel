@@ -117,13 +117,19 @@
                                class="block bg-white rounded-2xl border border-gray-200 shadow-sm p-5 group
                                       hover:shadow-md hover:border-gray-300 transition-all duration-200 mb-4">
                                 <div class="flex items-start gap-4">
-                                    {{-- Avatar --}}
-                                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-sky-400 to-sky-600 flex items-center justify-center overflow-hidden shrink-0 ring-2 ring-white shadow-sm">
-                                        <template x-if="thread.user.avatar">
-                                            <img :src="thread.user.avatar" alt="" class="w-full h-full object-cover" loading="lazy">
-                                        </template>
-                                        <template x-if="!thread.user.avatar">
-                                            <span class="text-xs font-bold text-white" x-text="thread.user.initial"></span>
+                                    <div class="relative group w-10 h-10 rounded-full bg-gradient-to-br from-sky-400 to-sky-600 flex items-center justify-center shrink-0 shadow-sm transition-all duration-300"
+                                         :class="[thread.user.active_frame ? 'scale-[1.02]' : 'ring-2 ring-white']">
+                                        <div class="w-full h-full rounded-full overflow-hidden flex items-center justify-center">
+                                            <template x-if="thread.user.avatar">
+                                                <img :src="thread.user.avatar" alt="" class="w-full h-full object-cover" loading="lazy">
+                                            </template>
+                                            <template x-if="!thread.user.avatar">
+                                                <span class="text-xs font-bold text-white" x-text="thread.user.initial"></span>
+                                            </template>
+                                        </div>
+                                        <template x-if="thread.user.active_frame">
+                                            <img :src="thread.user.active_frame.image_path" alt="" 
+                                                 class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[126%] h-[126%] max-w-none object-contain pointer-events-none z-10 transition-all duration-300">
                                         </template>
                                     </div>
 
@@ -245,6 +251,9 @@ function forumIndex() {
                             'id' => $thread->user->id,
                             'name' => $thread->user->name,
                             'avatar' => $thread->user->avatar,
+                            'active_frame' => $thread->user->activeFrame ? [
+                                'image_path' => \Illuminate\Support\Facades\Storage::url($thread->user->activeFrame->image_path),
+                            ] : null,
                             'initial' => strtoupper(substr($thread->user->name, 0, 1)),
                             'active_title' => $thread->user->activeTitle ? [
                                 'name' => $thread->user->activeTitle->name,

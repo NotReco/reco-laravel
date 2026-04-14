@@ -1,57 +1,63 @@
 <x-app-layout>
     <x-slot:title>Hồ sơ</x-slot:title>
 
-    <div class="py-12" x-data="unsavedChangesHub()">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-            
-            <div class="flex items-center justify-between mb-8">
+    <div class="min-h-screen py-12 relative overflow-hidden" x-data="unsavedChangesHub()">
+        {{-- Overall Page Background Blobs --}}
+        <div class="fixed top-0 left-0 w-full h-full pointer-events-none -z-10">
+            <div class="absolute top-1/4 -left-1/4 w-[800px] h-[800px] bg-sky-200/20 rounded-full blur-[120px]"></div>
+            <div class="absolute bottom-0 right-0 w-[600px] h-[600px] bg-blue-200/20 rounded-full blur-[120px]"></div>
+        </div>
+
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 relative z-10">
+
+            <div class="flex items-center justify-between mb-8 pb-4 border-b border-gray-200/60">
                 <div class="flex items-center gap-3">
-                    <svg class="w-8 h-8 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                    <h1 class="text-3xl font-display font-bold text-white">Hồ sơ</h1>
+                    <h1 class="text-3xl font-display font-bold text-gray-900">Thiết lập tài khoản</h1>
                 </div>
-                <a href="{{ route('profile.show', Auth::id()) }}"
-                   class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-dark-200 bg-dark-700/50 border border-dark-600/50 rounded-xl hover:bg-dark-600/50 hover:text-white transition-all">
+                <a href="{{ route('profile.show', Auth::user()) }}"
+                    class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:text-gray-900 shadow-sm transition-all">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                     </svg>
-                    Xem hồ sơ công khai
+                    Xem hồ sơ
                 </a>
             </div>
 
-            <div class="card p-6 sm:p-8">
+            <div
+                class="bg-white/80 backdrop-blur-xl border border-white/60 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.04)] rounded-3xl p-6 sm:p-8">
                 @include('profile.partials.update-profile-information-form')
             </div>
 
-            <div class="card p-6 sm:p-8">
+            <div
+                class="bg-white/80 backdrop-blur-xl border border-white/60 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.04)] rounded-3xl p-6 sm:p-8">
                 @include('profile.partials.update-password-form')
             </div>
 
-            <div class="card p-6 sm:p-8">
+            <div
+                class="bg-white/80 backdrop-blur-xl border border-white/60 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.04)] rounded-3xl p-6 sm:p-8">
                 @include('profile.partials.update-inventory-form')
             </div>
 
-            <div class="card p-6 sm:p-8">
+            <div
+                class="bg-white/80 backdrop-blur-xl border border-white/60 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.04)] rounded-3xl p-6 sm:p-8">
                 @include('profile.partials.update-top-movies-form')
             </div>
 
-            <div class="card p-6 sm:p-8 border-sky-900 border-2">
+            <div
+                class="bg-rose-50/50 backdrop-blur-xl border border-rose-200/60 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.04)] rounded-3xl p-6 sm:p-8">
                 @include('profile.partials.delete-user-form')
             </div>
-            
+
         </div>
 
-        <div
-            x-cloak
-            x-show="dirty"
-            x-transition.opacity.duration.150ms
-            class="fixed left-0 right-0 bottom-0 z-[9998] px-4 pb-4"
-        >
+        <div x-cloak x-show="dirty" x-transition.opacity.duration.150ms
+            class="fixed left-0 right-0 bottom-0 z-[9998] px-4 pb-4">
             <div class="max-w-4xl mx-auto">
-                <div class="rounded-2xl border border-gray-200 bg-white shadow-xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+                <div
+                    class="rounded-2xl border border-gray-200/50 bg-white/90 backdrop-blur-xl shadow-2xl shadow-sky-900/10 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 hover:border-gray-300/50 transition-colors">
                     <div class="flex-1">
                         <div class="text-sm font-semibold text-gray-900">
                             Hãy cẩn thận - bạn chưa lưu các thay đổi!
@@ -59,21 +65,223 @@
                     </div>
 
                     <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 sm:justify-end">
-                        <button
-                            type="button"
-                            class="w-full sm:w-auto px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 underline-offset-4 hover:underline"
-                            x-on:click="resetAll()"
-                        >
+                        <button type="button" :disabled="isSaving"
+                            class="w-full sm:w-auto px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 underline-offset-4 hover:underline disabled:opacity-50"
+                            x-on:click="resetAll()">
                             Đặt lại
                         </button>
-                        <button
-                            type="button"
-                            class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 rounded-xl text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-white transition"
-                            x-on:click="save()"
-                        >
-                            Lưu thay đổi
+                        <button type="button" :disabled="isSaving"
+                            class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-white transition disabled:opacity-75 disabled:cursor-wait"
+                            x-on:click="save()">
+                            <svg x-show="isSaving" style="display: none;" class="w-4 h-4 animate-spin outline-none" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                            <span x-text="isSaving ? 'Đang lưu...' : 'Lưu thay đổi'"></span>
                         </button>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- ══════════════════════════════════════════════════════════════════════
+         DISCORD-STYLE IMAGE EDITOR MODALS (Global scope, outside cards)
+         ══════════════════════════════════════════════════════════════════════ --}}
+    <div x-data="imageEditorModals()" x-cloak
+         @open-avatar-modal.window="openAvatar()"
+         @open-cover-modal.window="openCover()"
+         @keydown.escape.window="closeModal()">
+
+        {{-- ─── Avatar Modal ─── --}}
+        <div x-show="avatarModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4"
+             @wheel.prevent @contextmenu.prevent
+             x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+             x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+            <div class="absolute inset-0 bg-gray-900/70" @click="closeModal()"></div>
+            <div class="relative bg-white rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden"
+                 @click.stop
+                 x-transition:enter="ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-6 scale-95"
+                 x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                 x-transition:leave="ease-in duration-200"
+                 x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                 x-transition:leave-end="opacity-0 translate-y-6 scale-95">
+                <div class="p-6 sm:p-8">
+                    {{-- Header --}}
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-xl font-bold text-gray-900" x-text="avatarStep === 'edit' ? 'Chỉnh sửa hình ảnh' : 'Đổi ảnh đại diện'"></h3>
+                        <button type="button" @click="closeModal()" class="p-2 text-gray-400 hover:text-gray-900 rounded-xl bg-gray-50 hover:bg-gray-100 transition-all">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+
+                    {{-- Step 1: Current preview + Upload button --}}
+                    <template x-if="avatarStep === 'choose'">
+                        <div class="space-y-6">
+                            {{-- Current avatar preview --}}
+                            <div class="flex flex-col items-center gap-4">
+                                <p class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Ảnh hiện tại</p>
+                                <div class="w-32 h-32 rounded-full border-4 border-gray-100 shadow-lg overflow-hidden bg-gradient-to-br from-sky-400 to-sky-600 flex items-center justify-center">
+                                    <template x-if="avatarFinalSrc">
+                                        <img :src="avatarFinalSrc" alt="Avatar mới" class="w-full h-full object-cover">
+                                    </template>
+                                    <template x-if="!avatarFinalSrc">
+                                        @if($user->avatar)
+                                            <img src="{{ $user->avatar }}" alt="{{ $user->name }}" class="w-full h-full object-cover">
+                                        @else
+                                            <span class="text-4xl font-bold text-white">{{ strtoupper(substr($user->name, 0, 1)) }}</span>
+                                        @endif
+                                    </template>
+                                </div>
+                            </div>
+
+                            {{-- Upload button --}}
+                            <label class="flex items-center justify-center gap-3 w-full py-3.5 bg-[#5865F2] hover:bg-[#4752c4] text-white font-bold rounded-xl cursor-pointer transition-all active:scale-[0.98] shadow-lg shadow-indigo-500/20">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                                Tải lên hình ảnh
+                                <input type="file" accept="image/png,image/jpeg,image/gif,image/webp" class="sr-only" @change="handleAvatarUpload($event)">
+                            </label>
+                            <p class="text-xs text-gray-400 text-center">PNG, JPG, GIF hoặc WebP • Tối đa 2MB</p>
+                        </div>
+                    </template>
+
+                    {{-- Step 2: Image editor --}}
+                    <template x-if="avatarStep === 'edit'">
+                        <div class="space-y-5" x-init="$nextTick(() => drawAvatarCanvas())">
+                            {{-- Canvas preview area --}}
+                            <div class="relative mx-auto bg-[#2B2D31] rounded-2xl overflow-hidden flex items-center justify-center" style="width: 360px; height: 360px; max-width: 100%;">
+                                <canvas x-ref="avatarCanvas" width="360" height="360" class="block"></canvas>
+                            </div>
+
+                            {{-- Controls row: zoom slider + rotate buttons --}}
+                            <div class="flex items-center gap-2.5 justify-center">
+                                {{-- Small image icon --}}
+                                <svg class="w-4 h-4 text-gray-500 shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M1 5a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H3a2 2 0 01-2-2V5zm4 3a1 1 0 100-2 1 1 0 000 2zm10 4l-3-3-2 2-3-3-4 4h12z" clip-rule="evenodd"/></svg>
+                                {{-- Zoom slider --}}
+                                <input type="range" min="1" max="2" step="0.01" x-model="avatarZoom" @input="drawAvatarCanvas()" class="w-36 h-1 accent-gray-800 rounded-full cursor-pointer appearance-none bg-gray-300 [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-gray-800 [&::-webkit-slider-thumb]:border-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:shadow-none">
+                                {{-- Large image icon --}}
+                                <svg class="w-5 h-5 text-gray-500 shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M1 5a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H3a2 2 0 01-2-2V5zm4 3a1 1 0 100-2 1 1 0 000 2zm10 4l-3-3-2 2-3-3-4 4h12z" clip-rule="evenodd"/></svg>
+
+                                <div class="w-px h-5 bg-gray-200 shrink-0 mx-1"></div>
+
+                                {{-- Rotate left --}}
+                                <button type="button" @click="avatarRotation = (avatarRotation - 90) % 360; drawAvatarCanvas()" class="p-1.5 text-gray-800 hover:text-black rounded-lg hover:bg-gray-200 transition-all shrink-0" title="Xoay trái">
+                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" /></svg>
+                                </button>
+                                {{-- Rotate right --}}
+                                <button type="button" @click="avatarRotation = (avatarRotation + 90) % 360; drawAvatarCanvas()" class="p-1.5 text-gray-800 hover:text-black rounded-lg hover:bg-gray-200 transition-all shrink-0" title="Xoay phải">
+                                    <svg class="w-5 h-5 -scale-x-100" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" /></svg>
+                                </button>
+                            </div>
+
+                            {{-- Bottom row: Reset left, Cancel/Confirm right --}}
+                            <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+                                <button type="button" @click="resetAvatarEditor()" class="text-sm font-semibold text-[#5865F2] hover:text-[#4752c4] transition-colors">
+                                    Đặt lại
+                                </button>
+                                <div class="flex items-center gap-3">
+                                    <button type="button" @click="avatarStep = 'choose'; avatarNewSrc = null" class="px-5 py-2.5 text-sm font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-all">
+                                        Hủy
+                                    </button>
+                                    <button type="button" @click="confirmAvatar()" class="px-6 py-2.5 text-sm font-bold text-white bg-[#5865F2] hover:bg-[#4752c4] rounded-xl transition-all shadow-lg shadow-indigo-500/20 active:scale-95">
+                                        Xác nhận
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+
+        {{-- ─── Cover Modal ─── --}}
+        <div x-show="coverModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4"
+             @wheel.prevent @contextmenu.prevent
+             x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+             x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+            <div class="absolute inset-0 bg-gray-900/70" @click="closeModal()"></div>
+            <div class="relative bg-white rounded-3xl w-full max-w-2xl shadow-2xl overflow-hidden"
+                 @click.stop
+                 x-transition:enter="ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-6 scale-95"
+                 x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                 x-transition:leave="ease-in duration-200"
+                 x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                 x-transition:leave-end="opacity-0 translate-y-6 scale-95">
+                <div class="p-6 sm:p-8">
+                    {{-- Header --}}
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-xl font-bold text-gray-900" x-text="coverStep === 'edit' ? 'Chỉnh sửa ảnh bìa' : 'Thay ảnh bìa'"></h3>
+                        <button type="button" @click="closeModal()" class="p-2 text-gray-400 hover:text-gray-900 rounded-xl bg-gray-50 hover:bg-gray-100 transition-all">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+
+                    {{-- Step 1: Current preview + Upload --}}
+                    <template x-if="coverStep === 'choose'">
+                        <div class="space-y-6">
+                            <div class="flex flex-col items-center gap-4">
+                                <p class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Ảnh bìa hiện tại</p>
+                                <div class="w-full h-36 sm:h-44 rounded-2xl border border-gray-200 overflow-hidden bg-gray-50 flex items-center justify-center">
+                                    <template x-if="coverFinalSrc">
+                                        <img :src="coverFinalSrc" alt="Cover mới" class="w-full h-full object-cover">
+                                    </template>
+                                    <template x-if="!coverFinalSrc">
+                                        @if($user->cover_photo)
+                                            <img src="{{ $user->cover_photo }}" alt="Cover" class="w-full h-full object-cover">
+                                        @else
+                                            <div class="text-gray-400 font-medium">Chưa có ảnh bìa</div>
+                                        @endif
+                                    </template>
+                                </div>
+                            </div>
+
+                            <label class="flex items-center justify-center gap-3 w-full py-3.5 bg-[#5865F2] hover:bg-[#4752c4] text-white font-bold rounded-xl cursor-pointer transition-all active:scale-[0.98] shadow-lg shadow-indigo-500/20">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                                Tải lên hình ảnh
+                                <input type="file" accept="image/png,image/jpeg,image/gif,image/webp" class="sr-only" @change="handleCoverUpload($event)">
+                            </label>
+                            <p class="text-xs text-gray-400 text-center">PNG, JPG, GIF hoặc WebP • Tối đa 10MB • Tối ưu 680×240</p>
+                        </div>
+                    </template>
+
+                    {{-- Step 2: Image editor --}}
+                    <template x-if="coverStep === 'edit'">
+                        <div class="space-y-5" x-init="$nextTick(() => drawCoverCanvas())">
+                            <div class="relative mx-auto bg-[#2B2D31] rounded-2xl overflow-hidden flex items-center justify-center" style="max-width: 100%; aspect-ratio: 680/240;">
+                                <canvas x-ref="coverCanvas" width="680" height="240" class="block w-full h-full"></canvas>
+                            </div>
+
+                            {{-- Controls row: zoom slider + rotate buttons --}}
+                            <div class="flex items-center gap-2.5 justify-center">
+                                <svg class="w-4 h-4 text-gray-500 shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M1 5a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H3a2 2 0 01-2-2V5zm4 3a1 1 0 100-2 1 1 0 000 2zm10 4l-3-3-2 2-3-3-4 4h12z" clip-rule="evenodd"/></svg>
+                                <input type="range" min="1" max="2" step="0.01" x-model="coverZoom" @input="drawCoverCanvas()" class="w-36 h-1 accent-gray-800 rounded-full cursor-pointer appearance-none bg-gray-300 [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-gray-800 [&::-webkit-slider-thumb]:border-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:shadow-none">
+                                <svg class="w-5 h-5 text-gray-500 shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M1 5a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H3a2 2 0 01-2-2V5zm4 3a1 1 0 100-2 1 1 0 000 2zm10 4l-3-3-2 2-3-3-4 4h12z" clip-rule="evenodd"/></svg>
+
+                                <div class="w-px h-5 bg-gray-200 shrink-0 mx-1"></div>
+
+                                <button type="button" @click="coverRotation = (coverRotation - 90) % 360; drawCoverCanvas()" class="p-1.5 text-gray-800 hover:text-black rounded-lg hover:bg-gray-200 transition-all shrink-0" title="Xoay trái">
+                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" /></svg>
+                                </button>
+                                <button type="button" @click="coverRotation = (coverRotation + 90) % 360; drawCoverCanvas()" class="p-1.5 text-gray-800 hover:text-black rounded-lg hover:bg-gray-200 transition-all shrink-0" title="Xoay phải">
+                                    <svg class="w-5 h-5 -scale-x-100" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" /></svg>
+                                </button>
+                            </div>
+
+                            {{-- Bottom row: Reset left, Cancel/Confirm right --}}
+                            <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+                                <button type="button" @click="resetCoverEditor()" class="text-sm font-semibold text-[#5865F2] hover:text-[#4752c4] transition-colors">
+                                    Đặt lại
+                                </button>
+                                <div class="flex items-center gap-3">
+                                    <button type="button" @click="coverStep = 'choose'; coverNewSrc = null" class="px-5 py-2.5 text-sm font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-all">
+                                        Hủy
+                                    </button>
+                                    <button type="button" @click="confirmCover()" class="px-6 py-2.5 text-sm font-bold text-white bg-[#5865F2] hover:bg-[#4752c4] rounded-xl transition-all shadow-lg shadow-indigo-500/20 active:scale-95">
+                                        Xác nhận
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
                 </div>
             </div>
         </div>
@@ -82,33 +290,310 @@
     @push('scripts')
         <script>
             document.addEventListener('alpine:init', () => {
+                // ═══════════════════════════════════════════
+                // Image Editor Modals Alpine component
+                // ═══════════════════════════════════════════
+                Alpine.data('imageEditorModals', () => ({
+                    // Modal visibility
+                    avatarModal: false,
+                    coverModal: false,
+                    // Steps: 'choose' | 'edit'
+                    avatarStep: 'choose',
+                    coverStep: 'choose',
+                    // Editor state — Avatar
+                    avatarNewSrc: null,
+                    avatarFinalSrc: null,
+                    avatarImg: null,
+                    avatarZoom: 1,
+                    avatarRotation: 0,
+                    avatarFile: null,
+                    // Editor state — Cover
+                    coverNewSrc: null,
+                    coverFinalSrc: null,
+                    coverImg: null,
+                    coverZoom: 1,
+                    coverRotation: 0,
+                    coverFile: null,
+
+                    // ─── Open/Close ───
+                    openAvatar() {
+                        this.avatarModal = true;
+                        this.avatarStep = 'choose';
+                        this.avatarNewSrc = null;
+                        this.avatarZoom = 1;
+                        this.avatarRotation = 0;
+                        document.body.classList.add('overflow-hidden');
+                    },
+                    openCover() {
+                        this.coverModal = true;
+                        this.coverStep = 'choose';
+                        this.coverNewSrc = null;
+                        this.coverZoom = 1;
+                        this.coverRotation = 0;
+                        document.body.classList.add('overflow-hidden');
+                    },
+                    closeModal() {
+                        this.avatarModal = false;
+                        this.coverModal = false;
+                        document.body.classList.remove('overflow-hidden');
+                    },
+
+                    // ─── Avatar Upload & Editor ───
+                    handleAvatarUpload(e) {
+                        const file = e.target.files[0];
+                        if (!file) return;
+                        this.avatarFile = file;
+                        const reader = new FileReader();
+                        reader.onload = (ev) => {
+                            this.avatarNewSrc = ev.target.result;
+                            this.avatarImg = new Image();
+                            this.avatarImg.onload = () => {
+                                this.avatarZoom = 1;
+                                this.avatarRotation = 0;
+                                this.avatarStep = 'edit';
+                                this.$nextTick(() => this.drawAvatarCanvas());
+                            };
+                            this.avatarImg.src = ev.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                        e.target.value = '';
+                    },
+
+                    drawAvatarCanvas() {
+                        const canvas = this.$refs.avatarCanvas;
+                        if (!canvas || !this.avatarImg) return;
+                        const ctx = canvas.getContext('2d');
+                        const W = canvas.width, H = canvas.height;
+                        const img = this.avatarImg;
+
+                        // Clear
+                        ctx.clearRect(0, 0, W, H);
+                        ctx.fillStyle = '#2B2D31';
+                        ctx.fillRect(0, 0, W, H);
+
+                        // The visible circle radius (80% of canvas half)
+                        const circleR = Math.min(W, H) * 0.4;
+                        const circleDiam = circleR * 2;
+
+                        // At zoom=1, image should exactly fill the circle
+                        const baseScale = Math.max(circleDiam / img.width, circleDiam / img.height);
+
+                        ctx.save();
+                        ctx.translate(W / 2, H / 2);
+                        ctx.rotate((this.avatarRotation * Math.PI) / 180);
+
+                        const finalScale = baseScale * this.avatarZoom;
+                        const dw = img.width * finalScale;
+                        const dh = img.height * finalScale;
+                        ctx.drawImage(img, -dw / 2, -dh / 2, dw, dh);
+                        ctx.restore();
+
+                        // Draw dark overlay with circular cutout
+                        ctx.save();
+                        ctx.fillStyle = 'rgba(43, 45, 49, 0.6)';
+                        ctx.beginPath();
+                        ctx.rect(0, 0, W, H);
+                        ctx.arc(W / 2, H / 2, circleR, 0, Math.PI * 2, true);
+                        ctx.fill();
+                        ctx.restore();
+
+                        // Circle border
+                        ctx.beginPath();
+                        ctx.arc(W / 2, H / 2, circleR, 0, Math.PI * 2);
+                        ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+                        ctx.lineWidth = 2;
+                        ctx.stroke();
+                    },
+
+                    resetAvatarEditor() {
+                        this.avatarZoom = 1;
+                        this.avatarRotation = 0;
+                        this.drawAvatarCanvas();
+                    },
+
+                    confirmAvatar() {
+                        const size = 256;
+                        const img = this.avatarImg;
+                        if (!img) return;
+
+                        const offscreen = document.createElement('canvas');
+                        offscreen.width = size;
+                        offscreen.height = size;
+                        const ctx = offscreen.getContext('2d');
+
+                        // Fill background white (for transparency)
+                        ctx.fillStyle = '#ffffff';
+                        ctx.fillRect(0, 0, size, size);
+
+                        // Clip to circle
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+                        ctx.clip();
+
+                        ctx.translate(size / 2, size / 2);
+                        ctx.rotate((this.avatarRotation * Math.PI) / 180);
+
+                        const baseScale = Math.max(size / img.width, size / img.height);
+                        const finalScale = baseScale * this.avatarZoom;
+                        const dw = img.width * finalScale;
+                        const dh = img.height * finalScale;
+                        ctx.drawImage(img, -dw / 2, -dh / 2, dw, dh);
+                        ctx.restore();
+
+                        offscreen.toBlob((blob) => {
+                            if (!blob) return;
+                            const file = new File([blob], 'avatar.png', { type: 'image/png' });
+                            const dt = new DataTransfer();
+                            dt.items.add(file);
+                            const form = document.getElementById('profile-information-form');
+                            const input = form.querySelector('input[name=avatar]');
+                            input.files = dt.files;
+                            this.avatarFinalSrc = URL.createObjectURL(blob);
+                            this.$dispatch('avatar-confirmed');
+                            this.closeModal();
+                        }, 'image/png');
+                    },
+
+                    // ─── Cover Upload & Editor ───
+                    handleCoverUpload(e) {
+                        const file = e.target.files[0];
+                        if (!file) return;
+                        this.coverFile = file;
+                        const reader = new FileReader();
+                        reader.onload = (ev) => {
+                            this.coverNewSrc = ev.target.result;
+                            this.coverImg = new Image();
+                            this.coverImg.onload = () => {
+                                this.coverZoom = 1;
+                                this.coverRotation = 0;
+                                this.coverStep = 'edit';
+                                this.$nextTick(() => this.drawCoverCanvas());
+                            };
+                            this.coverImg.src = ev.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                        e.target.value = '';
+                    },
+
+                    drawCoverCanvas() {
+                        const canvas = this.$refs.coverCanvas;
+                        if (!canvas || !this.coverImg) return;
+                        const ctx = canvas.getContext('2d');
+                        const W = canvas.width, H = canvas.height;
+                        const img = this.coverImg;
+
+                        ctx.clearRect(0, 0, W, H);
+                        ctx.fillStyle = '#2B2D31';
+                        ctx.fillRect(0, 0, W, H);
+
+                        // At zoom=1, image fills the canvas exactly
+                        const baseScale = Math.max(W / img.width, H / img.height);
+
+                        ctx.save();
+                        ctx.translate(W / 2, H / 2);
+                        ctx.rotate((this.coverRotation * Math.PI) / 180);
+
+                        const finalScale = baseScale * this.coverZoom;
+                        const dw = img.width * finalScale;
+                        const dh = img.height * finalScale;
+                        ctx.drawImage(img, -dw / 2, -dh / 2, dw, dh);
+                        ctx.restore();
+                    },
+
+                    resetCoverEditor() {
+                        this.coverZoom = 1;
+                        this.coverRotation = 0;
+                        this.drawCoverCanvas();
+                    },
+
+                    confirmCover() {
+                        const W = 680, H = 240;
+                        const img = this.coverImg;
+                        if (!img) return;
+
+                        const offscreen = document.createElement('canvas');
+                        offscreen.width = W;
+                        offscreen.height = H;
+                        const ctx = offscreen.getContext('2d');
+
+                        const baseScale = Math.max(W / img.width, H / img.height);
+
+                        ctx.translate(W / 2, H / 2);
+                        ctx.rotate((this.coverRotation * Math.PI) / 180);
+
+                        const finalScale = baseScale * this.coverZoom;
+                        const dw = img.width * finalScale;
+                        const dh = img.height * finalScale;
+                        ctx.drawImage(img, -dw / 2, -dh / 2, dw, dh);
+
+                        offscreen.toBlob((blob) => {
+                            if (!blob) return;
+                            const file = new File([blob], 'cover.png', { type: 'image/png' });
+                            const dt = new DataTransfer();
+                            dt.items.add(file);
+                            const form = document.getElementById('profile-information-form');
+                            const input = form.querySelector('input[name=cover_photo]');
+                            input.files = dt.files;
+                            this.coverFinalSrc = URL.createObjectURL(blob);
+                            this.$dispatch('cover-confirmed');
+                            this.closeModal();
+                        }, 'image/png');
+                    },
+                }));
+
+                // ═══════════════════════════════════════════
+                // Unsaved Changes Hub (AJAX Support)
+                // ═══════════════════════════════════════════
                 Alpine.data('unsavedChangesHub', () => ({
                     dirtyFormIds: new Set(),
                     forms: [],
+                    isSaving: false,
                     init() {
                         this.forms = Array.from(document.querySelectorAll('form[data-unsaved-bar]'));
 
-                        for (const form of this.forms) {
-                            form._unsavedInitial = this._snapshot(form);
+                        // Restore scroll position if we just came back from a form submit
+                        const savedScroll = sessionStorage.getItem('profileEditScroll');
+                        if (savedScroll !== null) {
+                            requestAnimationFrame(() => {
+                                window.scrollTo({ top: parseInt(savedScroll), behavior: 'instant' });
+                                sessionStorage.removeItem('profileEditScroll');
+                            });
+                        }
 
+                        for (const form of this.forms) {
                             const mark = () => this._recomputeDirty(form);
-                            form.addEventListener('input', mark, { passive: true });
-                            form.addEventListener('change', mark, { passive: true });
+                            form.addEventListener('input', mark, {
+                                passive: true
+                            });
+                            form.addEventListener('change', mark, {
+                                passive: true
+                            });
                             form.addEventListener('submit', () => this.dirtyFormIds.delete(form.id));
                         }
 
-                        queueMicrotask(() => {
-                            for (const form of this.forms) this._recomputeDirty(form);
+                        // Delay initial snapshot so Alpine has finished all :value bindings
+                        requestAnimationFrame(() => {
+                            for (const form of this.forms) {
+                                form._unsavedInitial = this._snapshot(form);
+                            }
                         });
                     },
                     get dirty() {
                         return this.dirtyFormIds.size > 0;
                     },
                     _snapshot(form) {
+                        const excludeNames = new Set();
+                        for (const el of form.querySelectorAll('[data-unsaved-exclude]')) {
+                            if (el.name) excludeNames.add(el.name);
+                        }
                         const fd = new FormData(form);
                         const entries = [];
                         for (const [k, v] of fd.entries()) {
-                            entries.push([k, v instanceof File ? v.name : String(v)]);
+                            if (excludeNames.has(k)) continue;
+                            // Skip file inputs entirely — they are managed via modals
+                            if (v instanceof File) continue;
+                            entries.push([k, String(v)]);
                         }
                         for (const el of form.querySelectorAll('input[type="checkbox"][name]')) {
                             if (!el.checked) entries.push([el.name, '__unchecked__']);
@@ -134,9 +619,23 @@
                     },
                     save() {
                         const target = this.forms.find(f => this.dirtyFormIds.has(f.id));
-                        if (!target) return;
-                        if (typeof target.requestSubmit === 'function') target.requestSubmit();
-                        else target.submit();
+                        if (!target || this.isSaving) return;
+                        
+                        // Check validation before attempting submit, handles native required/pattern/email attributes
+                        if (!target.reportValidity()) return;
+
+                        // Lock the UI to prevent spam clicks during the form submission/page reload
+                        this.isSaving = true;
+                        
+                        // Save the current scroll position so we can instantly restore it after page reload
+                        sessionStorage.setItem('profileEditScroll', window.scrollY);
+                        
+                        // Standard form submission (reloads the page, ensuring all Blade data is fresh)
+                        if (typeof target.requestSubmit === 'function') {
+                            target.requestSubmit();
+                        } else {
+                            target.submit();
+                        }
                     },
                 }));
             });

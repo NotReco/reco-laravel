@@ -103,9 +103,22 @@
 
         {{-- Author --}}
         <div class="mt-8 flex justify-end">
-            <p class="text-base font-bold text-gray-900">
-                <strong>{{ $article->user->name ?? 'Ẩn danh' }}</strong>
-            </p>
+            @if($article->user)
+                <a href="{{ route('profile.show', $article->user->slug) }}" class="group flex items-center gap-2 hover:bg-gray-50 border border-transparent hover:border-gray-200 rounded-full pr-3 py-1 transition-all" title="Xem hồ sơ">
+                    <span class="text-base font-bold text-gray-900 group-hover:text-sky-600 transition-colors">{{ $article->user->name }}</span>
+                    @if($article->user->avatar)
+                        <img src="{{ $article->user->avatar }}" alt="{{ $article->user->name }}" class="w-8 h-8 rounded-full object-cover border border-gray-200 ml-1">
+                    @else
+                        <div class="w-8 h-8 flex items-center justify-center rounded-full bg-sky-100 text-sky-600 font-bold text-sm ml-1">
+                            {{ strtoupper(substr($article->user->name, 0, 1)) }}
+                        </div>
+                    @endif
+                </a>
+            @else
+                <p class="text-base font-bold text-gray-900 pr-3 py-1">
+                    <strong>Ẩn danh</strong>
+                </p>
+            @endif
         </div>
 
         {{-- Tags (Inline) --}}
@@ -270,9 +283,9 @@
                     }
                 },
 
-                startEdit(id) {
-                    this.editingCommentId = id;
-                    this.editingContent = this.commentData[id] || '';
+                startEdit(uuid) {
+                    this.editingCommentId = uuid;
+                    this.editingContent = this.commentData[uuid] || '';
                     this.$nextTick(() => {
                         const el = document.getElementById('edit-input-' + id);
                         if (el) {
@@ -521,26 +534,31 @@
                         '" alt="" class="w-full h-full rounded-full object-cover" loading="lazy">' :
                         '<span class="text-xs font-bold text-white">' + comment.user.initial + '</span>';
                     const deleteBtn = (this.currentUser.isStaff || this.currentUser.id === comment.user.id) ?
-                        '<button @click="openDeleteModal(' + comment.id +
+                        '<button @click="openDeleteModal(' + comment.uuid +
                         ')" class="text-[13px] font-semibold text-gray-500 hover:text-red-500 hover:underline transition-colors whitespace-nowrap">Xóa</button>' :
                         '';
                     const editBtn = (this.currentUser.id === comment.user.id) ?
-                        '<button @click="startEdit(' + comment.id + ')" class="text-[13px] font-semibold text-gray-500 hover:text-gray-700 hover:underline transition-colors whitespace-nowrap">Sửa</button>' :
+                        '<button @click="startEdit(' + comment.uuid + ')" class="text-[13px] font-semibold text-gray-500 hover:text-gray-700 hover:underline transition-colors whitespace-nowrap">Sửa</button>' :
                         '';
+                    const ringClass = (comment.user.active_frame && comment.user.active_frame.image_path) ? 'scale-[102%]' : 'ring-2 ring-sky-300';
+                    const frameHtml = (comment.user.active_frame && comment.user.active_frame.image_path) ?
+                        '<img src="' + comment.user.active_frame.image_path + '" alt="" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[126%] h-[126%] max-w-none object-contain pointer-events-none z-10 transition-all duration-300">' :
+                        '';
+                    const profileUrl = this.baseUrl + '/profile/' + (comment.user.slug || comment.user.id);
 
-                    const html = '<div class="flex gap-3" id="comment-' + comment.id +
+                    const html = '<div class="flex gap-3" id="comment-' + comment.uuid +
                         '" data-depth="0" style="opacity:0;transform:translateY(10px);transition:all 0.3s">' +
-                        '<div class="w-9 h-9 rounded-full bg-gradient-to-br from-gray-300 to-gray-500 flex items-center justify-center shrink-0">' +
-                        avatarHtml + '</div>' +
+                        '<a href="' + profileUrl + '" class="relative group w-9 h-9 rounded-full bg-gradient-to-br from-gray-300 to-gray-500 flex items-center justify-center shrink-0 transition-all duration-300 ' + ringClass + '">' +
+                        avatarHtml + frameHtml + '</a>' +
                         '<div class="flex-1 min-w-0">' +
                         '<div class="bg-white rounded-xl px-3.5 py-2 border border-gray-200 transition-colors" :class="replyingToId === ' +
-                        comment.id + ' ? \'!bg-blue-50 !border-blue-200\' : \'\'">' +
-                        '<div class="flex items-center gap-2 mb-0.5"><span class="text-[15px] font-bold text-gray-900">' +
-                        this.escapeHtml(comment.user.name) + '</span></div>' +
-                        '<div x-show="editingCommentId !== ' + comment.id + '"><p id="comment-text-' + comment.id + '" class="text-[15px] text-gray-800 leading-relaxed whitespace-pre-line break-words">' +
+                        comment.uuid + ' ? \'!bg-blue-50 !border-blue-200\' : \'\'">' +
+                        '<div class="flex items-center gap-2 mb-0.5"><a href="' + profileUrl + '" class="text-[15px] font-bold text-gray-900 hover:text-sky-600 hover:underline transition-colors">' +
+                        this.escapeHtml(comment.user.name) + '</a></div>' +
+                        '<div x-show="editingCommentId !== ' + comment.uuid + '"><p id="comment-text-' + comment.uuid + '" class="text-[15px] text-gray-800 leading-relaxed whitespace-pre-line break-words">' +
                         this.formatMentions(comment.content) + '</p></div>' +
-                        '<div x-show="editingCommentId === ' + comment.id + '" x-cloak style="display:none">' +
-                        '<textarea id="edit-input-' + comment.id + '" x-model="editingContent" @keydown.enter="if(!$event.shiftKey) { $event.preventDefault(); submitEdit(); }" class="w-full px-3 py-2 bg-white border border-blue-300 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all resize-none mt-1" rows="2"></textarea>' +
+                        '<div x-show="editingCommentId === ' + comment.uuid + '" x-cloak style="display:none">' +
+                        '<textarea id="edit-input-' + comment.uuid + '" x-model="editingContent" @keydown.enter="if(!$event.shiftKey) { $event.preventDefault(); submitEdit(); }" class="w-full px-3 py-2 bg-white border border-blue-300 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all resize-none mt-1" rows="2"></textarea>' +
                         '<div class="flex gap-2 justify-end mt-1.5"><button @click="cancelEdit()" class="text-xs text-gray-500 hover:underline px-2 py-1">Hủy</button><button @click="submitEdit()" class="text-xs font-semibold bg-blue-500 text-white rounded px-3 py-1.5 mt-1 hover:bg-blue-600 disabled:opacity-50" :disabled="submittingEdit || !editingContent.trim()">Lưu</button></div>' +
                         '</div>' +
                         '</div>' +
@@ -549,31 +567,31 @@
                         '<span class="text-[13px] font-medium text-gray-500 hover:underline cursor-pointer" title="' +
                         this.getFullDateString() + '">' + comment.created_at.replace(" trước", "") +
                         '</span>' +
-                        '<button @click="toggleLike(' + comment.id +
+                        '<button @click="toggleLike(' + comment.uuid +
                         ', $event)" class="group flex items-center gap-1.5 text-[13px] font-bold transition-colors whitespace-nowrap" :class="likedComments[' +
-                        comment.id +
+                        comment.uuid +
                         '] ? \'text-blue-600\' : \'text-gray-500 hover:text-gray-700 hover:underline\'" id="like-btn-' +
-                        comment.id + '"><span>Thích</span></button>' +
-                        '<button @click="focusReply(' + comment.id + ', ' + comment.id + ', \'' + this
+                        comment.uuid + '"><span>Thích</span></button>' +
+                        '<button @click="focusReply(' + comment.uuid + ', ' + comment.uuid + ', \'' + this
                         .escapeHtml(comment.user.name) +
                         '\')" class="text-[13px] font-semibold text-gray-500 hover:text-gray-700 hover:underline transition-colors whitespace-nowrap">Trả lời</button>' +
-                        '<button @click="openReport(' + comment.id +
+                        '<button @click="openReport(' + comment.uuid +
                         ')" class="text-[13px] font-semibold text-gray-500 hover:text-gray-700 hover:underline transition-colors whitespace-nowrap">Báo cáo</button>' +
                         editBtn +
                         deleteBtn +
                         '</div>' +
-                        '<div x-show="likeCounts[' + comment.id +
+                        '<div x-show="likeCounts[' + comment.uuid +
                         '] > 0" x-cloak style="display: none" class="flex items-center gap-1 cursor-pointer">' +
-                        '<span x-text="likeCounts[' + comment.id +
+                        '<span x-text="likeCounts[' + comment.uuid +
                         ']" class="text-xs text-gray-500 hover:underline"></span>' +
                         '<div class="w-4 h-4 rounded-full bg-blue-500 flex items-center justify-center shadow-sm"><svg class="w-2.5 h-2.5 text-white fill-current" viewBox="0 0 24 24"><path d="M4 21h1V8H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2zM20.28 8H14V4.11a2.11 2.11 0 0 0-2.11-2.11c-.48 0-.94.19-1.29.54L5 8.12v12.76l6.83 1.13c.44.07.89.11 1.34.11H19a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2z"></path></svg></div>' +
                         '</div></div></div></div>';
                     list.insertAdjacentHTML('afterbegin', html);
-                    this.commentData[comment.id] = comment.content;
-                    this.likedComments[comment.id] = false;
-                    this.likeCounts[comment.id] = 0;
+                    this.commentData[comment.uuid] = comment.content;
+                    this.likedComments[comment.uuid] = false;
+                    this.likeCounts[comment.uuid] = 0;
                     requestAnimationFrame(() => {
-                        const el = document.getElementById('comment-' + comment.id);
+                        const el = document.getElementById('comment-' + comment.uuid);
                         if (el) {
                             el.style.opacity = '1';
                             el.style.transform = 'translateY(0)';
@@ -641,29 +659,34 @@
                         '" alt="" class="w-full h-full rounded-full object-cover" loading="lazy">' :
                         '<span class="text-[10px] font-bold text-white">' + reply.user.initial + '</span>';
                     const deleteBtn = (this.currentUser.isStaff || this.currentUser.id === reply.user.id) ?
-                        '<button @click="openDeleteModal(' + reply.id +
+                        '<button @click="openDeleteModal(' + reply.uuid +
                         ')" class="text-[13px] font-semibold text-gray-500 hover:text-red-500 hover:underline transition-colors whitespace-nowrap">Xóa</button>' :
                         '';
-                    const editBtn = (this.currentUser.id === reply.user.id) ? '<button @click="startEdit(' + reply.id + ')" class="text-[13px] font-semibold text-gray-500 hover:text-gray-700 hover:underline transition-colors whitespace-nowrap">Sửa</button>' : '';
+                    const editBtn = (this.currentUser.id === reply.user.id) ? '<button @click="startEdit(' + reply.uuid + ')" class="text-[13px] font-semibold text-gray-500 hover:text-gray-700 hover:underline transition-colors whitespace-nowrap">Sửa</button>' : '';
 
                     const replyBtn = depth < 2 ?
-                        '<button @click="focusReply(' + rootCommentId + ', ' + reply.id + ', \'' + this
+                        '<button @click="focusReply(' + rootCommentId + ', ' + reply.uuid + ', \'' + this
                         .escapeHtml(reply.user.name) +
                         '\')" class="text-[13px] font-semibold text-gray-500 hover:text-gray-700 hover:underline transition-colors whitespace-nowrap">Trả lời</button>' :
                         '';
-                    const html = '<div class="flex gap-2.5" id="comment-' + reply.id + '" data-depth="' +
+                    const frameHtml = (reply.user.active_frame && reply.user.active_frame.image_path) ?
+                        '<img src="' + reply.user.active_frame.image_path + '" alt="" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[126%] h-[126%] max-w-none object-contain pointer-events-none z-10 transition-all duration-300">' :
+                        '';
+                    const replyProfileUrl = this.baseUrl + '/profile/' + (reply.user.slug || reply.user.id);
+                    const ringClass = (reply.user.active_frame && reply.user.active_frame.image_path) ? 'scale-[102%]' : 'ring-2 ring-sky-300';
+                    const html = '<div class="flex gap-2.5" id="comment-' + reply.uuid + '" data-depth="' +
                         depth + '" style="opacity:0;transform:translateY(5px);transition:all 0.3s">' +
-                        '<div class="w-7 h-7 rounded-full bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center shrink-0">' +
-                        avatarHtml + '</div>' +
+                        '<a href="' + replyProfileUrl + '" class="relative group w-7 h-7 rounded-full bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center shrink-0 transition-all duration-300 ' + ringClass + '">' +
+                        avatarHtml + frameHtml + '</a>' +
                         '<div class="flex-1 min-w-0">' +
                         '<div class="bg-gray-50 rounded-lg px-3 py-2 border border-gray-200 transition-colors" :class="replyingToId === ' +
-                        reply.id + ' ? \'!bg-blue-50 !border-blue-100\' : \'\'">' +
-                        '<div class="flex items-center gap-2 mb-0.5"><span class="text-sm font-bold text-gray-900">' +
-                        this.escapeHtml(reply.user.name) + '</span></div>' +
-                        '<div x-show="editingCommentId !== ' + reply.id + '"><p id="comment-text-' + reply.id + '" class="text-[15px] text-gray-800 leading-relaxed whitespace-pre-line break-words">' +
+                        reply.uuid + ' ? \'!bg-blue-50 !border-blue-100\' : \'\'">' +
+                        '<div class="flex items-center gap-2 mb-0.5"><a href="' + replyProfileUrl + '" class="text-sm font-bold text-gray-900 hover:text-sky-600 hover:underline transition-colors">' +
+                        this.escapeHtml(reply.user.name) + '</a></div>' +
+                        '<div x-show="editingCommentId !== ' + reply.uuid + '"><p id="comment-text-' + reply.uuid + '" class="text-[15px] text-gray-800 leading-relaxed whitespace-pre-line break-words">' +
                         this.formatMentions(reply.content) + '</p></div>' +
-                        '<div x-show="editingCommentId === ' + reply.id + '" x-cloak style="display:none">' +
-                        '<textarea id="edit-input-' + reply.id + '" x-model="editingContent" @keydown.enter="if(!$event.shiftKey) { $event.preventDefault(); submitEdit(); }" class="w-full px-3 py-2 bg-white border border-blue-300 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all resize-none mt-1" rows="2"></textarea>' +
+                        '<div x-show="editingCommentId === ' + reply.uuid + '" x-cloak style="display:none">' +
+                        '<textarea id="edit-input-' + reply.uuid + '" x-model="editingContent" @keydown.enter="if(!$event.shiftKey) { $event.preventDefault(); submitEdit(); }" class="w-full px-3 py-2 bg-white border border-blue-300 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all resize-none mt-1" rows="2"></textarea>' +
                         '<div class="flex gap-2 justify-end mt-1.5"><button @click="cancelEdit()" class="text-xs text-gray-500 hover:underline px-2 py-1">Hủy</button><button @click="submitEdit()" class="text-xs font-semibold bg-blue-500 text-white rounded px-3 py-1.5 mt-1 hover:bg-blue-600 disabled:opacity-50" :disabled="submittingEdit || !editingContent.trim()">Lưu</button></div>' +
                         '</div>' +
                         '</div>' +
@@ -672,29 +695,29 @@
                         '<span class="text-[13px] font-medium text-gray-500 hover:underline cursor-pointer" title="' +
                         this.getFullDateString() + '">' + reply.created_at.replace(" trước", "") +
                         '</span>' +
-                        '<button @click="toggleLike(' + reply.id +
+                        '<button @click="toggleLike(' + reply.uuid +
                         ', $event)" class="group flex items-center gap-1.5 text-[13px] font-bold transition-colors whitespace-nowrap" :class="likedComments[' +
-                        reply.id +
+                        reply.uuid +
                         '] ? \'text-blue-600\' : \'text-gray-500 hover:text-gray-700 hover:underline\'" id="like-btn-' +
-                        reply.id + '"><span>Thích</span></button>' +
+                        reply.uuid + '"><span>Thích</span></button>' +
                         replyBtn +
                         editBtn +
-                        '<button @click="openReport(' + reply.id +
+                        '<button @click="openReport(' + reply.uuid +
                         ')" class="text-[13px] font-semibold text-gray-500 hover:text-gray-700 hover:underline transition-colors whitespace-nowrap">Báo cáo</button>' +
                         deleteBtn +
                         '</div>' +
-                        '<div x-show="likeCounts[' + reply.id +
+                        '<div x-show="likeCounts[' + reply.uuid +
                         '] > 0" x-cloak style="display: none" class="flex items-center gap-1 cursor-pointer">' +
-                        '<span x-text="likeCounts[' + reply.id +
+                        '<span x-text="likeCounts[' + reply.uuid +
                         ']" class="text-[11px] text-gray-500 hover:underline"></span>' +
                         '<div class="w-[14px] h-[14px] rounded-full bg-blue-500 flex items-center justify-center shadow-sm"><svg class="w-2 h-2 text-white fill-current" viewBox="0 0 24 24"><path d="M4 21h1V8H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2zM20.28 8H14V4.11a2.11 2.11 0 0 0-2.11-2.11c-.48 0-.94.19-1.29.54L5 8.12v12.76l6.83 1.13c.44.07.89.11 1.34.11H19a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2z"></path></svg></div>' +
                         '</div></div></div></div>';
                     rc.insertAdjacentHTML('beforeend', html);
-                    this.commentData[reply.id] = reply.content;
-                    this.likedComments[reply.id] = false;
-                    this.likeCounts[reply.id] = 0;
+                    this.commentData[reply.uuid] = reply.content;
+                    this.likedComments[reply.uuid] = false;
+                    this.likeCounts[reply.uuid] = 0;
                     requestAnimationFrame(() => {
-                        const el = document.getElementById('comment-' + reply.id);
+                        const el = document.getElementById('comment-' + reply.uuid);
                         if (el) {
                             el.dataset.depth = String(depth);
                             el.style.opacity = '1';
@@ -783,13 +806,17 @@
                 <form @submit.prevent="submitComment($event)" class="mb-8">
                     <div class="flex gap-3">
                         <div
-                            class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center shrink-0 mt-0.5">
+                            class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center shrink-0 mt-0.5 relative group transition-all duration-300 {{ auth()->user()->activeFrame ? 'scale-[1.02]' : '' }}">
                             @if (auth()->user()->avatar)
                                 <img src="{{ auth()->user()->avatar }}" alt=""
                                     class="w-full h-full rounded-full object-cover" loading="lazy">
                             @else
                                 <span
                                     class="text-sm font-bold text-white">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
+                            @endif
+                            @if (auth()->user()->activeFrame)
+                                <img src="{{ Storage::url(auth()->user()->activeFrame->image_path) }}" alt="" 
+                                     class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[126%] h-[126%] max-w-none object-contain pointer-events-none z-10 transition-all duration-300">
                             @endif
                         </div>
                         <div class="flex-1">
@@ -818,8 +845,8 @@
                     @forelse($article->comments as $comment)
                         <div class="flex gap-3" id="comment-{{ $comment->id }}" data-depth="0">
                             {{-- Avatar --}}
-                            <div
-                                class="w-9 h-9 rounded-full bg-gradient-to-br from-gray-300 to-gray-500 flex items-center justify-center shrink-0">
+                            <a href="{{ route('profile.show', $comment->user) }}"
+                                class="w-9 h-9 rounded-full bg-gradient-to-br from-gray-300 to-gray-500 flex items-center justify-center shrink-0 transition-all duration-300 relative group {{ ($comment->user->activeFrame ?? false) ? 'scale-[1.02]' : 'hover:ring-2 hover:ring-sky-300' }}">
                                 @if ($comment->user->avatar ?? false)
                                     <img src="{{ $comment->user->avatar }}" alt=""
                                         class="w-full h-full rounded-full object-cover" loading="lazy">
@@ -827,13 +854,17 @@
                                     <span
                                         class="text-xs font-bold text-white">{{ strtoupper(substr($comment->user->name ?? '?', 0, 1)) }}</span>
                                 @endif
-                            </div>
+                                @if (($comment->user->activeFrame ?? false))
+                                    <img src="{{ Storage::url($comment->user->activeFrame->image_path) }}" alt="" 
+                                         class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[126%] h-[126%] max-w-none object-contain pointer-events-none z-10 transition-all duration-300">
+                                @endif
+                            </a>
                             <div class="flex-1 min-w-0">
                                 {{-- Comment Bubble --}}
                                 <div class="bg-white rounded-xl px-3.5 py-2 border border-gray-200 transition-colors"
                                     :class="replyingToId === {{ $comment->id }} ? '!bg-blue-50 !border-blue-200' : ''">
                                     <div class="flex items-center gap-2 mb-0.5">
-                                        <span class="text-[15px] font-bold text-gray-900">{{ $comment->user->name ?? 'Ẩn danh' }}</span>
+                                        <a href="{{ route('profile.show', $comment->user) }}" class="text-[15px] font-bold text-gray-900 hover:text-sky-600 hover:underline transition-colors">{{ $comment->user->name ?? 'Ẩn danh' }}</a>
                                     </div>
                                     <div x-show="editingCommentId !== {{ $comment->id }}">
                                         <p id="comment-text-{{ $comment->id }}" class="text-[15px] text-gray-800 leading-relaxed whitespace-pre-line break-words" x-html='formatMentions(commentData[{{ $comment->id }}])'></p>
@@ -952,8 +983,8 @@
                         <div class="space-y-3 pl-[26px] mt-1">
                             @foreach ($comment->replies as $reply)
                                 <div class="flex gap-2.5" id="comment-{{ $reply->id }}" data-depth="1">
-                                    <div
-                                        class="w-7 h-7 rounded-full bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center shrink-0">
+                                    <a href="{{ route('profile.show', $reply->user) }}"
+                                        class="w-7 h-7 rounded-full bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center shrink-0 transition-all duration-300 relative group {{ ($reply->user->activeFrame ?? false) ? 'scale-[1.02]' : 'hover:ring-2 hover:ring-sky-300' }}">
                                         @if ($reply->user->avatar ?? false)
                                             <img src="{{ $reply->user->avatar }}" alt=""
                                                 class="w-full h-full rounded-full object-cover" loading="lazy">
@@ -961,12 +992,16 @@
                                             <span
                                                 class="text-[10px] font-bold text-white">{{ strtoupper(substr($reply->user->name ?? '?', 0, 1)) }}</span>
                                         @endif
-                                    </div>
+                                        @if (($reply->user->activeFrame ?? false))
+                                            <img src="{{ Storage::url($reply->user->activeFrame->image_path) }}" alt="" 
+                                                 class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[126%] h-[126%] max-w-none object-contain pointer-events-none z-10 transition-all duration-300">
+                                        @endif
+                                    </a>
                                     <div class="flex-1 min-w-0">
                                         <div class="bg-gray-50 rounded-lg px-3 py-2 border border-gray-200 transition-colors"
                                             :class="replyingToId === {{ $reply->id }} ? '!bg-blue-50 !border-blue-100' : ''">
                                             <div class="flex items-center gap-2 mb-0.5">
-                                                <span class="text-sm font-bold text-gray-900">{{ $reply->user->name ?? 'Ẩn danh' }}</span>
+                                                <a href="{{ route('profile.show', $reply->user) }}" class="text-sm font-bold text-gray-900 hover:text-sky-600 hover:underline transition-colors">{{ $reply->user->name ?? 'Ẩn danh' }}</a>
                                             </div>
                                             <div x-show="editingCommentId !== {{ $reply->id }}">
                                                 <p id="comment-text-{{ $reply->id }}" x-html='formatMentions(commentData[{{ $reply->id }}])' class="text-[15px] text-gray-800 leading-relaxed whitespace-pre-line break-words"></p>
@@ -1052,8 +1087,8 @@
                         <div class="nested-replies-container mt-2 pl-5 border-l-2 border-gray-200 space-y-3">
                             @foreach ($reply->replies as $nestedReply)
                                 <div class="flex gap-2.5" id="comment-{{ $nestedReply->id }}" data-depth="2">
-                                    <div
-                                        class="w-7 h-7 rounded-full bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center shrink-0">
+                                    <a href="{{ route('profile.show', $nestedReply->user) }}"
+                                        class="w-7 h-7 rounded-full bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center shrink-0 transition-all duration-300 relative group {{ ($nestedReply->user->activeFrame ?? false) ? 'scale-[1.02]' : 'hover:ring-2 hover:ring-sky-300' }}">
                                         @if ($nestedReply->user->avatar ?? false)
                                             <img src="{{ $nestedReply->user->avatar }}" alt=""
                                                 class="w-full h-full rounded-full object-cover" loading="lazy">
@@ -1061,11 +1096,15 @@
                                             <span
                                                 class="text-[10px] font-bold text-white">{{ strtoupper(substr($nestedReply->user->name ?? '?', 0, 1)) }}</span>
                                         @endif
-                                    </div>
+                                        @if (($nestedReply->user->activeFrame ?? false))
+                                            <img src="{{ Storage::url($nestedReply->user->activeFrame->image_path) }}" alt="" 
+                                                 class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[126%] h-[126%] max-w-none object-contain pointer-events-none z-10 transition-all duration-300">
+                                        @endif
+                                    </a>
                                     <div class="flex-1 min-w-0">
                                         <div class="bg-gray-50 rounded-lg px-3 py-2 border border-gray-200">
                                             <div class="flex items-center gap-2 mb-0.5">
-                                                <span class="text-sm font-bold text-gray-900">{{ $nestedReply->user->name ?? 'Ẩn danh' }}</span>
+                                                <a href="{{ route('profile.show', $nestedReply->user) }}" class="text-sm font-bold text-gray-900 hover:text-sky-600 hover:underline transition-colors">{{ $nestedReply->user->name ?? 'Ẩn danh' }}</a>
                                             </div>
                                             <div x-show="editingCommentId !== {{ $nestedReply->id }}">
                                                 <p id="comment-text-{{ $nestedReply->id }}" x-html='formatMentions(commentData[{{ $nestedReply->id }}])' class="text-[15px] text-gray-800 leading-relaxed whitespace-pre-line break-words"></p>

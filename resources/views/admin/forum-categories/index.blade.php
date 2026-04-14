@@ -1,4 +1,4 @@
-<x-admin-layout pageTitle="Quản lý chuyên mục diễn đàn">
+<x-admin-layout title="Diễn đàn" pageTitle="Quản lý chuyên mục diễn đàn">
     <div class="flex justify-between items-center mb-6">
         <div>
             <h2 class="text-xl font-semibold text-white">Danh sách chuyên mục</h2>

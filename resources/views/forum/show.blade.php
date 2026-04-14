@@ -20,14 +20,18 @@
             {{-- Header --}}
             <div class="flex items-start gap-4">
                 {{-- Author avatar --}}
-                <a href="{{ route('profile.show', $thread->user->id) }}" class="shrink-0">
-                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-sky-400 to-sky-600 flex items-center justify-center overflow-hidden ring-2 ring-white shadow-sm hover:ring-sky-200 transition-all">
+                <a href="{{ route('profile.show', $thread->user) }}" class="shrink-0 relative group">
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-sky-400 to-sky-600 flex items-center justify-center overflow-hidden transition-all duration-300 {{ $thread->user->activeFrame ? 'scale-[1.02]' : 'ring-2 ring-white shadow-sm hover:ring-sky-200' }}">
                         @if($thread->user->avatar)
                             <img src="{{ $thread->user->avatar }}" alt="" class="w-full h-full object-cover" loading="lazy">
                         @else
                             <span class="text-sm font-bold text-white">{{ strtoupper(substr($thread->user->name, 0, 1)) }}</span>
                         @endif
                     </div>
+                    @if($thread->user->activeFrame)
+                        <img src="{{ Storage::url($thread->user->activeFrame->image_path) }}" alt="" 
+                             class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[126%] h-[126%] max-w-none object-contain pointer-events-none z-10 transition-all duration-300">
+                    @endif
                 </a>
 
                 <div class="flex-1 min-w-0">
@@ -43,7 +47,7 @@
                         </h1>
                     </div>
                     <div class="flex items-center gap-3 mt-1.5 text-sm text-gray-500">
-                        <a href="{{ route('profile.show', $thread->user->id) }}" class="font-medium text-gray-700 hover:text-sky-600 transition-colors">{{ $thread->user->name }}</a>
+                        <a href="{{ route('profile.show', $thread->user) }}" class="font-medium text-gray-700 hover:text-sky-600 transition-colors">{{ $thread->user->name }}</a>
                         @if($thread->user->activeTitle)
                             <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold border"
                                   style="color: {{ $thread->user->activeTitle->color_hex }}; border-color: {{ $thread->user->activeTitle->color_hex }}40; background-color: {{ $thread->user->activeTitle->color_hex }}15;">
@@ -102,19 +106,23 @@
                 @forelse($replies as $reply)
                     <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
                         <div class="flex items-start gap-3">
-                            <a href="{{ route('profile.show', $reply->user->id) }}" class="shrink-0">
-                                <div class="w-9 h-9 rounded-full bg-gradient-to-br from-gray-300 to-gray-500 flex items-center justify-center overflow-hidden ring-2 ring-white shadow-sm">
+                            <a href="{{ route('profile.show', $reply->user) }}" class="shrink-0 relative group">
+                                <div class="w-9 h-9 rounded-full bg-gradient-to-br from-gray-300 to-gray-500 flex items-center justify-center overflow-hidden transition-all duration-300 {{ $reply->user->activeFrame ? 'scale-[1.02]' : 'ring-2 ring-white shadow-sm' }}">
                                     @if($reply->user->avatar)
                                         <img src="{{ $reply->user->avatar }}" alt="" class="w-full h-full object-cover" loading="lazy">
                                     @else
                                         <span class="text-xs font-bold text-white">{{ strtoupper(substr($reply->user->name, 0, 1)) }}</span>
                                     @endif
                                 </div>
+                                @if($reply->user->activeFrame)
+                                    <img src="{{ Storage::url($reply->user->activeFrame->image_path) }}" alt="" 
+                                         class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[126%] h-[126%] max-w-none object-contain pointer-events-none z-10 transition-all duration-300">
+                                @endif
                             </a>
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center gap-2 text-sm">
-                                        <a href="{{ route('profile.show', $reply->user->id) }}" class="font-semibold text-gray-900 hover:text-sky-600 transition-colors">{{ $reply->user->name }}</a>
+                                        <a href="{{ route('profile.show', $reply->user) }}" class="font-semibold text-gray-900 hover:text-sky-600 transition-colors">{{ $reply->user->name }}</a>
                                         @if($reply->user->activeTitle)
                                             <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold border"
                                                   style="color: {{ $reply->user->activeTitle->color_hex }}; border-color: {{ $reply->user->activeTitle->color_hex }}40; background-color: {{ $reply->user->activeTitle->color_hex }}15;">

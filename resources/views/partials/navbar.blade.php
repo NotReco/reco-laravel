@@ -117,7 +117,7 @@
                         notificationsData: { all: [], unread: [] },
                         loadedTabs: { all: false, unread: false },
                         limits: { all: 5, unread: 5 },
-                        unreadCount: 0,
+                        unreadCount: {{ Auth::user()->unreadNotifications()->count() }},
                         pendingAction: null,
                         get limit() { return this.limits[this.tab]; },
                         set limit(val) { this.limits[this.tab] = val; },
@@ -637,21 +637,19 @@
 
                     {{-- Avatar / Profile button --}}
                     <div class="relative" x-data="{ open: false }" @mousedown.outside="open = false">
-                        <button @click="open = !open"
-                            class="w-10 h-10 rounded-full overflow-hidden
-                                           flex items-center justify-center transition-all duration-300"
-                            :class="darkHero ? 'ring-2 ring-white/30 hover:ring-white/50' :
-                                'ring-2 ring-gray-200 hover:ring-gray-300'">
-                            <div
-                                class="w-full h-full rounded-full bg-gradient-to-br from-sky-400 to-sky-600
-                                            flex items-center justify-center overflow-hidden">
-                                @if (Auth::user()->avatar)
-                                    <img src="{{ Auth::user()->avatar }}" alt=""
-                                        class="w-full h-full object-cover">
-                                @else
-                                    <span class="text-xs font-bold text-white">
-                                        {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
-                                    </span>
+                        <button @click="open = !open" class="relative group">
+                            <div class="relative group w-10 h-10 shrink-0">
+                                <div class="w-full h-full rounded-full bg-gradient-to-br from-sky-500 to-sky-700 flex items-center justify-center overflow-hidden transition-all duration-300 {{ Auth::user()->activeFrame ? 'scale-[1.02]' : '' }}">
+                                    @if (Auth::user()->avatar)
+                                        <img src="{{ Auth::user()->avatar }}" alt="{{ Auth::user()->name }}"
+                                            class="w-full h-full object-cover">
+                                    @else
+                                        <span class="text-xs font-bold text-white">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</span>
+                                    @endif
+                                </div>
+                                @if (Auth::user()->activeFrame)
+                                    <img src="{{ Storage::url(Auth::user()->activeFrame->image_path) }}" alt="" 
+                                         class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[126%] h-[126%] max-w-none object-contain pointer-events-none drop-shadow-lg z-10 transition-all duration-300">
                                 @endif
                             </div>
                         </button>
@@ -692,7 +690,7 @@
 
                             {{-- Menu items --}}
                             <div class="space-y-1">
-                                <a href="{{ route('profile.show', Auth::id()) }}"
+                                <a href="{{ route('profile.show', Auth::user()) }}"
                                     class="flex items-center gap-3 px-2 py-2 rounded-xl text-[14px] font-semibold text-gray-900 hover:bg-gray-100 transition-colors group">
                                     <div
                                         class="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center shrink-0">
@@ -702,20 +700,7 @@
                                                 d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                         </svg>
                                     </div>
-                                    <span>Xem hồ sơ</span>
-                                </a>
-
-                                <a href="{{ route('profile.edit') }}"
-                                    class="flex items-center gap-3 px-2 py-2 rounded-xl text-[14px] font-semibold text-gray-900 hover:bg-gray-100 transition-colors group">
-                                    <div
-                                        class="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center shrink-0">
-                                        <svg class="w-5 h-5 text-gray-900 group-hover:text-[#007ba7] transition-colors" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                        </svg>
-                                    </div>
-                                    <span>Chỉnh sửa hồ sơ</span>
+                                    <span>Hồ sơ cá nhân</span>
                                 </a>
 
                                 <a href="{{ route('messages.index') }}"

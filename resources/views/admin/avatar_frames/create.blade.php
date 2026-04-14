@@ -20,8 +20,8 @@
             </div>
 
             <div class="space-y-2">
-                <label for="image" class="block text-sm font-medium text-dark-300">File Ảnh Nền Trong (PNG/GIF) <span class="text-red-500">*</span></label>
-                <input type="file" id="image" name="image" accept="image/png, image/gif"
+                <label for="image" class="block text-sm font-medium text-dark-300">File Ảnh Nền Trong (PNG/GIF/WEBP/SVG) <span class="text-red-500">*</span></label>
+                <input type="file" id="image" name="image" accept="image/png, image/gif, image/webp, image/jpeg, image/svg+xml"
                        class="w-full text-sm text-dark-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-dark-800 file:text-white hover:file:bg-dark-700 transition" required>
             </div>
 

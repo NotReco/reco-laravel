@@ -18,7 +18,7 @@
 
                 <div class="flex-1 overflow-y-auto scrollbar-hide">
                     @forelse($partners as $conv)
-                        <a href="{{ route('messages.show', $conv->user->id) }}"
+                        <a href="{{ route('messages.show', $conv->user) }}"
                            class="flex items-center gap-3 px-4 py-3 border-b border-dark-800 hover:bg-dark-800/50 transition-colors
                                   {{ isset($partner) && $partner->id === $conv->user->id ? 'bg-dark-800 border-l-2 border-l-sky-500' : '' }}">
                             {{-- Avatar --}}
@@ -60,7 +60,7 @@
                         <button @click="mobileShowChat = false" class="lg:hidden text-dark-400 hover:text-white transition-colors mr-1">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
                         </button>
-                        <a href="{{ route('profile.show', $partner->id) }}" class="flex items-center gap-3 group">
+                        <a href="{{ route('profile.show', $partner) }}" class="flex items-center gap-3 group">
                             <div class="w-9 h-9 rounded-full bg-gradient-to-br from-sky-500 to-sky-700 flex items-center justify-center overflow-hidden ring-2 ring-dark-700">
                                 @if($partner->avatar)
                                     <img src="{{ $partner->avatar }}" alt="" class="w-full h-full object-cover" loading="lazy">

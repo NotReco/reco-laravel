@@ -1,4 +1,4 @@
-<x-admin-layout pageTitle="Quản lý danh hiệu">
+<x-admin-layout title="Danh hiệu" pageTitle="Quản lý danh hiệu">
     <div class="flex justify-between items-center mb-6">
         <div>
             <h2 class="text-xl font-semibold text-white">Danh sách Danh hiệu</h2>

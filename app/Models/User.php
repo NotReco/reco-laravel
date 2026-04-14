@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\UserRole;
+use App\Traits\HasSlug;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -10,7 +11,10 @@ use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, SoftDeletes;
+    use HasFactory, Notifiable, SoftDeletes, HasSlug;
+
+    // Slug được tạo tự động từ 'name'
+    protected $slugSource = 'name';
 
     protected $fillable = [
         'name',
@@ -20,7 +24,7 @@ class User extends Authenticatable
         'cover_photo',
         'bio',
         'date_of_birth',
-        'gender',
+        'pronouns',
         'location',
         'website',
         'role',

@@ -24,7 +24,7 @@ class AvatarFrameController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'image' => 'required|image|mimes:png,gif|max:2048',
+            'image' => 'required|image|mimes:png,gif,webp,jpg,jpeg,svg|max:2048',
             'is_active' => 'boolean',
         ]);
 
@@ -52,7 +52,7 @@ class AvatarFrameController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'image' => 'nullable|image|mimes:png,gif|max:2048',
+            'image' => 'nullable|image|mimes:png,gif,webp,jpg,jpeg,svg|max:2048',
             'is_active' => 'boolean',
         ]);
 

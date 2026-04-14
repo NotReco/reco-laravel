@@ -1,7 +1,7 @@
 {{-- Review Form Component --}}
-{{-- Usage: <x-review-form :movieId="$movie->id" /> --}}
+{{-- Usage: <x-review-form :movie="$movie" /> --}}
 
-@props(['movieId'])
+@props(['movie'])
 
 @auth
 <div class="card p-6" x-data="{
@@ -26,7 +26,7 @@
 }">
     <h3 class="text-lg font-display font-semibold text-white mb-4">✍️ Viết đánh giá</h3>
 
-    <form action="{{ route('reviews.store', $movieId) }}" method="POST">
+    <form action="{{ route('reviews.store', $movie) }}" method="POST">
         @csrf
 
         {{-- Star Rating --}}

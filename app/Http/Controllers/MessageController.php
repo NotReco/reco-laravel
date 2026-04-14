@@ -55,9 +55,8 @@ class MessageController extends Controller
     /**
      * Chat với user cụ thể.
      */
-    public function show($userId)
+    public function show(User $partner)
     {
-        $partner = User::findOrFail($userId);
         $currentUserId = Auth::id();
 
         if ($partner->id === $currentUserId) {
@@ -114,8 +113,10 @@ class MessageController extends Controller
             'content' => $validated['content'],
         ]);
 
+        $receiver = User::find($validated['receiver_id']);
+
         return redirect()
-            ->route('messages.show', $validated['receiver_id'])
+            ->route('messages.show', $receiver)
             ->with('success', 'Tin nhắn đã gửi!');
     }
 }

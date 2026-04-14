@@ -85,10 +85,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/reviews/{review}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
 
     // ── Profile ──
-    Route::get('/users/{id}', [\App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');
-    Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/users/{user}/profile', [\App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');
+    Route::get('/users/{user}/favorites', [\App\Http\Controllers\ProfileController::class, 'favorites'])->name('profile.favorites');
+    Route::get('/users/profile/edit', [\App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/users/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/users/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // ── Favorites ──
     Route::post('/api/favorites/toggle', [\App\Http\Controllers\FavoriteController::class, 'toggle'])->name('favorites.toggle');
@@ -139,7 +140,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // ── Messages ──
     Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
-    Route::get('/messages/{userId}', [MessageController::class, 'show'])->name('messages.show');
+    Route::get('/messages/{user}', [MessageController::class, 'show'])->name('messages.show');
     Route::post('/messages', [MessageController::class, 'store'])->name('messages.store');
 
     // ── Settings ──

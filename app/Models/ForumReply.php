@@ -10,6 +10,22 @@ class ForumReply extends Model
 
     // ── Relationships ──
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (empty($model->uuid)) {
+                $model->uuid = (string) \Illuminate\Support\Str::uuid();
+            }
+        });
+    }
+
+    public function getRouteKeyName()
+    {
+        return 'uuid';
+    }
+
     public function thread()
     {
         return $this->belongsTo(ForumThread::class, 'forum_thread_id');

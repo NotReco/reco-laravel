@@ -26,7 +26,7 @@
                     <div class="w-16 h-16 bg-dark-800 rounded flex items-center justify-center p-1 border border-dark-700 shrink-0">
                         <img src="{{ Storage::url($frame->image_path) }}" alt="{{ $frame->name }}" class="max-w-full max-h-full object-contain">
                     </div>
-                    <input type="file" id="image" name="image" accept="image/png, image/gif"
+                    <input type="file" id="image" name="image" accept="image/png, image/gif, image/webp, image/jpeg, image/svg+xml"
                            class="w-full text-sm text-dark-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-dark-800 file:text-white hover:file:bg-dark-700 transition">
                 </div>
             </div>

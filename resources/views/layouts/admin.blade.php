@@ -9,9 +9,11 @@
     <meta name="article-editor-upload-url" content="{{ route('admin.articles.editor-upload') }}">
 
     <title>
-        @isset($title)
+        @if (!empty($title))
             {{ $title }} |
-        @endisset Admin Panel
+        @elseif (!empty($pageTitle))
+            {{ $pageTitle }} |
+        @endif Admin Panel
     </title>
 
     {{-- Favicon & App Icons --}}

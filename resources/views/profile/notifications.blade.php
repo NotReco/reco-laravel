@@ -4,7 +4,7 @@
         tab: '{{ request('filter') === 'unread' ? 'unread' : 'all' }}',
         loading: true,
         notificationsData: { all: [], unread: [] },
-        unreadCount: 0,
+        unreadCount: {{ Auth::user()->unreadNotifications()->count() }},
         limits: { all: 15, unread: 15 },
         pendingAction: null,
         get limit() { return this.limits[this.tab]; },
