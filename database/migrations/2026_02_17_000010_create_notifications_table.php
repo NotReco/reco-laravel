@@ -10,17 +10,6 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        // Tin nhắn chat (user ↔ user hoặc user ↔ AI)
-        Schema::create('chat_messages', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->enum('role', ['user', 'assistant'])->default('user');
-            $table->text('message');
-            $table->timestamps();
-
-            $table->index('user_id');
-        });
-
         // Thông báo (Laravel default)
         Schema::create('notifications', function (Blueprint $table) {
             $table->uuid('id')->primary();
@@ -38,6 +27,5 @@ return new class extends Migration {
     public function down(): void
     {
         Schema::dropIfExists('notifications');
-        Schema::dropIfExists('chat_messages');
     }
 };

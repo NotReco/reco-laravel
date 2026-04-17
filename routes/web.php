@@ -8,7 +8,6 @@ use App\Http\Controllers\PersonController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ForumController;
-use App\Http\Controllers\MessageController;
 use Illuminate\Support\Facades\Route;
 
 // ═══════════════════════════════════════════════════
@@ -137,11 +136,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/forum/replies/{reply}/edit', [ForumController::class, 'editReply'])->name('forum.editReply');
     Route::put('/forum/replies/{reply}', [ForumController::class, 'updateReply'])->name('forum.updateReply');
     Route::delete('/forum/replies/{reply}', [ForumController::class, 'destroyReply'])->name('forum.destroyReply');
-
-    // ── Messages ──
-    Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
-    Route::get('/messages/{user}', [MessageController::class, 'show'])->name('messages.show');
-    Route::post('/messages', [MessageController::class, 'store'])->name('messages.store');
 
     // ── Settings ──
     Route::get('/settings', [\App\Http\Controllers\SettingsController::class, 'index'])->name('settings.index');

@@ -147,8 +147,8 @@
                     <template x-if="avatarStep === 'edit'">
                         <div class="space-y-5" x-init="$nextTick(() => drawAvatarCanvas())">
                             {{-- Canvas preview area --}}
-                            <div class="relative mx-auto bg-[#2B2D31] rounded-2xl overflow-hidden flex items-center justify-center" style="width: 360px; height: 360px; max-width: 100%;">
-                                <canvas x-ref="avatarCanvas" width="360" height="360" class="block"></canvas>
+                            <div class="relative mx-auto bg-[#2B2D31] rounded-2xl overflow-hidden flex items-center justify-center cursor-move touch-none" style="width: 360px; height: 360px; max-width: 100%;" @mousedown="startPan($event, 'avatar')" @mousemove.window="pan($event, 'avatar')" @mouseup.window="endPan()" @touchstart="startPan($event, 'avatar')" @touchmove.prevent.window="pan($event, 'avatar')" @touchend.window="endPan()">
+                                <canvas x-ref="avatarCanvas" width="360" height="360" class="block pointer-events-none"></canvas>
                             </div>
 
                             {{-- Controls row: zoom slider + rotate buttons --}}
@@ -156,7 +156,7 @@
                                 {{-- Small image icon --}}
                                 <svg class="w-4 h-4 text-gray-500 shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M1 5a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H3a2 2 0 01-2-2V5zm4 3a1 1 0 100-2 1 1 0 000 2zm10 4l-3-3-2 2-3-3-4 4h12z" clip-rule="evenodd"/></svg>
                                 {{-- Zoom slider --}}
-                                <input type="range" min="1" max="2" step="0.01" x-model="avatarZoom" @input="drawAvatarCanvas()" class="w-36 h-1 accent-gray-800 rounded-full cursor-pointer appearance-none bg-gray-300 [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-gray-800 [&::-webkit-slider-thumb]:border-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:shadow-none">
+                                <input type="range" min="1" max="3" step="0.01" x-model="avatarZoom" @input="drawAvatarCanvas()" class="w-36 h-1 accent-gray-800 rounded-full cursor-pointer appearance-none bg-gray-300 [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-gray-800 [&::-webkit-slider-thumb]:border-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:shadow-none">
                                 {{-- Large image icon --}}
                                 <svg class="w-5 h-5 text-gray-500 shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M1 5a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H3a2 2 0 01-2-2V5zm4 3a1 1 0 100-2 1 1 0 000 2zm10 4l-3-3-2 2-3-3-4 4h12z" clip-rule="evenodd"/></svg>
 
@@ -192,13 +192,14 @@
             </div>
         </div>
 
-        {{-- ─── Cover Modal ─── --}}
+        {{-- ─── Cover Modal (Advanced Crop + Resize) ─── --}}
         <div x-show="coverModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4"
              @wheel.prevent @contextmenu.prevent
              x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
              x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
-            <div class="absolute inset-0 bg-gray-900/70" @click="closeModal()"></div>
-            <div class="relative bg-white rounded-3xl w-full max-w-2xl shadow-2xl overflow-hidden"
+            <div class="absolute inset-0 bg-gray-900/75" @click="closeModal()"></div>
+            <div class="relative bg-white rounded-3xl w-full shadow-2xl"
+                 style="max-width: 700px;"
                  @click.stop
                  x-transition:enter="ease-out duration-300"
                  x-transition:enter-start="opacity-0 translate-y-6 scale-95"
@@ -206,11 +207,11 @@
                  x-transition:leave="ease-in duration-200"
                  x-transition:leave-start="opacity-100 translate-y-0 scale-100"
                  x-transition:leave-end="opacity-0 translate-y-6 scale-95">
-                <div class="p-6 sm:p-8">
+                <div class="p-5 sm:p-6">
                     {{-- Header --}}
                     <div class="flex items-center justify-between mb-6">
-                        <h3 class="text-xl font-bold text-gray-900" x-text="coverStep === 'edit' ? 'Chỉnh sửa ảnh bìa' : 'Thay ảnh bìa'"></h3>
-                        <button type="button" @click="closeModal()" class="p-2 text-gray-400 hover:text-gray-900 rounded-xl bg-gray-50 hover:bg-gray-100 transition-all">
+                        <h3 class="text-xl font-bold text-gray-900">Thay ảnh bìa</h3>
+                        <button type="button" @click="closeModal()" class="p-1.5 text-gray-400 hover:text-gray-900 rounded-xl bg-gray-100 hover:bg-gray-200 transition-all">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
                         </button>
                     </div>
@@ -218,49 +219,57 @@
                     {{-- Step 1: Current preview + Upload --}}
                     <template x-if="coverStep === 'choose'">
                         <div class="space-y-6">
-                            <div class="flex flex-col items-center gap-4">
+                            <div class="flex flex-col items-center gap-3">
                                 <p class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Ảnh bìa hiện tại</p>
-                                <div class="w-full h-36 sm:h-44 rounded-2xl border border-gray-200 overflow-hidden bg-gray-50 flex items-center justify-center">
+                                <div class="w-full rounded-2xl border border-gray-200 overflow-hidden bg-gray-50 flex items-center justify-center p-2" style="height: 200px;">
                                     <template x-if="coverFinalSrc">
-                                        <img :src="coverFinalSrc" alt="Cover mới" class="w-full h-full object-cover">
+                                        <img :src="coverFinalSrc" alt="Cover mới" class="w-full h-full object-contain rounded-xl">
                                     </template>
                                     <template x-if="!coverFinalSrc">
                                         @if($user->cover_photo)
-                                            <img src="{{ $user->cover_photo }}" alt="Cover" class="w-full h-full object-cover">
+                                            <img src="{{ Str::startsWith($user->cover_photo, 'http') ? $user->cover_photo : asset($user->cover_photo) }}" alt="Cover" class="w-full h-full object-contain rounded-xl">
                                         @else
-                                            <div class="text-gray-400 font-medium">Chưa có ảnh bìa</div>
+                                            <div class="flex flex-col items-center gap-2 text-gray-400">
+                                                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                                <span class="text-sm">Chưa có ảnh bìa</span>
+                                            </div>
                                         @endif
                                     </template>
                                 </div>
                             </div>
-
-                            <label class="flex items-center justify-center gap-3 w-full py-3.5 bg-[#5865F2] hover:bg-[#4752c4] text-white font-bold rounded-xl cursor-pointer transition-all active:scale-[0.98] shadow-lg shadow-indigo-500/20">
+                            <label class="flex items-center justify-center gap-3 w-full py-3.5 bg-gray-900 hover:bg-black text-white font-bold rounded-xl cursor-pointer transition-all active:scale-[0.98] shadow-sm">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-                                Tải lên hình ảnh
+                                Tải lên ảnh bìa mới
                                 <input type="file" accept="image/png,image/jpeg,image/gif,image/webp" class="sr-only" @change="handleCoverUpload($event)">
                             </label>
-                            <p class="text-xs text-gray-400 text-center">PNG, JPG, GIF hoặc WebP • Tối đa 10MB • Tối ưu 680×240</p>
+                            <p class="text-xs text-gray-400 text-center">PNG, JPG, GIF hoặc WebP • Tối đa 10MB</p>
                         </div>
                     </template>
 
-                    {{-- Step 2: Image editor --}}
+                    {{-- Step 2: Image editor for Cover --}}
                     <template x-if="coverStep === 'edit'">
                         <div class="space-y-5" x-init="$nextTick(() => drawCoverCanvas())">
-                            <div class="relative mx-auto bg-[#2B2D31] rounded-2xl overflow-hidden flex items-center justify-center" style="max-width: 100%; aspect-ratio: 680/240;">
-                                <canvas x-ref="coverCanvas" width="680" height="240" class="block w-full h-full"></canvas>
+                            {{-- Canvas preview area --}}
+                            <div class="relative mx-auto bg-[#2B2D31] rounded-2xl overflow-hidden flex items-center justify-center cursor-move touch-none" style="width: 630px; height: 270px; max-width: 100%; aspect-ratio: 21/9;" @mousedown="startPan($event, 'cover')" @mousemove.window="pan($event, 'cover')" @mouseup.window="endPan()" @touchstart="startPan($event, 'cover')" @touchmove.prevent.window="pan($event, 'cover')" @touchend.window="endPan()">
+                                <canvas x-ref="coverCanvas" width="630" height="270" class="block pointer-events-none w-full h-full object-contain"></canvas>
                             </div>
 
                             {{-- Controls row: zoom slider + rotate buttons --}}
                             <div class="flex items-center gap-2.5 justify-center">
+                                {{-- Small image icon --}}
                                 <svg class="w-4 h-4 text-gray-500 shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M1 5a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H3a2 2 0 01-2-2V5zm4 3a1 1 0 100-2 1 1 0 000 2zm10 4l-3-3-2 2-3-3-4 4h12z" clip-rule="evenodd"/></svg>
-                                <input type="range" min="1" max="2" step="0.01" x-model="coverZoom" @input="drawCoverCanvas()" class="w-36 h-1 accent-gray-800 rounded-full cursor-pointer appearance-none bg-gray-300 [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-gray-800 [&::-webkit-slider-thumb]:border-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:shadow-none">
+                                {{-- Zoom slider --}}
+                                <input type="range" min="1" max="3" step="0.01" x-model="coverZoom" @input="drawCoverCanvas()" class="w-36 h-1 accent-gray-800 rounded-full cursor-pointer appearance-none bg-gray-300 [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-gray-800 [&::-webkit-slider-thumb]:border-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:shadow-none">
+                                {{-- Large image icon --}}
                                 <svg class="w-5 h-5 text-gray-500 shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M1 5a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H3a2 2 0 01-2-2V5zm4 3a1 1 0 100-2 1 1 0 000 2zm10 4l-3-3-2 2-3-3-4 4h12z" clip-rule="evenodd"/></svg>
 
                                 <div class="w-px h-5 bg-gray-200 shrink-0 mx-1"></div>
 
+                                {{-- Rotate left --}}
                                 <button type="button" @click="coverRotation = (coverRotation - 90) % 360; drawCoverCanvas()" class="p-1.5 text-gray-800 hover:text-black rounded-lg hover:bg-gray-200 transition-all shrink-0" title="Xoay trái">
                                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" /></svg>
                                 </button>
+                                {{-- Rotate right --}}
                                 <button type="button" @click="coverRotation = (coverRotation + 90) % 360; drawCoverCanvas()" class="p-1.5 text-gray-800 hover:text-black rounded-lg hover:bg-gray-200 transition-all shrink-0" title="Xoay phải">
                                     <svg class="w-5 h-5 -scale-x-100" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" /></svg>
                                 </button>
@@ -268,7 +277,7 @@
 
                             {{-- Bottom row: Reset left, Cancel/Confirm right --}}
                             <div class="flex items-center justify-between pt-3 border-t border-gray-100">
-                                <button type="button" @click="resetCoverEditor()" class="text-sm font-semibold text-[#5865F2] hover:text-[#4752c4] transition-colors">
+                                <button type="button" @click="resetCoverEditor()" class="text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors">
                                     Đặt lại
                                 </button>
                                 <div class="flex items-center gap-3">
@@ -306,6 +315,8 @@
                     avatarImg: null,
                     avatarZoom: 1,
                     avatarRotation: 0,
+                    avatarPanX: 0,
+                    avatarPanY: 0,
                     avatarFile: null,
                     // Editor state — Cover
                     coverNewSrc: null,
@@ -313,7 +324,82 @@
                     coverImg: null,
                     coverZoom: 1,
                     coverRotation: 0,
+                    coverPanX: 0,
+                    coverPanY: 0,
                     coverFile: null,
+
+                    // Crop box state (values in % of stage dimensions 0-1)
+                    crop: { x: 0.05, y: 0.1, w: 0.9, h: 0.8 },
+                    _cropAction: null,   // 'move' | 'resize-nw' | 'resize-ne' | 'resize-sw' | 'resize-se' | 'resize-n' | 'resize-s' | 'resize-e' | 'resize-w'
+                    _cropDragStart: null,
+                    _cropAtDragStart: null,
+                    cropHandles: [
+                        { id: 'nw', cx: 0,   cy: 0   },
+                        { id: 'ne', cx: 1,   cy: 0   },
+                        { id: 'sw', cx: 0,   cy: 1   },
+                        { id: 'se', cx: 1,   cy: 1   },
+                        { id: 'n',  cx: 0.5, cy: 0   },
+                        { id: 's',  cx: 0.5, cy: 1   },
+                        { id: 'w',  cx: 0,   cy: 0.5 },
+                        { id: 'e',  cx: 1,   cy: 0.5 },
+                    ],
+
+                    isPanning: false,
+                    panStartX: 0,
+                    panStartY: 0,
+                    panType: null,
+
+                    // ─── Panning logic ───
+                    startPan(e, type) {
+                        this.isPanning = true;
+                        this.panType = type;
+                        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                        this.panStartX = clientX;
+                        this.panStartY = clientY;
+                    },
+                    pan(e, activeType) {
+                        if (!this.isPanning || this.panType !== activeType) return;
+                        
+                        const canvasEl = this.panType === 'cover' ? this.$refs.coverCanvas : this.$refs.avatarCanvas;
+                        if (!canvasEl) return;
+                        const rect = canvasEl.getBoundingClientRect();
+                        const scaleScale = canvasEl.width / rect.width;
+                        
+                        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                        const screenDx = clientX - this.panStartX;
+                        const screenDy = clientY - this.panStartY;
+                        
+                        // Chuyển đổi khoảng cách di chuyển từ màn hình sang pixel nội bộ của Canvas
+                        const dx = screenDx * scaleScale;
+                        const dy = screenDy * scaleScale;
+
+                        if (this.panType === 'avatar') {
+                            const rad = (this.avatarRotation * Math.PI) / -180;
+                            const rdx = dx * Math.cos(rad) - dy * Math.sin(rad);
+                            const rdy = dx * Math.sin(rad) + dy * Math.cos(rad);
+                            
+                            this.avatarPanX += rdx;
+                            this.avatarPanY += rdy;
+                            this.drawAvatarCanvas();
+                        } else {
+                            const rad = (this.coverRotation * Math.PI) / -180;
+                            const rdx = dx * Math.cos(rad) - dy * Math.sin(rad);
+                            const rdy = dx * Math.sin(rad) + dy * Math.cos(rad);
+                            
+                            this.coverPanX += rdx;
+                            this.coverPanY += rdy;
+                            this.drawCoverCanvas();
+                        }
+                        
+                        this.panStartX = clientX;
+                        this.panStartY = clientY;
+                    },
+                    endPan() {
+                        this.isPanning = false;
+                        this.panType = null;
+                    },
 
                     // ─── Open/Close ───
                     openAvatar() {
@@ -322,6 +408,8 @@
                         this.avatarNewSrc = null;
                         this.avatarZoom = 1;
                         this.avatarRotation = 0;
+                        this.avatarPanX = 0;
+                        this.avatarPanY = 0;
                         document.body.classList.add('overflow-hidden');
                     },
                     openCover() {
@@ -330,6 +418,8 @@
                         this.coverNewSrc = null;
                         this.coverZoom = 1;
                         this.coverRotation = 0;
+                        this.coverPanX = 0;
+                        this.coverPanY = 0;
                         document.body.classList.add('overflow-hidden');
                     },
                     closeModal() {
@@ -376,38 +466,84 @@
                         const circleDiam = circleR * 2;
 
                         // At zoom=1, image should exactly fill the circle
-                        const baseScale = Math.max(circleDiam / img.width, circleDiam / img.height);
-
-                        ctx.save();
-                        ctx.translate(W / 2, H / 2);
-                        ctx.rotate((this.avatarRotation * Math.PI) / 180);
+                        let isRotated = (this.avatarRotation % 180 !== 0);
+                        let imgW = isRotated ? img.height : img.width;
+                        let imgH = isRotated ? img.width : img.height;
+                        const baseScale = Math.max(circleDiam / imgW, circleDiam / imgH);
 
                         const finalScale = baseScale * this.avatarZoom;
                         const dw = img.width * finalScale;
                         const dh = img.height * finalScale;
-                        ctx.drawImage(img, -dw / 2, -dh / 2, dw, dh);
-                        ctx.restore();
 
-                        // Draw dark overlay with circular cutout
+                        // Clamp pan to not go beyond bounds
+                        let effCropW = isRotated ? circleDiam : circleDiam;
+                        let effCropH = isRotated ? circleDiam : circleDiam;
+                        let maxPanX = Math.max(0, Math.abs(dw - effCropW) / 2);
+                        let maxPanY = Math.max(0, Math.abs(dh - effCropH) / 2);
+                        this.avatarPanX = Math.max(-maxPanX, Math.min(maxPanX, this.avatarPanX));
+                        this.avatarPanY = Math.max(-maxPanY, Math.min(maxPanY, this.avatarPanY));
+
+                        ctx.clearRect(0, 0, W, H);
+
+                        // 1. Blurred background
                         ctx.save();
-                        ctx.fillStyle = 'rgba(43, 45, 49, 0.6)';
-                        ctx.beginPath();
-                        ctx.rect(0, 0, W, H);
-                        ctx.arc(W / 2, H / 2, circleR, 0, Math.PI * 2, true);
-                        ctx.fill();
+                        ctx.translate(W / 2, H / 2);
+                        ctx.rotate((this.avatarRotation * Math.PI) / 180);
+                        ctx.filter = 'blur(16px) brightness(0.4)';
+                        ctx.drawImage(img, (-dw / 2) + this.avatarPanX, (-dh / 2) + this.avatarPanY, dw, dh);
                         ctx.restore();
 
-                        // Circle border
+                        // 2. Clear image inside circle
+                        ctx.save();
                         ctx.beginPath();
                         ctx.arc(W / 2, H / 2, circleR, 0, Math.PI * 2);
-                        ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+                        ctx.clip();
+                        
+                        ctx.translate(W / 2, H / 2);
+                        ctx.rotate((this.avatarRotation * Math.PI) / 180);
+                        ctx.drawImage(img, (-dw / 2) + this.avatarPanX, (-dh / 2) + this.avatarPanY, dw, dh);
+                        ctx.restore();
+
+                        // 3. Dashed border
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.arc(W / 2, H / 2, circleR, 0, Math.PI * 2);
+                        ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
                         ctx.lineWidth = 2;
+                        ctx.setLineDash([8, 6]);
                         ctx.stroke();
+
+                        // 4. Center Anchor Icon
+                        ctx.setLineDash([]);
+                        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                        ctx.beginPath();
+                        ctx.arc(W / 2, H / 2, 16, 0, Math.PI * 2);
+                        ctx.fill();
+
+                        ctx.strokeStyle = '#333';
+                        ctx.lineWidth = 1.5;
+                        ctx.beginPath();
+                        const cX = W / 2, cY = H / 2;
+                        const s = 6;
+                        ctx.moveTo(cX - s, cY); ctx.lineTo(cX + s, cY);
+                        ctx.moveTo(cX - s, cY); ctx.lineTo(cX - s + 3, cY - 3);
+                        ctx.moveTo(cX - s, cY); ctx.lineTo(cX - s + 3, cY + 3);
+                        ctx.moveTo(cX + s, cY); ctx.lineTo(cX + s - 3, cY - 3);
+                        ctx.moveTo(cX + s, cY); ctx.lineTo(cX + s - 3, cY + 3);
+                        ctx.moveTo(cX, cY - s); ctx.lineTo(cX, cY + s);
+                        ctx.moveTo(cX, cY - s); ctx.lineTo(cX - 3, cY - s + 3);
+                        ctx.moveTo(cX, cY - s); ctx.lineTo(cX + 3, cY - s + 3);
+                        ctx.moveTo(cX, cY + s); ctx.lineTo(cX - 3, cY + s - 3);
+                        ctx.moveTo(cX, cY + s); ctx.lineTo(cX + 3, cY + s - 3);
+                        ctx.stroke();
+                        ctx.restore();
                     },
 
                     resetAvatarEditor() {
                         this.avatarZoom = 1;
                         this.avatarRotation = 0;
+                        this.avatarPanX = 0;
+                        this.avatarPanY = 0;
                         this.drawAvatarCanvas();
                     },
 
@@ -434,11 +570,19 @@
                         ctx.translate(size / 2, size / 2);
                         ctx.rotate((this.avatarRotation * Math.PI) / 180);
 
-                        const baseScale = Math.max(size / img.width, size / img.height);
+                        let isRotated = (this.avatarRotation % 180 !== 0);
+                        let imgW = isRotated ? img.height : img.width;
+                        let imgH = isRotated ? img.width : img.height;
+                        const baseScale = Math.max(size / imgW, size / imgH);
                         const finalScale = baseScale * this.avatarZoom;
                         const dw = img.width * finalScale;
                         const dh = img.height * finalScale;
-                        ctx.drawImage(img, -dw / 2, -dh / 2, dw, dh);
+                        
+                        // Scale the panning offset from Preview Canvas size to Export Canvas size
+                        const previewCropSize = 360 * 0.8; // 288 is the circle diameter in drawAvatarCanvas
+                        const panRatio = size / previewCropSize;
+                        
+                        ctx.drawImage(img, (-dw / 2) + (this.avatarPanX * panRatio), (-dh / 2) + (this.avatarPanY * panRatio), dw, dh);
                         ctx.restore();
 
                         offscreen.toBlob((blob) => {
@@ -455,7 +599,7 @@
                         }, 'image/png');
                     },
 
-                    // ─── Cover Upload & Editor ───
+                    // ─── Cover Upload & Discord-style Canvas Editor ───
                     handleCoverUpload(e) {
                         const file = e.target.files[0];
                         if (!file) return;
@@ -467,6 +611,8 @@
                             this.coverImg.onload = () => {
                                 this.coverZoom = 1;
                                 this.coverRotation = 0;
+                                this.coverPanX = 0;
+                                this.coverPanY = 0;
                                 this.coverStep = 'edit';
                                 this.$nextTick(() => this.drawCoverCanvas());
                             };
@@ -483,32 +629,83 @@
                         const W = canvas.width, H = canvas.height;
                         const img = this.coverImg;
 
+                        // Clear
                         ctx.clearRect(0, 0, W, H);
-                        ctx.fillStyle = '#2B2D31';
+                        ctx.fillStyle = '#2B2D31'; // Dark background behind
                         ctx.fillRect(0, 0, W, H);
 
-                        // At zoom=1, image fills the canvas exactly
-                        const baseScale = Math.max(W / img.width, H / img.height);
-
-                        ctx.save();
-                        ctx.translate(W / 2, H / 2);
-                        ctx.rotate((this.coverRotation * Math.PI) / 180);
-
+                        let isRotated = (this.coverRotation % 180 !== 0);
+                        let imgW = isRotated ? img.height : img.width;
+                        let imgH = isRotated ? img.width : img.height;
+                        
+                        // Scale to cover the entire canvas
+                        const baseScale = Math.max(W / imgW, H / imgH);
                         const finalScale = baseScale * this.coverZoom;
                         const dw = img.width * finalScale;
                         const dh = img.height * finalScale;
-                        ctx.drawImage(img, -dw / 2, -dh / 2, dw, dh);
+
+                        // Clamp pan
+                        let maxPanX = Math.max(0, Math.abs(dw - W) / 2);
+                        let maxPanY = Math.max(0, Math.abs(dh - H) / 2);
+                        this.coverPanX = Math.max(-maxPanX, Math.min(maxPanX, this.coverPanX));
+                        this.coverPanY = Math.max(-maxPanY, Math.min(maxPanY, this.coverPanY));
+
+                        ctx.save();
+                        // 1. Clear inside clip 
+                        ctx.beginPath();
+                        ctx.rect(0, 0, W, H);
+                        ctx.clip();
+                        
+                        ctx.translate(W / 2, H / 2);
+                        ctx.rotate((this.coverRotation * Math.PI) / 180);
+                        ctx.drawImage(img, (-dw / 2) + this.coverPanX, (-dh / 2) + this.coverPanY, dw, dh);
+                        ctx.restore();
+
+                        // 2. Grid guide (3x3)
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+                        ctx.lineWidth = 1;
+                        ctx.setLineDash([4, 4]);
+                        
+                        // verticals
+                        ctx.moveTo(W / 3, 0); ctx.lineTo(W / 3, H);
+                        ctx.moveTo((W / 3) * 2, 0); ctx.lineTo((W / 3) * 2, H);
+                        
+                        // horizontals
+                        ctx.moveTo(0, H / 3); ctx.lineTo(W, H / 3);
+                        ctx.moveTo(0, (H / 3) * 2); ctx.lineTo(W, (H / 3) * 2);
+                        ctx.stroke();
+
+                        // 3. Center Anchor Icon
+                        ctx.setLineDash([]);
+                        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                        ctx.beginPath();
+                        ctx.arc(W / 2, H / 2, 12, 0, Math.PI * 2);
+                        ctx.fill();
+
+                        ctx.strokeStyle = '#333';
+                        ctx.lineWidth = 1.5;
+                        ctx.beginPath();
+                        const cX = W / 2, cY = H / 2;
+                        const s = 4;
+                        ctx.moveTo(cX - s, cY); ctx.lineTo(cX + s, cY);
+                        ctx.moveTo(cX, cY - s); ctx.lineTo(cX, cY + s);
+                        ctx.stroke();
                         ctx.restore();
                     },
 
                     resetCoverEditor() {
                         this.coverZoom = 1;
                         this.coverRotation = 0;
+                        this.coverPanX = 0;
+                        this.coverPanY = 0;
                         this.drawCoverCanvas();
                     },
 
                     confirmCover() {
-                        const W = 680, H = 240;
+                        const W = 1050; // Export width for Cover
+                        const H = 450;  // 21:9 ratio (1050 / 2.333...)
                         const img = this.coverImg;
                         if (!img) return;
 
@@ -517,15 +714,28 @@
                         offscreen.height = H;
                         const ctx = offscreen.getContext('2d');
 
-                        const baseScale = Math.max(W / img.width, H / img.height);
+                        ctx.fillStyle = '#ffffff';
+                        ctx.fillRect(0, 0, W, H);
+
+                        ctx.save();
+                        ctx.rect(0, 0, W, H);
+                        ctx.clip();
 
                         ctx.translate(W / 2, H / 2);
                         ctx.rotate((this.coverRotation * Math.PI) / 180);
 
+                        let isRotated = (this.coverRotation % 180 !== 0);
+                        let imgW = isRotated ? img.height : img.width;
+                        let imgH = isRotated ? img.width : img.height;
+                        const baseScale = Math.max(W / imgW, H / imgH);
                         const finalScale = baseScale * this.coverZoom;
                         const dw = img.width * finalScale;
                         const dh = img.height * finalScale;
-                        ctx.drawImage(img, -dw / 2, -dh / 2, dw, dh);
+                        
+                        const panRatio = W / 630;
+                        
+                        ctx.drawImage(img, (-dw / 2) + (this.coverPanX * panRatio), (-dh / 2) + (this.coverPanY * panRatio), dw, dh);
+                        ctx.restore();
 
                         offscreen.toBlob((blob) => {
                             if (!blob) return;
@@ -534,7 +744,7 @@
                             dt.items.add(file);
                             const form = document.getElementById('profile-information-form');
                             const input = form.querySelector('input[name=cover_photo]');
-                            input.files = dt.files;
+                            if (input) input.files = dt.files;
                             this.coverFinalSrc = URL.createObjectURL(blob);
                             this.$dispatch('cover-confirmed');
                             this.closeModal();

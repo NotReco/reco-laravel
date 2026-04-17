@@ -145,10 +145,6 @@ class User extends Authenticatable
         return $this->hasMany(Article::class);
     }
 
-    public function chatMessages()
-    {
-        return $this->hasMany(ChatMessage::class);
-    }
 
     /**
      * Tùy chỉnh hệ thống gửi Email khôi phục mật khẩu.
