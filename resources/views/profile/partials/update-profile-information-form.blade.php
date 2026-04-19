@@ -1,12 +1,6 @@
 <section>
-    <header>
-        <h2 class="text-xl font-display font-bold text-gray-900">
-            Thông tin Hồ sơ
-        </h2>
-
-        <p class="mt-1 text-sm text-gray-500">
-            Cập nhật ảnh đại diện, email và các thông tin cá nhân của bạn.
-        </p>
+    <header class="pb-1">
+        <h2 class="text-lg font-bold text-gray-900">Thông tin cá nhân</h2>
     </header>
 
     <form id="send-verification" method="post" action="{{ route('verification.send') }}">
@@ -14,7 +8,7 @@
     </form>
 
     <form id="profile-information-form" data-unsaved-bar data-unsaved-title="Thông tin hồ sơ" method="post"
-        action="{{ route('profile.update') }}" enctype="multipart/form-data" class="mt-6 space-y-10"
+        action="{{ route('profile.update') }}" enctype="multipart/form-data" class="mt-3 space-y-6"
         x-data="{
             removeAvatar: false,
             removeCover: false,
@@ -107,39 +101,38 @@
             {{-- ══════════════════════════════════════════════════════════════
                  NHÓM 2: Hình ảnh (Discord-style compact)
                  ══════════════════════════════════════════════════════════════ --}}
-            <div class="space-y-6">
+            {{-- Avatar + Cover: cùng hàng --}}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 py-2">
                 {{-- Avatar --}}
-                <div class="space-y-3">
-                    <h3 class="text-base font-bold text-gray-800">Ảnh Đại Diện</h3>
-                    <div class="flex flex-wrap items-center gap-3">
+                <div class="space-y-2.5 p-4 rounded-2xl border border-gray-200 bg-gray-50/40">
+                    <h3 class="text-sm font-bold text-gray-800">Ảnh Đại Diện</h3>
+                    <div class="flex flex-wrap items-center gap-2">
                         <button type="button" @click="$dispatch('open-avatar-modal')" :disabled="isSaving"
-                            class="px-5 py-2.5 text-sm font-bold text-white rounded-xl bg-[#5865F2] hover:bg-[#4752c4] transition-all shadow-lg shadow-indigo-500/20 active:scale-95 disabled:opacity-50 disabled:pointer-events-none">
+                            class="px-4 py-2 text-sm font-bold text-white rounded-xl bg-[#5865F2] hover:bg-[#4752c4] transition-all shadow-md shadow-indigo-500/20 active:scale-95 disabled:opacity-50 disabled:pointer-events-none">
                             Đổi Ảnh Đại Diện
                         </button>
                         <template x-if="!removeAvatar && hasAvatar">
                             <button type="button" @click="removeAvatar = true; $nextTick(() => { document.getElementById('profile-information-form').dispatchEvent(new Event('change', { bubbles: true })) })" :disabled="isSaving"
-                                class="px-5 py-2.5 text-sm font-bold text-white rounded-xl bg-[#4E5058] hover:bg-[#404249] transition-all shadow-lg shadow-gray-500/10 active:scale-95 disabled:opacity-50 disabled:pointer-events-none">
-                                Xóa Ảnh Đại Diện
+                                class="px-4 py-2 text-sm font-bold text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none">
+                                Xóa
                             </button>
                         </template>
                     </div>
                     <x-input-error class="mt-1" :messages="$errors->get('avatar')" />
                 </div>
 
-                <div class="h-px bg-gray-200/60"></div>
-
                 {{-- Cover --}}
-                <div class="space-y-3">
-                    <h3 class="text-base font-bold text-gray-800">Ảnh Bìa</h3>
-                    <div class="flex flex-wrap items-center gap-3">
+                <div class="space-y-2.5 p-4 rounded-2xl border border-gray-200 bg-gray-50/40">
+                    <h3 class="text-sm font-bold text-gray-800">Ảnh Bìa</h3>
+                    <div class="flex flex-wrap items-center gap-2">
                         <button type="button" @click="$dispatch('open-cover-modal')" :disabled="isSaving"
-                            class="px-5 py-2.5 text-sm font-bold text-white rounded-xl bg-[#5865F2] hover:bg-[#4752c4] transition-all shadow-lg shadow-indigo-500/20 active:scale-95 disabled:opacity-50 disabled:pointer-events-none">
+                            class="px-4 py-2 text-sm font-bold text-white rounded-xl bg-[#5865F2] hover:bg-[#4752c4] transition-all shadow-md shadow-indigo-500/20 active:scale-95 disabled:opacity-50 disabled:pointer-events-none">
                             Thay Ảnh Bìa
                         </button>
                         <template x-if="!removeCover && hasCover">
                             <button type="button" @click="removeCover = true; $nextTick(() => { document.getElementById('profile-information-form').dispatchEvent(new Event('change', { bubbles: true })) })" :disabled="isSaving"
-                                class="px-5 py-2.5 text-sm font-bold text-white rounded-xl bg-[#4E5058] hover:bg-[#404249] transition-all shadow-lg shadow-gray-500/10 active:scale-95 disabled:opacity-50 disabled:pointer-events-none">
-                                Xóa Ảnh Bìa
+                                class="px-4 py-2 text-sm font-bold text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none">
+                                Xóa
                             </button>
                         </template>
                     </div>

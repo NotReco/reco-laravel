@@ -37,9 +37,9 @@ class ReviewController extends Controller
      */
     public function approve(Review $review)
     {
-        $review->update(['status' => 'approved']);
+        $review->update(['status' => 'published']);
 
-        return back()->with('success', 'Review đã được duyệt.');
+        return back()->with('success', 'Review đã được duyệt và công khai.');
     }
 
     /**

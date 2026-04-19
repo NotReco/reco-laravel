@@ -34,6 +34,8 @@ class Movie extends Model
         'view_count',
         'is_approved',
         'status',
+        'is_featured',
+        'featured_order',
         'created_by_user_id',
     ];
 
@@ -42,6 +44,7 @@ class Movie extends Model
         return [
             'release_date' => 'date',
             'is_approved' => 'boolean',
+            'is_featured' => 'boolean',
             'avg_rating' => 'decimal:1',
         ];
     }

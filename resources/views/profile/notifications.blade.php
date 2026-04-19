@@ -11,7 +11,7 @@
         set limit(val) { this.limits[this.tab] = val; },
         get notifications() {
             const list = this.notificationsData[this.tab] || [];
-            let filtered = list.filter(n => n.id !== (this.pendingAction ? this.pendingAction.id : null));
+            let filtered = list.filter(n => !(this.pendingAction && this.pendingAction.type === 'delete' && n.id === this.pendingAction.id));
             return this.tab === 'unread' ? filtered.filter(n => !n.read_at) : filtered;
         },
         async fetchNotifications() {
@@ -63,10 +63,13 @@
                     '/api/notifications/' + actionObj.id + '/turn-off';
                 await fetch(url, {
                     method: actionObj.type === 'delete' ? 'DELETE' : 'POST',
-                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
+                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                    keepalive: true
                 });
-                this.notificationsData.all = this.notificationsData.all.filter(n => n.id !== actionObj.id);
-                this.notificationsData.unread = this.notificationsData.unread.filter(n => n.id !== actionObj.id);
+                if (actionObj.type === 'delete') {
+                    this.notificationsData.all = this.notificationsData.all.filter(n => n.id !== actionObj.id);
+                    this.notificationsData.unread = this.notificationsData.unread.filter(n => n.id !== actionObj.id);
+                }
             } catch (e) {}
         },
         deleteNotif(id) {
@@ -233,8 +236,9 @@
                                     </template>
 
                                     <template x-for="item in notifications.slice(0, limit)" :key="item.id">
-                                        <div class="relative group" x-data="{ itemMenuOpen: false }"
-                                            @mousedown.outside="itemMenuOpen = false">
+                                        <div class="relative group transition-all" x-data="{ itemMenuOpen: false, openUp: false }"
+                                            @mousedown.outside="itemMenuOpen = false"
+                                            :class="itemMenuOpen ? 'z-[60]' : 'z-10'">
                                             <a :href="item.data.url ? item.data.url : '#'"
                                                 @click.prevent="if(!item.read_at) markAsRead(item.id); if($event.button === 0 && item.data.url) { window.location.href = item.data.url; }"
                                                 class="block px-2 mx-2 mb-0.5 py-2.5 rounded-lg cursor-pointer flex gap-3 transition"
@@ -285,23 +289,28 @@
 
                                             {{-- Absolute Overlay for Dots/Badge --}}
                                             <div
-                                                class="absolute top-1/2 right-4 -translate-y-1/2 flex items-center justify-center z-10 gap-2">
-                                                <button @click.stop.prevent="itemMenuOpen = !itemMenuOpen"
-                                                    class="w-8 h-8 rounded-full bg-white border border-gray-200 shadow-sm flex items-center justify-center hover:bg-gray-50 transition opacity-0 group-hover:opacity-100 focus:opacity-100"
-                                                    :class="{ 'opacity-100': itemMenuOpen }">
+                                                class="absolute top-1/2 right-4 -translate-y-1/2 flex items-center justify-center z-10 w-8 h-8">
+                                                <div x-show="!item.read_at"
+                                                    class="w-3 h-3 rounded-full bg-sky-500 shrink-0"></div>
+                                                <button @click.stop.prevent="
+                                                    const rect = $el.getBoundingClientRect();
+                                                    openUp = (window.innerHeight - rect.bottom) < 220;
+                                                    itemMenuOpen = !itemMenuOpen;
+                                                "
+                                                    class="absolute inset-0 w-8 h-8 rounded-full bg-white border border-gray-200 shadow-sm flex items-center justify-center hover:bg-gray-50 transition opacity-0 group-hover:opacity-100 focus:opacity-100"
+                                                    :class="itemMenuOpen ? 'opacity-100 bg-gray-50 border-gray-300' : ''">
                                                     <svg class="w-5 h-5 text-gray-600" fill="currentColor"
                                                         viewBox="0 0 24 24">
                                                         <path
                                                             d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
                                                     </svg>
                                                 </button>
-                                                <div x-show="!item.read_at"
-                                                    class="w-3 h-3 rounded-full bg-sky-500 shrink-0"></div>
                                             </div>
 
                                             {{-- Item Menu Dropdown --}}
                                             <div x-show="itemMenuOpen" style="display: none;"
-                                                class="absolute right-8 top-12 w-[300px] sm:w-[350px] bg-white border border-gray-200 rounded-xl shadow-xl py-2 z-50">
+                                                class="absolute right-8 w-[300px] sm:w-[350px] bg-white border border-gray-200 rounded-xl shadow-xl py-2 z-50"
+                                                :class="openUp ? 'bottom-8' : 'top-12'">
                                                 <template x-if="item.read_at">
                                                     <button @click.stop="markAsUnread(item.id); itemMenuOpen = false"
                                                         class="w-full text-left px-4 py-2.5 hover:bg-gray-50 text-[15px] text-gray-900 font-semibold flex items-center gap-3 transition">
@@ -372,7 +381,7 @@
 
         {{-- Snackbar for Undo Delete/Mute --}}
         <div x-show="pendingAction" style="display: none;"
-            class="fixed bottom-6 left-6 z-[60] flex items-center bg-[#323436] text-white px-4 py-3 rounded-xl shadow-xl min-w-[300px]">
+            class="fixed bottom-6 right-6 z-[60] flex items-center bg-[#323436] text-white px-4 py-3 rounded-xl shadow-xl min-w-[300px]">
 
             <span class="text-[15px] mr-auto font-medium"
                 x-text="pendingAction && pendingAction.type === 'delete' ? 'Đã xóa thông báo.' : 'Bạn sẽ không nhận được thông báo tương tự nữa.'"></span>

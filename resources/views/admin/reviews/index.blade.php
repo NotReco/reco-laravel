@@ -7,9 +7,11 @@
                class="input-dark text-sm flex-1 py-2.5">
         <select name="status" class="input-dark text-sm w-40 py-2.5">
             <option value="">Tất cả</option>
-            <option value="approved" {{ request('status') === 'approved' ? 'selected' : '' }}>Đã duyệt</option>
+            <option value="published" {{ request('status') === 'published' ? 'selected' : '' }}>Đã duyệt</option>
             <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Chờ duyệt</option>
             <option value="rejected" {{ request('status') === 'rejected' ? 'selected' : '' }}>Từ chối</option>
+            <option value="draft" {{ request('status') === 'draft' ? 'selected' : '' }}>Nháp</option>
+            <option value="hidden" {{ request('status') === 'hidden' ? 'selected' : '' }}>Ẩn</option>
         </select>
         <button type="submit" class="btn-secondary py-2.5 px-5 text-sm">Lọc</button>
     </form>
@@ -52,9 +54,21 @@
                         </td>
                         <td class="px-5 py-3">
                             @php
-                                $status = $review->status ?? 'approved';
-                                $colors = ['approved' => 'emerald', 'pending' => 'amber', 'rejected' => 'red'];
-                                $labels = ['approved' => 'Đã duyệt', 'pending' => 'Chờ duyệt', 'rejected' => 'Từ chối'];
+                                $status = $review->status ?? 'draft';
+                                $colors = [
+                                    'published' => 'emerald',
+                                    'pending'   => 'amber',
+                                    'rejected'  => 'red',
+                                    'draft'     => 'slate',
+                                    'hidden'    => 'purple',
+                                ];
+                                $labels = [
+                                    'published' => 'Đã duyệt',
+                                    'pending'   => 'Chờ duyệt',
+                                    'rejected'  => 'Từ chối',
+                                    'draft'     => 'Nháp',
+                                    'hidden'    => 'Ẩn',
+                                ];
                             @endphp
                             <span class="badge text-[10px] bg-{{ $colors[$status] ?? 'gray' }}-500/20 text-{{ $colors[$status] ?? 'gray' }}-400">
                                 {{ $labels[$status] ?? $status }}

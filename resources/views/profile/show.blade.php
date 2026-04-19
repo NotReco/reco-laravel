@@ -189,14 +189,17 @@
         }
 
         .btn-primary-minimal {
-            background: #0f172a;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
             color: #fff;
-            border: 1px solid transparent;
-            transition: background 0.2s;
+            border: 1px solid rgba(99,102,241,0.3);
+            box-shadow: 0 2px 10px rgba(99,102,241,0.25);
+            transition: all 0.2s;
         }
 
         .btn-primary-minimal:hover {
-            background: #1e293b;
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            box-shadow: 0 4px 16px rgba(99,102,241,0.4);
+            transform: translateY(-1px);
         }
     </style>
 
@@ -285,26 +288,56 @@
                                         '12' => 'Tháng 12',
                                     ];
                                 @endphp
-                                <p
-                                    class="text-[13px] text-slate-500 flex items-center justify-center md:justify-start gap-2">
+                                <p class="text-[13px] text-slate-500 flex items-center justify-center md:justify-start gap-2 flex-wrap">
                                     @if ($user->pronouns)
-                                        <span
-                                            class="font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded">{{ $user->pronouns }}</span>
+                                        <span class="font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded">{{ $user->pronouns }}</span>
+                                        <span class="text-slate-300">•</span>
+                                    @elseif ($isOwnProfile)
+                                        <a href="{{ route('profile.edit') }}#pronouns"
+                                           class="inline-flex items-center gap-1 text-slate-400 hover:text-slate-600 border border-dashed border-slate-300 hover:border-slate-400 px-2 py-0.5 rounded text-[11px] transition-colors">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                            Thêm đại từ
+                                        </a>
                                         <span class="text-slate-300">•</span>
                                     @endif
-                                    <span>Thành viên từ {{ $months[$user->created_at->format('m')] }},
-                                        {{ $user->created_at->format('Y') }}</span>
+                                    @if ($user->location)
+                                        <span class="inline-flex items-center gap-1">
+                                            <svg class="w-3.5 h-3.5 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                            </svg>
+                                            {{ $user->location }}
+                                        </span>
+                                        <span class="text-slate-300">•</span>
+                                    @elseif ($isOwnProfile)
+                                        <a href="{{ route('profile.edit') }}#location"
+                                           class="inline-flex items-center gap-1 text-slate-400 hover:text-slate-600 border border-dashed border-slate-300 hover:border-slate-400 px-2 py-0.5 rounded text-[11px] transition-colors">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                            Thêm địa điểm
+                                        </a>
+                                        <span class="text-slate-300">•</span>
+                                    @endif
+                                    <span class="inline-flex items-center gap-1">
+                                        <svg class="w-3.5 h-3.5 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                        </svg>
+                                        Thành viên từ {{ $months[$user->created_at->format('m')] }}, {{ $user->created_at->format('Y') }}
+                                    </span>
                                 </p>
 
                                 @if ($user->movie_quote)
-                                    <div
-                                        class="mt-3.5 bg-slate-50/70 border border-slate-100 rounded-xl p-3 max-w-lg inline-block text-left relative overflow-hidden">
+                                    <div class="mt-3.5 bg-slate-50/70 border border-slate-100 rounded-xl p-3 max-w-lg inline-block text-left relative overflow-hidden">
                                         <div class="absolute top-0 left-0 w-1 h-full bg-slate-300"></div>
-                                        <p
-                                            class="text-slate-600 italic text-[13px] font-medium leading-relaxed pl-2 relative z-10 w-full break-words">
+                                        <p class="text-slate-600 italic text-[13px] font-medium leading-relaxed pl-2 relative z-10 w-full break-words">
                                             "{{ $user->movie_quote }}"
                                         </p>
                                     </div>
+                                @elseif ($isOwnProfile)
+                                    <a href="{{ route('profile.edit') }}#movie_quote"
+                                       class="mt-3 inline-flex items-center gap-1.5 text-slate-400 hover:text-slate-600 border border-dashed border-slate-300 hover:border-slate-400 rounded-xl px-3 py-2 text-[12px] transition-colors">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                        Thêm châm ngôn yêu thích
+                                    </a>
                                 @endif
                             </div>
 
@@ -363,7 +396,7 @@
                         <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
                             {{-- Đánh giá --}}
                             <div
-                                class="flex items-center gap-3 bg-gradient-to-br from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 p-3 rounded-xl border border-indigo-400/30 transition-all shadow-md shadow-indigo-500/20 text-white">
+                                class="flex items-center gap-3 bg-gradient-to-br from-indigo-500 to-violet-600 p-3 rounded-xl border border-indigo-400/30 shadow-md shadow-indigo-500/20 text-white">
                                 <div
                                     class="w-[38px] h-[38px] rounded-lg bg-white/20 border border-white/30 backdrop-blur-sm flex items-center justify-center shadow-inner shrink-0">
                                     <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -383,7 +416,7 @@
 
                             {{-- Yêu thích --}}
                             <div
-                                class="flex items-center gap-3 bg-gradient-to-br from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 p-3 rounded-xl border border-pink-400/30 transition-all shadow-md shadow-pink-500/20 text-white">
+                                class="flex items-center gap-3 bg-gradient-to-br from-pink-500 to-rose-600 p-3 rounded-xl border border-pink-400/30 shadow-md shadow-pink-500/20 text-white">
                                 <div
                                     class="w-[38px] h-[38px] rounded-lg bg-white/20 border border-white/30 backdrop-blur-sm flex items-center justify-center shadow-inner shrink-0">
                                     <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -403,7 +436,7 @@
 
                             {{-- Người theo dõi --}}
                             <div
-                                class="flex items-center gap-3 bg-gradient-to-br from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 p-3 rounded-xl border border-sky-400/30 transition-all shadow-md shadow-sky-500/20 text-white">
+                                class="flex items-center gap-3 bg-gradient-to-br from-sky-500 to-blue-600 p-3 rounded-xl border border-sky-400/30 shadow-md shadow-sky-500/20 text-white">
                                 <div
                                     class="w-[38px] h-[38px] rounded-lg bg-white/20 border border-white/30 backdrop-blur-sm flex items-center justify-center shadow-inner shrink-0">
                                     <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -422,7 +455,7 @@
 
                             {{-- Đang theo dõi --}}
                             <div
-                                class="flex items-center gap-3 bg-gradient-to-br from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 p-3 rounded-xl border border-emerald-400/30 transition-all shadow-md shadow-emerald-500/20 text-white">
+                                class="flex items-center gap-3 bg-gradient-to-br from-emerald-500 to-teal-600 p-3 rounded-xl border border-emerald-400/30 shadow-md shadow-emerald-500/20 text-white">
                                 <div
                                     class="w-[38px] h-[38px] rounded-lg bg-white/20 border border-white/30 backdrop-blur-sm flex items-center justify-center shadow-inner shrink-0">
                                     <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -443,7 +476,7 @@
 
                             {{-- Uy Tín --}}
                             <div
-                                class="flex items-center gap-3 bg-gradient-to-br from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 p-3 rounded-xl border border-amber-400/30 transition-all shadow-md shadow-amber-500/20 text-white col-span-2 lg:col-span-1">
+                                class="flex items-center gap-3 bg-gradient-to-br from-amber-500 to-orange-600 p-3 rounded-xl border border-amber-400/30 shadow-md shadow-amber-500/20 text-white col-span-2 lg:col-span-1">
                                 <div
                                     class="w-[38px] h-[38px] rounded-lg bg-white/20 border border-white/30 backdrop-blur-sm flex items-center justify-center shadow-inner shrink-0">
                                     <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">

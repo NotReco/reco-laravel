@@ -22,6 +22,7 @@ class NotificationController extends Controller
         $notifications = $query->take(30)->get()->map(function ($notification) {
             return [
                 'id' => $notification->id,
+                'type' => $notification->type,
                 'data' => $notification->data, // [message => '', url => '']
                 'read_at' => $notification->read_at,
                 'created_at' => $notification->created_at->diffForHumans(),
@@ -143,6 +144,22 @@ class NotificationController extends Controller
         }
         
         return response()->json(['success' => true]);
+    }
+
+    /**
+     * Cập nhật danh sách các loại thông báo bị tắt (form-based).
+     */
+    public function updatePreferences(Request $request)
+    {
+        $user = Auth::user();
+        $disabledTypes = $request->input('disabled_types', []);
+        
+        $prefs = $user->notification_preferences ?? [];
+        $prefs['disabled_types'] = array_values(array_filter($disabledTypes));
+        $user->notification_preferences = $prefs;
+        $user->save();
+
+        return redirect()->route('settings.index')->with('success', 'Đã cập nhật tùy chọn thông báo.');
     }
 
     /**

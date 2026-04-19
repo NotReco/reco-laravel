@@ -46,22 +46,30 @@ class WatchlistController extends Controller
             // Nếu gửi status mới khác status cũ -> Update
             if ($request->has('status') && $watchlist->status !== $status) {
                 $watchlist->update(['status' => $status]);
-                return response()->json([
-                    'success' => true,
-                    'in_watchlist' => true,
-                    'status' => $status,
-                    'message' => 'Đã cập nhật trạng thái phim.',
-                ]);
+                
+                if ($request->wantsJson() || $request->ajax()) {
+                    return response()->json([
+                        'success' => true,
+                        'in_watchlist' => true,
+                        'status' => $status,
+                        'message' => 'Đã cập nhật trạng thái phim.',
+                    ]);
+                }
+                return back()->with('success', 'Đã cập nhật trạng thái phim.');
             }
 
             // Nếu không gửi status, hoặc gửi lại status cũ -> Xóa khỏi Watchlist (Toggle OFF)
             $watchlist->delete();
-            return response()->json([
-                'success' => true,
-                'in_watchlist' => false,
-                'status' => null,
-                'message' => 'Đã xóa khỏi danh sách của bạn.',
-            ]);
+            
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'in_watchlist' => false,
+                    'status' => null,
+                    'message' => 'Đã xóa khỏi danh sách của bạn.',
+                ]);
+            }
+            return back()->with('success', 'Đã xóa khỏi danh sách của bạn.');
         }
 
         // 2. Trường hợp chưa có -> Thêm mới (Toggle ON)
@@ -71,11 +79,14 @@ class WatchlistController extends Controller
             'status' => $status,
         ]);
 
-        return response()->json([
-            'success' => true,
-            'in_watchlist' => true,
-            'status' => $status,
-            'message' => 'Đã thêm vào danh sách phim của bạn.',
-        ]);
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'in_watchlist' => true,
+                'status' => $status,
+                'message' => 'Đã thêm vào danh sách phim của bạn.',
+            ]);
+        }
+        return back()->with('success', 'Đã thêm vào danh sách phim của bạn.');
     }
 }

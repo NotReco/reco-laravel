@@ -11,24 +11,13 @@ class HomeController extends Controller
 {
     public function index()
     {
-        // Hero carousel — 5 phim có backdrop + trailer, view cao nhất
+        // Hero carousel — Lấy danh sách phim đã được ghim trong Admin Carousel (tối đa 20)
         $heroMovies = Movie::with('genres')
-            ->whereNotNull('backdrop')
-            ->whereNotNull('poster')
-            ->whereNotNull('trailer_url')
-            ->orderByDesc('view_count')
-            ->take(5)
+            ->where('is_featured', true)
+            ->orderBy('featured_order', 'asc')
+            ->orderByDesc('updated_at')
+            ->take(20)
             ->get();
-
-        // Fallback: nếu không đủ phim có trailer, bổ sung phim có backdrop
-        if ($heroMovies->count() < 3) {
-            $heroMovies = Movie::with('genres')
-                ->whereNotNull('backdrop')
-                ->whereNotNull('poster')
-                ->orderByDesc('view_count')
-                ->take(5)
-                ->get();
-        }
 
         // 🔥 Trending — 10 phim xem nhiều nhất
         $trendingMovies = Movie::with('genres')

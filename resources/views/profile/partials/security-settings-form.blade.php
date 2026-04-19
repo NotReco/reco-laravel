@@ -1,10 +1,7 @@
 <section>
-    <header>
-        <h2 class="text-xl font-display font-bold text-white">
-            Bảo mật
-        </h2>
-
-        <p class="mt-1 text-sm text-dark-400">
+    <header class="pb-5 border-b border-gray-100">
+        <h2 class="text-lg font-bold text-gray-900">Bảo mật</h2>
+        <p class="mt-1 text-sm text-gray-500">
             Bật/tắt bảo mật 2 lớp và tuỳ chọn lưu đăng nhập để khỏi phải nhập mã mỗi lần.
         </p>
     </header>
@@ -15,44 +12,43 @@
         data-unsaved-title="Bảo mật"
         method="post"
         action="{{ route('settings.security.update') }}"
-        class="mt-6 space-y-6"
+        class="mt-6 space-y-3"
     >
         @csrf
         @method('patch')
 
-        <div class="space-y-4">
-            <label class="flex items-start gap-3 p-4 rounded-xl bg-dark-900/40 border border-dark-700">
-                <input type="hidden" name="two_factor_enabled" value="0" />
-                <input
-                    type="checkbox"
-                    name="two_factor_enabled"
-                    value="1"
-                    @checked(old('two_factor_enabled', $user->two_factor_enabled))
-                    class="mt-1 rounded border-dark-700 bg-dark-900 text-sky-500 focus:ring-sky-500"
-                />
-                <span>
-                    <span class="block font-semibold text-white">Bảo mật 2 lớp (2FA)</span>
-                    <span class="block text-sm text-dark-400">Khi bật, bạn sẽ nhận mã 6 số qua email khi đăng nhập.</span>
-                </span>
-            </label>
+        {{-- 2FA --}}
+        <label class="flex items-start gap-4 p-4 rounded-2xl border border-gray-200 bg-gray-50/60 hover:bg-gray-50 hover:border-gray-300 transition-colors cursor-pointer group">
+            <input type="hidden" name="two_factor_enabled" value="0" />
+            <input
+                type="checkbox"
+                name="two_factor_enabled"
+                value="1"
+                @checked(old('two_factor_enabled', $user->two_factor_enabled))
+                class="mt-0.5 w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+            />
+            <span class="flex-1">
+                <span class="block text-sm font-semibold text-gray-900">Bảo mật 2 lớp (2FA)</span>
+                <span class="block text-sm text-gray-500 mt-0.5">Khi bật, bạn sẽ nhận mã 6 số qua email khi đăng nhập.</span>
+            </span>
+        </label>
 
-            <label class="flex items-start gap-3 p-4 rounded-xl bg-dark-900/40 border border-dark-700">
-                <input type="hidden" name="two_factor_remember_enabled" value="0" />
-                <input
-                    type="checkbox"
-                    name="two_factor_remember_enabled"
-                    value="1"
-                    @checked(old('two_factor_remember_enabled', $user->two_factor_remember_enabled))
-                    class="mt-1 rounded border-dark-700 bg-dark-900 text-sky-500 focus:ring-sky-500"
-                />
-                <span>
-                    <span class="block font-semibold text-white">Cho phép lưu đăng nhập</span>
-                    <span class="block text-sm text-dark-400">Sau khi nhập mã, bạn có thể chọn “lưu đăng nhập” để lần sau khỏi nhập lại.</span>
-                </span>
-            </label>
-        </div>
+        {{-- Remember 2FA --}}
+        <label class="flex items-start gap-4 p-4 rounded-2xl border border-gray-200 bg-gray-50/60 hover:bg-gray-50 hover:border-gray-300 transition-colors cursor-pointer group">
+            <input type="hidden" name="two_factor_remember_enabled" value="0" />
+            <input
+                type="checkbox"
+                name="two_factor_remember_enabled"
+                value="1"
+                @checked(old('two_factor_remember_enabled', $user->two_factor_remember_enabled))
+                class="mt-0.5 w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+            />
+            <span class="flex-1">
+                <span class="block text-sm font-semibold text-gray-900">Cho phép lưu đăng nhập</span>
+                <span class="block text-sm text-gray-500 mt-0.5">Sau khi nhập mã, bạn có thể chọn "lưu đăng nhập" để lần sau khỏi nhập lại.</span>
+            </span>
+        </label>
 
         <button type="submit" class="hidden" aria-hidden="true" tabindex="-1">Lưu</button>
     </form>
 </section>
-

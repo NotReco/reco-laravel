@@ -66,6 +66,10 @@ Route::get('/news/{article}', [ArticleController::class, 'show'])->name('news.sh
 Route::get('/forum', [ForumController::class, 'index'])->name('forum.index');
 Route::get('/forum/threads/{thread:slug}', [ForumController::class, 'show'])->name('forum.show');
 
+// Public profiles (no auth needed)
+Route::get('/users/{user}/profile', [\App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');
+Route::get('/users/{user}/favorites', [\App\Http\Controllers\ProfileController::class, 'favorites'])->name('profile.favorites');
+
 // ═══════════════════════════════════════════════════
 //  GROUP 2: AUTH — Login, Register, Password Reset
 // ═══════════════════════════════════════════════════
@@ -83,9 +87,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/reviews/{review}', [ReviewController::class, 'update'])->name('reviews.update');
     Route::delete('/reviews/{review}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
 
-    // ── Profile ──
-    Route::get('/users/{user}/profile', [\App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');
-    Route::get('/users/{user}/favorites', [\App\Http\Controllers\ProfileController::class, 'favorites'])->name('profile.favorites');
+    // ── Profile (private actions only) ──
     Route::get('/users/profile/edit', [\App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/users/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/users/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -117,12 +119,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // ── Notifications ──
     Route::get('/api/notifications', [\App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/api/notifications/turn-on', [\App\Http\Controllers\NotificationController::class, 'turnOn'])->name('notifications.turnOn');
+    Route::post('/api/notifications/read-all', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.markAllAsRead');
     Route::post('/api/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
     Route::post('/api/notifications/{id}/unread', [\App\Http\Controllers\NotificationController::class, 'markAsUnread'])->name('notifications.markAsUnread');
     Route::delete('/api/notifications/{id}', [\App\Http\Controllers\NotificationController::class, 'destroy'])->name('notifications.destroy');
     Route::post('/api/notifications/{id}/turn-off', [\App\Http\Controllers\NotificationController::class, 'turnOff'])->name('notifications.turnOff');
-    Route::post('/api/notifications/turn-on', [\App\Http\Controllers\NotificationController::class, 'turnOn'])->name('notifications.turnOn');
-    Route::post('/api/notifications/read-all', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.markAllAsRead');
     Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'all'])->name('notifications.all');
 
     // ── Forum (auth actions) ──
@@ -140,6 +142,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // ── Settings ──
     Route::get('/settings', [\App\Http\Controllers\SettingsController::class, 'index'])->name('settings.index');
     Route::patch('/settings/security', [\App\Http\Controllers\SettingsController::class, 'updateSecurity'])->name('settings.security.update');
+    Route::patch('/settings/notifications', [\App\Http\Controllers\NotificationController::class, 'updatePreferences'])->name('settings.notifications.update');
 });
 
 // ═══════════════════════════════════════════════════
@@ -178,4 +181,12 @@ Route::middleware(['auth', 'role:staff'])->prefix('admin')->name('admin.')->grou
     // User Titles & Avatar Frames
     Route::resource('user-titles', \App\Http\Controllers\Admin\UserTitleController::class)->except(['show']);
     Route::resource('avatar-frames', \App\Http\Controllers\Admin\AvatarFrameController::class)->except(['show']);
+
+    // Carousel
+    Route::get('/carousel', [\App\Http\Controllers\Admin\CarouselController::class, 'index'])->name('carousel.index');
+    Route::post('/carousel', [\App\Http\Controllers\Admin\CarouselController::class, 'store'])->name('carousel.store');
+    Route::post('/carousel/auto', [\App\Http\Controllers\Admin\CarouselController::class, 'autoUpdate'])->name('carousel.autoUpdate');
+    Route::post('/carousel/{movie}/up', [\App\Http\Controllers\Admin\CarouselController::class, 'moveUp'])->name('carousel.moveUp');
+    Route::post('/carousel/{movie}/down', [\App\Http\Controllers\Admin\CarouselController::class, 'moveDown'])->name('carousel.moveDown');
+    Route::delete('/carousel/{movie}', [\App\Http\Controllers\Admin\CarouselController::class, 'destroy'])->name('carousel.destroy');
 });

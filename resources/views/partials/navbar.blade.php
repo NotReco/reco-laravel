@@ -123,7 +123,7 @@
                         set limit(val) { this.limits[this.tab] = val; },
                         get notifications() {
                             const list = this.notificationsData[this.tab] || [];
-                            let filtered = list.filter(n => n.id !== (this.pendingAction ? this.pendingAction.id : null));
+                            let filtered = list.filter(n => !(this.pendingAction && this.pendingAction.type === 'delete' && n.id === this.pendingAction.id));
                             return this.tab === 'unread' ? filtered.filter(n => !n.read_at) : filtered;
                         },
                         async fetchNotifications(force = false) {
@@ -182,7 +182,7 @@
                             if (!actionObj) return;
                             try {
                                 if (actionObj.type === 'delete') {
-                                    navigator.sendBeacon('/api/notifications/' + actionObj.id + '/delete');
+                                    fetch('/api/notifications/' + actionObj.id, { method: 'DELETE', headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }, keepalive: true });
                                     this.notificationsData.all = this.notificationsData.all.filter(n => n.id !== actionObj.id);
                                     this.notificationsData.unread = this.notificationsData.unread.filter(n => n.id !== actionObj.id);
                                     if (actionObj.wasUnread) this.unreadCount = Math.max(0, this.unreadCount - 1);
@@ -190,9 +190,7 @@
                                     const body = new FormData();
                                     body.append('_token', '{{ csrf_token() }}');
                                     body.append('type', actionObj.notifType);
-                                    navigator.sendBeacon('/api/notifications/' + actionObj.id + '/turn-off', body);
-                                    this.notificationsData.all = this.notificationsData.all.filter(n => n.type !== actionObj.notifType);
-                                    this.notificationsData.unread = this.notificationsData.unread.filter(n => n.type !== actionObj.notifType);
+                                    fetch('/api/notifications/' + actionObj.id + '/turn-off', { method: 'POST', body: body, keepalive: true });
                                     const mCount = actionObj.mutedUnreadCount;
                                     this.unreadCount = Math.max(0, this.unreadCount - mCount);
                                 }
@@ -453,8 +451,9 @@
                                                         </template>
                                                         <template x-for="item in notifications.slice(0, limit)"
                                                             :key="item.id">
-                                                            <div class="relative group" x-data="{ itemMenuOpen: false }"
-                                                                @mousedown.outside="itemMenuOpen = false">
+                                                            <div class="relative group transition-all" x-data="{ itemMenuOpen: false, openUp: false }"
+                                                                @mousedown.outside="itemMenuOpen = false"
+                                                                :class="itemMenuOpen ? 'z-[60]' : 'z-10'">
                                                                 <a :href="item.data.url ? item.data.url : '#'"
                                                                     @click.prevent="if(!item.read_at) await markAsRead(item.id); if($event.button === 0 && item.data.url) { window.location.href = item.data.url; }"
                                                                     class="block px-2 mx-2 mb-0.5 py-2.5 rounded-lg cursor-pointer flex gap-3 transition"
@@ -503,28 +502,33 @@
                                                                             x-text="item.created_at"></p>
                                                                     </div>
                                                                     <div
-                                                                        class="flex items-center justify-center shrink-0 w-8 pr-1 relative">
+                                                                        class="flex items-center justify-center shrink-0 w-8 h-8 relative self-center">
+                                                                        <div x-show="!item.read_at"
+                                                                            class="w-3 h-3 rounded-full bg-sky-500">
+                                                                        </div>
                                                                         <button
-                                                                            @click.prevent.stop="itemMenuOpen = !itemMenuOpen"
+                                                                            @click.prevent.stop="
+                                                                                const rect = $el.getBoundingClientRect();
+                                                                                openUp = (window.innerHeight - rect.bottom) < 220;
+                                                                                itemMenuOpen = !itemMenuOpen;
+                                                                            "
                                                                             title="Tùy chọn"
-                                                                            class="opacity-0 group-hover:opacity-100 w-8 h-8 rounded-full bg-white border border-gray-200 shadow-sm flex items-center justify-center hover:bg-gray-50 transition absolute right-2 lg:right-6 z-10"
-                                                                            :class="itemMenuOpen ? 'opacity-100' : 'opacity-0'">
+                                                                            class="absolute inset-0 w-8 h-8 rounded-full bg-white border border-gray-200 shadow-sm flex items-center justify-center hover:bg-gray-50 transition opacity-0 group-hover:opacity-100 z-10"
+                                                                            :class="itemMenuOpen ? 'opacity-100 bg-gray-50 border-gray-300' : 'opacity-0'">
                                                                             <svg class="w-5 h-5 text-gray-600"
                                                                                 fill="currentColor" viewBox="0 0 24 24">
                                                                                 <path
                                                                                     d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
                                                                             </svg>
                                                                         </button>
-                                                                        <div x-show="!item.read_at"
-                                                                            class="w-3 h-3 rounded-full bg-sky-500 mr-2 lg:mr-0">
-                                                                        </div>
                                                                     </div>
                                                                 </a>
 
                                                                 {{-- Item Actions Dropdown --}}
                                                                 <template x-if="itemMenuOpen">
                                                                     <div @click.stop
-                                                                        class="absolute right-8 top-10 w-64 bg-white border border-gray-100 rounded-xl shadow-2xl z-20 overflow-hidden text-gray-700 font-medium py-2">
+                                                                        class="absolute right-8 w-64 bg-white border border-gray-100 rounded-xl shadow-2xl z-20 overflow-hidden text-gray-700 font-medium py-2"
+                                                                        :class="openUp ? 'bottom-8' : 'top-10'">
                                                                         <div class="flex flex-col">
                                                                             <template x-if="!item.read_at">
                                                                                 <button
@@ -606,30 +610,32 @@
                                     </div>
 
                                     {{-- Global Snackbar for Pending Actions (Positioned Inside Dropdown or fixed on screen) --}}
-                                    <div x-show="pendingAction" style="display: none;"
-                                        x-transition:enter="transition ease-out duration-300"
-                                        x-transition:enter-start="opacity-0 translate-y-4"
-                                        x-transition:enter-end="opacity-100 translate-y-0"
-                                        x-transition:leave="transition ease-in duration-200"
-                                        x-transition:leave-start="opacity-100 translate-y-0"
-                                        x-transition:leave-end="opacity-0 translate-y-4"
-                                        class="fixed bottom-6 left-6 z-[9999] flex items-center bg-[#323436] text-white px-5 py-3 rounded-xl shadow-2xl min-w-[320px] origin-bottom justify-between">
-                                        <span class="text-[15px] font-medium" x-text="pendingAction?.message"></span>
-                                        <div class="flex items-center ml-4">
-                                            <button @click.prevent="undoAction"
-                                                class="text-sky-400 font-bold hover:bg-white/10 px-3 py-1.5 rounded-lg transition text-[15px]">
-                                                Hoàn tác
-                                            </button>
-                                            <button @click.prevent="confirmAction"
-                                                class="w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center transition ml-1 shrink-0">
-                                                <svg class="w-5 h-5 text-gray-300" fill="none" stroke="currentColor"
-                                                    viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M6 18L18 6M6 6l12 12" />
-                                                </svg>
-                                            </button>
+                                    <template x-teleport="body">
+                                        <div x-show="pendingAction" style="display: none;"
+                                            x-transition:enter="transition ease-out duration-300"
+                                            x-transition:enter-start="opacity-0 translate-y-4"
+                                            x-transition:enter-end="opacity-100 translate-y-0"
+                                            x-transition:leave="transition ease-in duration-200"
+                                            x-transition:leave-start="opacity-100 translate-y-0"
+                                            x-transition:leave-end="opacity-0 translate-y-4"
+                                            class="fixed bottom-6 right-6 z-[9999] flex items-center bg-[#323436] text-white px-5 py-3 rounded-xl shadow-2xl min-w-[320px] origin-bottom justify-between">
+                                            <span class="text-[15px] font-medium" x-text="pendingAction?.message"></span>
+                                            <div class="flex items-center ml-4">
+                                                <button @click.prevent="undoAction"
+                                                    class="text-sky-400 font-bold hover:bg-white/10 px-3 py-1.5 rounded-lg transition text-[15px]">
+                                                    Hoàn tác
+                                                </button>
+                                                <button @click.prevent="confirmAction"
+                                                    class="w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center transition ml-1 shrink-0">
+                                                    <svg class="w-5 h-5 text-gray-300" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                            d="M6 18L18 6M6 6l12 12" />
+                                                    </svg>
+                                                </button>
+                                            </div>
                                         </div>
-                                    </div>
+                                    </template>
                                 </div>
                             </template>
                         </div>
@@ -688,13 +694,11 @@
 
                             <hr class="border-t-[1.5px] border-gray-300 my-2 mx-1">
 
-                            {{-- Menu items --}}
                             <div class="space-y-1">
                                 <a href="{{ route('profile.show', Auth::user()) }}"
                                     class="flex items-center gap-3 px-2 py-2 rounded-xl text-[14px] font-semibold text-gray-900 hover:bg-gray-100 transition-colors group">
-                                    <div
-                                        class="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center shrink-0">
-                                        <svg class="w-5 h-5 text-gray-900 group-hover:text-amber-500 transition-colors" fill="none" stroke="currentColor"
+                                    <div class="w-9 h-9 rounded-full bg-gray-100 group-hover:bg-sky-100 flex items-center justify-center shrink-0 transition-colors">
+                                        <svg class="w-5 h-5 text-gray-500 group-hover:text-sky-600 transition-colors" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -705,9 +709,8 @@
 
                                 <a href="{{ route('mylist') }}"
                                     class="flex items-center gap-3 px-2 py-2 rounded-xl text-[14px] font-semibold text-gray-900 hover:bg-gray-100 transition-colors group">
-                                    <div
-                                        class="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center shrink-0">
-                                        <svg class="w-5 h-5 text-gray-900 group-hover:text-pink-500 transition-colors" fill="none" stroke="currentColor"
+                                    <div class="w-9 h-9 rounded-full bg-gray-100 group-hover:bg-emerald-100 flex items-center justify-center shrink-0 transition-colors">
+                                        <svg class="w-5 h-5 text-gray-500 group-hover:text-emerald-600 transition-colors" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
@@ -718,9 +721,8 @@
 
                                 <a href="{{ route('settings.index') }}"
                                     class="flex items-center gap-3 px-2 py-2 rounded-xl text-[14px] font-semibold text-gray-900 hover:bg-gray-100 transition-colors group">
-                                    <div
-                                        class="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center shrink-0">
-                                        <svg class="w-5 h-5 text-gray-900 group-hover:text-purple-500 transition-colors" fill="none" stroke="currentColor"
+                                    <div class="w-9 h-9 rounded-full bg-gray-100 group-hover:bg-slate-200 flex items-center justify-center shrink-0 transition-colors">
+                                        <svg class="w-5 h-5 text-gray-500 group-hover:text-slate-700 transition-colors" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -728,15 +730,14 @@
                                                 d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                         </svg>
                                     </div>
-                                    <span>Cài đặt bảo mật</span>
+                                    <span>Cài đặt</span>
                                 </a>
 
                                 @if (Auth::user()->isStaff())
                                     <a href="{{ route('admin.dashboard') }}"
                                         class="flex items-center gap-3 px-2 py-2 rounded-xl text-[14px] font-semibold text-gray-900 hover:bg-gray-100 transition-colors group mt-1">
-                                        <div
-                                            class="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center shrink-0">
-                                            <svg class="w-5 h-5 text-gray-900 group-hover:text-[#007ba7] transition-colors" fill="none" stroke="currentColor"
+                                        <div class="w-9 h-9 rounded-full bg-gray-100 group-hover:bg-red-100 flex items-center justify-center shrink-0 transition-colors">
+                                            <svg class="w-5 h-5 text-gray-500 group-hover:text-red-600 transition-colors" fill="none" stroke="currentColor"
                                                 viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
@@ -749,11 +750,9 @@
                                 <form method="POST" action="{{ route('logout') }}" class="w-full block m-0 mt-1">
                                     @csrf
                                     <button type="submit" class="w-full text-left">
-                                        <div
-                                            class="flex items-center gap-3 px-2 py-2 rounded-xl text-[14px] font-semibold text-gray-900 hover:bg-gray-100 transition-colors group">
-                                            <div
-                                                class="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center shrink-0">
-                                                <svg class="w-5 h-5 text-gray-900 group-hover:text-red-500 transition-colors" fill="none" stroke="currentColor"
+                                        <div class="flex items-center gap-3 px-2 py-2 rounded-xl text-[14px] font-semibold text-gray-900 hover:bg-gray-100 transition-colors group">
+                                            <div class="w-9 h-9 rounded-full bg-gray-100 group-hover:bg-red-100 flex items-center justify-center shrink-0 transition-colors">
+                                                <svg class="w-5 h-5 text-gray-500 group-hover:text-red-600 transition-colors" fill="none" stroke="currentColor"
                                                     viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                         d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
