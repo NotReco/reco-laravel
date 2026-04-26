@@ -108,12 +108,32 @@ class User extends Authenticatable
 
     public function favorites()
     {
-        return $this->belongsToMany(Movie::class, 'favorites')->withTimestamps();
+        return $this->belongsToMany(Movie::class, 'favorites')->whereNotNull('movie_id')->withTimestamps();
+    }
+
+    public function tvShowFavorites()
+    {
+        return $this->belongsToMany(\App\Models\TvShow::class, 'favorites', 'user_id', 'tv_show_id')->whereNotNull('tv_show_id')->withTimestamps();
     }
 
     public function watchlists()
     {
-        return $this->belongsToMany(Movie::class, 'watchlists')->withPivot('status')->withTimestamps();
+        return $this->belongsToMany(Movie::class, 'watchlists')->whereNotNull('movie_id')->withPivot('status')->withTimestamps();
+    }
+
+    public function tvShowWatchlists()
+    {
+        return $this->belongsToMany(\App\Models\TvShow::class, 'watchlists', 'user_id', 'tv_show_id')->whereNotNull('tv_show_id')->withPivot('status')->withTimestamps();
+    }
+
+    public function vibes()
+    {
+        return $this->hasMany(MovieVibe::class);
+    }
+
+    public function tvShowVibes()
+    {
+        return $this->hasMany(\App\Models\TvShowVibe::class);
     }
 
     public function activeTitle()

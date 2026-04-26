@@ -31,17 +31,31 @@ class AutoUpdateCarousel extends Command
             'is_featured' => false,
             'featured_order' => 0
         ]);
+        \App\Models\TvShow::where('is_featured', true)->update([
+            'is_featured' => false,
+            'featured_order' => 0
+        ]);
 
-        $this->info("Lấy danh sách 20 phim Trending có đủ HÌNH/ẢNH/TRAILER...");
+        $this->info("Lấy danh sách 10 phim lẻ và 10 TV series Trending có đủ HÌNH/ẢNH...");
+        
         $trendingMovies = Movie::whereNotNull('backdrop')
             ->whereNotNull('poster')
             ->whereNotNull('trailer_url')
             ->orderByDesc('view_count')
-            ->take(20)
+            ->take(10)
             ->get();
+            
+        $trendingTvShows = \App\Models\TvShow::whereNotNull('backdrop')
+            ->whereNotNull('poster')
+            ->orderByDesc('view_count')
+            ->take(10)
+            ->get();
+            
+        // Gộp chung và sắp xếp lại theo view_count
+        $allTrending = $trendingMovies->concat($trendingTvShows)->sortByDesc('view_count')->values();
 
-        foreach ($trendingMovies as $index => $movie) {
-            $movie->update([
+        foreach ($allTrending as $index => $item) {
+            $item->update([
                 'is_featured' => true,
                 'featured_order' => $index + 1,
             ]);

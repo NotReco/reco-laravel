@@ -29,6 +29,15 @@ class CommentController extends Controller
 
         Auth::user()->increment('reputation_score', 1);
 
+        if ($request->wantsJson()) {
+            $comment->load(['user.activeFrame', 'review.comments.user']);
+            $html = view('components.reviews.comment-item', ['comment' => $comment, 'review' => $comment->review])->render();
+            return response()->json([
+                'success' => true,
+                'html' => $html
+            ]);
+        }
+
         return back()->with('success', 'Bình luận của bạn đã được đăng thành công.');
     }
 
@@ -64,6 +73,10 @@ class CommentController extends Controller
 
         // Parent comment will cascade delete its children due to database constraint
         $comment->delete();
+
+        if (request()->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
 
         return back()->with('success', 'Đã xóa bình luận.');
     }

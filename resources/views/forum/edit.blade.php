@@ -72,8 +72,7 @@
                 <div>
                     <label for="content" class="block text-sm font-medium text-gray-700 mb-2">Nội dung</label>
                     <textarea id="content" name="content" rows="10"
-                              class="js-richtext-simple w-full"
-                              data-richtext-height="350"
+                              class="js-markdown-editor w-full"
                               placeholder="Viết nội dung bài viết của bạn..." required minlength="10">{!! old('content', $thread->content) !!}</textarea>
                     @error('content')
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
@@ -96,5 +95,5 @@
     </div>
 </div>
 
-@include('partials.tinymce-simple')
+@include('partials.markdown-editor')
 </x-app-layout>

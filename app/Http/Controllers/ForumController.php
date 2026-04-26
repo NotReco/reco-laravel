@@ -5,11 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\ForumCategory;
 use App\Models\ForumThread;
 use App\Models\ForumReply;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Notifications\ForumReplyNotification;
+use App\Notifications\ForumMentionNotification;
 use Stevebauman\Purify\Facades\Purify;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class ForumController extends Controller
 {
@@ -93,7 +96,7 @@ class ForumController extends Controller
 
         $thread->load(['category', 'user.activeTitle', 'user.activeFrame']);
         $replies = $thread->replies()
-            ->with(['user.activeTitle', 'user.activeFrame'])
+            ->with(['user.activeTitle', 'user.activeFrame', 'parent.user'])
             ->orderBy('created_at')
             ->paginate(20);
 
@@ -144,18 +147,33 @@ class ForumController extends Controller
         }
 
         $validated = $request->validate([
-            'content' => 'required|string|min:3',
+            'content' => 'required|string|max:10000',
+            'parent_id' => 'nullable|exists:forum_replies,id',
         ]);
+
+        $parentId = $request->input('parent_id');
+
+        // Validate parent belongs to same thread
+        if ($parentId) {
+            $parentReply = ForumReply::find($parentId);
+            if (!$parentReply || $parentReply->forum_thread_id !== $thread->id) {
+                $parentId = null;
+            }
+        }
 
         $reply = $thread->replies()->create([
             'user_id' => Auth::id(),
             'content' => Purify::clean($validated['content']),
+            'parent_id' => $parentId,
         ]);
 
         // Gửi thông báo cho chủ sở hữu thread nếu người trả lời khác với chủ thread
         if ($thread->user_id !== Auth::id()) {
             $thread->user->notify(new ForumReplyNotification($thread, Auth::user()));
         }
+
+        // Gửi thông báo cho người bị nhắc tên (@mention)
+        $this->processForumMentions($validated['content'], $thread, Auth::user());
 
         Auth::user()->increment('reputation_score', 1);
 
@@ -243,7 +261,7 @@ class ForumController extends Controller
         }
 
         $validated = $request->validate([
-            'content' => 'required|string|min:3',
+            'content' => 'required|string|max:10000',
         ]);
 
         $reply->update([
@@ -269,5 +287,71 @@ class ForumController extends Controller
         $reply->delete();
 
         return redirect()->route('forum.show', $thread)->with('success', 'Đã xóa phản hồi.');
+    }
+
+    /**
+     * API tìm kiếm users cho tính năng @mention.
+     */
+    public function searchUsers(Request $request)
+    {
+        $q = trim($request->query('q', ''));
+        if (!$q || mb_strlen($q) < 1) {
+            return response()->json([]);
+        }
+
+        $users = User::where('name', 'like', "%{$q}%")
+            ->where('is_active', true)
+            ->select('id', 'name', 'slug', 'avatar')
+            ->limit(8)
+            ->get()
+            ->map(function ($user) {
+                return [
+                    'key' => $user->name,
+                    'value' => $user->name,
+                    'slug' => $user->slug,
+                    'avatar' => $user->avatar,
+                    'initial' => strtoupper(mb_substr($user->name, 0, 1)),
+                ];
+            });
+
+        return response()->json($users);
+    }
+
+    /**
+     * Quét nội dung tìm @username và gửi thông báo mention.
+     */
+    private function processForumMentions(string $content, ForumThread $thread, $mentioner): void
+    {
+        if (!str_contains($content, '@')) {
+            return;
+        }
+
+        // Lấy danh sách users tham gia thread + chủ thread
+        $participantIds = ForumReply::where('forum_thread_id', $thread->id)
+            ->distinct()
+            ->pluck('user_id');
+        $participantIds->push($thread->user_id);
+
+        $users = User::whereIn('id', $participantIds->filter()->unique())->get();
+
+        foreach ($users as $notifiableUser) {
+            if ($notifiableUser->id === Auth::id()) {
+                continue;
+            }
+
+            $pattern = '/@' . preg_quote($notifiableUser->name, '/') . '(?![\p{L}\p{N}_])/u';
+
+            if (preg_match($pattern, $content)) {
+                try {
+                    $notifiableUser->notify(new ForumMentionNotification($thread, $mentioner));
+                } catch (\Throwable $e) {
+                    Log::warning('Failed to send forum mention notification', [
+                        'thread_id' => $thread->id,
+                        'notifiable_user_id' => $notifiableUser->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
+        }
     }
 }

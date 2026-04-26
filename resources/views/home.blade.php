@@ -2,7 +2,7 @@
     <x-slot:title>Trang chủ</x-slot:title>
 
     {{-- ═══ Hero Banner Carousel ═══ --}}
-    <x-hero-carousel :movies="$heroMovies" />
+    <x-hero-carousel :items="$heroItems" />
 
     {{-- ═══ Section 1: Trending – full-width bg xen kẽ --}}
     <div class="bg-white py-6 border-b border-gray-100">

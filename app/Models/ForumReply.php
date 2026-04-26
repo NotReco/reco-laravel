@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class ForumReply extends Model
 {
-    protected $fillable = ['forum_thread_id', 'user_id', 'content'];
+    protected $fillable = ['forum_thread_id', 'user_id', 'content', 'parent_id'];
 
     // ── Relationships ──
 
@@ -34,5 +34,15 @@ class ForumReply extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function parent()
+    {
+        return $this->belongsTo(ForumReply::class, 'parent_id');
+    }
+
+    public function children()
+    {
+        return $this->hasMany(ForumReply::class, 'parent_id');
     }
 }

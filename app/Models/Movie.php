@@ -102,6 +102,11 @@ class Movie extends Model
         return $this->hasMany(Review::class);
     }
 
+    public function vibes()
+    {
+        return $this->hasMany(MovieVibe::class);
+    }
+
     public function publishedReviews()
     {
         return $this->hasMany(Review::class)->where('status', 'published');

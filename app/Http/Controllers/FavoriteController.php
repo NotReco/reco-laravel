@@ -10,20 +10,29 @@ use Illuminate\Support\Facades\Auth;
 class FavoriteController extends Controller
 {
     /**
-     * Bật/tắt trạng thái yêu thích phim qua API.
+     * Bật/tắt trạng thái yêu thích phim/TV show qua API.
      */
     public function toggle(Request $request)
     {
         $request->validate([
-            'movie_id' => ['required', 'exists:movies,id'],
+            'movie_id' => ['nullable', 'exists:movies,id'],
+            'tv_show_id' => ['nullable', 'exists:tv_shows,id'],
         ]);
 
-        $userId = Auth::id();
-        $movieId = $request->movie_id;
+        if (!$request->movie_id && !$request->tv_show_id) {
+            return response()->json(['success' => false, 'message' => 'Missing ID'], 400);
+        }
 
-        $favorite = Favorite::where('user_id', $userId)
-            ->where('movie_id', $movieId)
-            ->first();
+        $userId = Auth::id();
+
+        $query = Favorite::where('user_id', $userId);
+        if ($request->movie_id) {
+            $query->where('movie_id', $request->movie_id);
+        } else {
+            $query->where('tv_show_id', $request->tv_show_id);
+        }
+
+        $favorite = $query->first();
 
         if ($favorite) {
             $favorite->delete();
@@ -36,7 +45,8 @@ class FavoriteController extends Controller
 
         Favorite::create([
             'user_id' => $userId,
-            'movie_id' => $movieId,
+            'movie_id' => $request->movie_id,
+            'tv_show_id' => $request->tv_show_id,
         ]);
 
         return response()->json([

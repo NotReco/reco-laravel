@@ -21,8 +21,12 @@ Route::view('/terms', 'pages.terms', ['title' => 'Điều khoản dịch vụ'])
 Route::view('/privacy', 'pages.privacy', ['title' => 'Chính sách bảo mật'])->name('pages.privacy');
 
 // Phim
-Route::get('/explore', [MovieController::class, 'index'])->name('explore');
-Route::get('/movies/{movie}', [MovieController::class, 'show'])->name('movies.show');
+Route::get('/movie', [MovieController::class, 'index'])->name('explore');
+Route::get('/movie/{movie}', [MovieController::class, 'show'])->name('movies.show');
+
+// TV Shows
+Route::get('/tv-shows', [\App\Http\Controllers\TvShowController::class, 'index'])->name('tv-shows.index');
+Route::get('/tv-shows/{tvShow:slug}', [\App\Http\Controllers\TvShowController::class, 'show'])->name('tv-shows.show');
 
 // Search API cho Navbar Live Search
 Route::get('/api/search', function (\Illuminate\Http\Request $request) {
@@ -31,31 +35,72 @@ Route::get('/api/search', function (\Illuminate\Http\Request $request) {
     // Strip SQL wildcards
     $q = str_replace(['%', '_'], '', $q);
 
-    // Only allow: Unicode letters, digits 0-9, spaces (reject +, -, etc.)
-    if (!$q || !preg_match('/^[\p{L}\p{N}\s]+$/u', $q)) {
+    // Only require minimum 2 chars
+    if (mb_strlen($q) < 2) {
         return response()->json([]);
     }
 
     $movies = \App\Models\Movie::where(function ($qb) use ($q) {
             $qb->where('title', 'like', "%{$q}%")
-               ->orWhere('original_title', 'like', "%{$q}%");
+               ->orWhere('original_title', 'like', "%{$q}%")
+               ->orWhereHas('tags', function($qTag) use ($q) {
+                   $qTag->where('name', 'like', "%{$q}%");
+               });
         })
         ->select('id', 'slug', 'title', 'poster', 'release_date', 'view_count')
-        ->limit(20)
-        ->get();
+        ->limit(10)
+        ->get()
+        ->map(function ($m) {
+            $m->url = route('movies.show', $m->slug);
+            $m->release_year = $m->release_date ? \Carbon\Carbon::parse($m->release_date)->format('Y') : '';
+            return $m;
+        });
 
-    // Sort in PHP to ensure exact diacritics match but case-insensitive
-    // mb_stripos is case-insensitive, but diacritics-sensitive!
-    $movies = $movies->sortByDesc('view_count')->sortBy(function ($movie) use ($q) {
-        $titleMatch = mb_stripos($movie->title, $q) !== false;
-        $originalMatch = mb_stripos($movie->original_title ?? '', $q) !== false;
+    $tvShows = \App\Models\TvShow::where(function ($qb) use ($q) {
+            $qb->where('title', 'like', "%{$q}%")
+               ->orWhere('original_title', 'like', "%{$q}%")
+               ->orWhereHas('tags', function($qTag) use ($q) {
+                   $qTag->where('name', 'like', "%{$q}%");
+               });
+        })
+        ->select('id', 'slug', 'title', 'poster', 'first_air_date as release_date', 'view_count')
+        ->limit(10)
+        ->get()
+        ->map(function ($t) {
+            $t->url = route('tv-shows.show', $t->slug);
+            $t->release_year = $t->release_date ? \Carbon\Carbon::parse($t->release_date)->format('Y') : '';
+            return $t;
+        });
+
+    $results = $movies->concat($tvShows);
+
+    // Sort in PHP to ensure exact literal match comes first, fallback to view_count
+    $results = $results->sortByDesc('view_count')->sortBy(function ($item) use ($q) {
+        // Strip accents for comparison
+        $cleanTitle = \Illuminate\Support\Str::ascii($item->title);
+        $cleanQ = \Illuminate\Support\Str::ascii($q);
+        
+        $titleMatch = mb_stripos($item->title, $q) !== false || mb_stripos($cleanTitle, $cleanQ) !== false;
+        $originalMatch = mb_stripos($item->original_title ?? '', $q) !== false;
         return ($titleMatch || $originalMatch) ? 1 : 2;
     })->take(8)->values();
 
-    return response()->json($movies);
+    // Map again to keep response small and clean
+    $cleanResults = $results->map(function ($item) {
+        return [
+            'id' => $item->id,
+            'title' => $item->title,
+            'url' => $item->url,
+            'poster' => $item->poster,
+            'release_year' => $item->release_year,
+        ];
+    });
+
+    return response()->json($cleanResults);
 })->name('api.search');
 
-// Person detail
+// Person
+Route::get('/person', [PersonController::class, 'index'])->name('person.index');
 Route::get('/person/{person}', [PersonController::class, 'show'])->name('person.show');
 
 // Tin tức (public)
@@ -84,8 +129,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // ── Reviews ──
     Route::post('/movies/{movie}/review', [ReviewController::class, 'store'])->name('reviews.store');
+    Route::post('/tv-shows/{tvShow}/review', [ReviewController::class, 'storeTv'])->name('tv-shows.reviews.store');
     Route::put('/reviews/{review}', [ReviewController::class, 'update'])->name('reviews.update');
     Route::delete('/reviews/{review}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
+
+    // ── Vibes ──
+    Route::post('/movies/{movie}/vibe', [\App\Http\Controllers\MovieVibeController::class, 'update'])->name('movies.vibe.update');
+    Route::post('/tv-shows/{tvShow}/vibe', [\App\Http\Controllers\TvShowVibeController::class, 'update'])->name('tv-shows.vibe.update');
 
     // ── Profile (private actions only) ──
     Route::get('/users/profile/edit', [\App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
@@ -139,6 +189,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/forum/replies/{reply}', [ForumController::class, 'updateReply'])->name('forum.updateReply');
     Route::delete('/forum/replies/{reply}', [ForumController::class, 'destroyReply'])->name('forum.destroyReply');
 
+    // ── Forum Mentions API ──
+    Route::get('/api/users/search', [ForumController::class, 'searchUsers'])->name('api.users.search');
+
     // ── Settings ──
     Route::get('/settings', [\App\Http\Controllers\SettingsController::class, 'index'])->name('settings.index');
     Route::patch('/settings/security', [\App\Http\Controllers\SettingsController::class, 'updateSecurity'])->name('settings.security.update');
@@ -157,6 +210,12 @@ Route::middleware(['auth', 'role:staff'])->prefix('admin')->name('admin.')->grou
     Route::get('/movies/{movie}/edit', [\App\Http\Controllers\Admin\MovieController::class, 'edit'])->name('movies.edit');
     Route::put('/movies/{movie}', [\App\Http\Controllers\Admin\MovieController::class, 'update'])->name('movies.update');
     Route::delete('/movies/{movie}', [\App\Http\Controllers\Admin\MovieController::class, 'destroy'])->name('movies.destroy');
+
+    // TV Shows
+    Route::get('/tv-shows', [\App\Http\Controllers\Admin\TvShowController::class, 'index'])->name('tv-shows.index');
+    Route::get('/tv-shows/{tvShow}/edit', [\App\Http\Controllers\Admin\TvShowController::class, 'edit'])->name('tv-shows.edit');
+    Route::put('/tv-shows/{tvShow}', [\App\Http\Controllers\Admin\TvShowController::class, 'update'])->name('tv-shows.update');
+    Route::delete('/tv-shows/{tvShow}', [\App\Http\Controllers\Admin\TvShowController::class, 'destroy'])->name('tv-shows.destroy');
 
     // Reviews
     Route::get('/reviews', [\App\Http\Controllers\Admin\ReviewController::class, 'index'])->name('reviews.index');

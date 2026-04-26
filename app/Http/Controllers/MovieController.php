@@ -103,24 +103,7 @@ class MovieController extends Controller
             ->get();
 
         // Lấy danh sách quốc gia cho bộ lọc
-        $countryNames = [
-            'AR' => 'Argentina',
-            'AU' => 'Úc',
-            'BR' => 'Brazil',
-            'CA' => 'Canada',
-            'CN' => 'Trung Quốc',
-            'ES' => 'Tây Ban Nha',
-            'FR' => 'Pháp',
-            'GB' => 'Anh',
-            'IE' => 'Ireland',
-            'IN' => 'Ấn Độ',
-            'JP' => 'Nhật Bản',
-            'KR' => 'Hàn Quốc',
-            'NO' => 'Na Uy',
-            'PH' => 'Philippines',
-            'RU' => 'Nga',
-            'US' => 'Mỹ',
-        ];
+        $countryNames = config('countries');
 
         $countries = Movie::whereNotNull('country')
             ->where('country', '!=', '')
@@ -144,6 +127,7 @@ class MovieController extends Controller
     {
         $movie->load([
             'genres',
+            'tags',
             'people' => fn($q) => $q->orderBy('display_order'),
             'reviews' => fn($q) => $q->published()
                 ->fullReview()
@@ -170,6 +154,39 @@ class MovieController extends Controller
         $directors = $movie->people->where('pivot.role', 'director');
         $writers = $movie->people->where('pivot.role', 'writer');
 
+        // Tên quốc gia tiếng Việt
+        $countryName = config('countries')[$movie->country] ?? $movie->country;
+
+        // Tên ngôn ngữ gốc tiếng Việt
+        $languageName = config('languages')[$movie->language] ?? $movie->language;
+
+        // Phân phối điểm (số lượng đánh giá theo từng điểm 1-10)
+        $ratingDistribution = $movie->reviews()
+            ->where('status', 'published')
+            ->whereNotNull('rating')
+            ->selectRaw('ROUND(rating) as score, COUNT(*) as count')
+            ->groupBy('score')
+            ->orderBy('score')
+            ->pluck('count', 'score')
+            ->toArray();
+        // Đảm bảo đủ 10 mức
+        $distribution = [];
+        for ($i = 1; $i <= 10; $i++) {
+            $distribution[$i] = $ratingDistribution[$i] ?? 0;
+        }
+
+        // Lịch sử đánh giá theo tháng (12 tháng gần nhất)
+        $ratingHistory = $movie->reviews()
+            ->where('status', 'published')
+            ->whereNotNull('rating')
+            ->where('created_at', '>=', now()->subMonths(12))
+            ->selectRaw('DATE_FORMAT(created_at, "%Y-%m") as month, AVG(rating) as avg_score, COUNT(*) as count')
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get()
+            ->keyBy('month')
+            ->toArray();
+
         return view('movies.show', compact(
             'movie',
             'avgRating',
@@ -178,6 +195,10 @@ class MovieController extends Controller
             'cast',
             'directors',
             'writers',
+            'countryName',
+            'languageName',
+            'distribution',
+            'ratingHistory',
         ));
     }
 }

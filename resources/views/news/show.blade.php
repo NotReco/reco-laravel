@@ -598,7 +598,7 @@
                         '<button @click="toggleLike(' + comment.uuid +
                         ', $event)" class="group flex items-center gap-1.5 text-[13px] font-bold transition-colors whitespace-nowrap" :class="likedComments[' +
                         comment.uuid +
-                        '] ? \'text-blue-600\' : \'text-gray-500 hover:text-gray-700 hover:underline\'" id="like-btn-' +
+                        '] ? \'text-rose-500\' : \'text-gray-500 hover:text-gray-700 hover:underline\'" id="like-btn-' +
                         comment.uuid + '"><span>Thích</span></button>' +
                         '<button @click="focusReply(' + comment.uuid + ', ' + comment.uuid + ', \'' + this
                         .escapeHtml(comment.user.name) +
@@ -612,7 +612,7 @@
                         '] > 0" x-cloak style="display: none" class="flex items-center gap-1 cursor-pointer">' +
                         '<span x-text="likeCounts[' + comment.uuid +
                         ']" class="text-xs text-gray-500 hover:underline"></span>' +
-                        '<div class="w-4 h-4 rounded-full bg-blue-500 flex items-center justify-center shadow-sm"><svg class="w-2.5 h-2.5 text-white fill-current" viewBox="0 0 24 24"><path d="M4 21h1V8H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2zM20.28 8H14V4.11a2.11 2.11 0 0 0-2.11-2.11c-.48 0-.94.19-1.29.54L5 8.12v12.76l6.83 1.13c.44.07.89.11 1.34.11H19a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2z"></path></svg></div>' +
+                        '<div class="w-4 h-4 rounded-full bg-rose-500 flex items-center justify-center shadow-sm"><svg class="w-2.5 h-2.5 text-white fill-current" viewBox="0 0 24 24"><path d="M4 21h1V8H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2zM20.28 8H14V4.11a2.11 2.11 0 0 0-2.11-2.11c-.48 0-.94.19-1.29.54L5 8.12v12.76l6.83 1.13c.44.07.89.11 1.34.11H19a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2z"></path></svg></div>' +
                         '</div></div></div></div>';
                     list.insertAdjacentHTML('afterbegin', html);
                     this.commentData[comment.uuid] = comment.content;
@@ -740,7 +740,7 @@
                         '<button @click="toggleLike(' + reply.uuid +
                         ', $event)" class="group flex items-center gap-1.5 text-[13px] font-bold transition-colors whitespace-nowrap" :class="likedComments[' +
                         reply.uuid +
-                        '] ? \'text-blue-600\' : \'text-gray-500 hover:text-gray-700 hover:underline\'" id="like-btn-' +
+                        '] ? \'text-rose-500\' : \'text-gray-500 hover:text-gray-700 hover:underline\'" id="like-btn-' +
                         reply.uuid + '"><span>Thích</span></button>' +
                         replyBtn +
                         editBtn +
@@ -752,7 +752,7 @@
                         '] > 0" x-cloak style="display: none" class="flex items-center gap-1 cursor-pointer">' +
                         '<span x-text="likeCounts[' + reply.uuid +
                         ']" class="text-[11px] text-gray-500 hover:underline"></span>' +
-                        '<div class="w-[14px] h-[14px] rounded-full bg-blue-500 flex items-center justify-center shadow-sm"><svg class="w-2 h-2 text-white fill-current" viewBox="0 0 24 24"><path d="M4 21h1V8H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2zM20.28 8H14V4.11a2.11 2.11 0 0 0-2.11-2.11c-.48 0-.94.19-1.29.54L5 8.12v12.76l6.83 1.13c.44.07.89.11 1.34.11H19a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2z"></path></svg></div>' +
+                        '<div class="w-[14px] h-[14px] rounded-full bg-rose-500 flex items-center justify-center shadow-sm"><svg class="w-2 h-2 text-white fill-current" viewBox="0 0 24 24"><path d="M4 21h1V8H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2zM20.28 8H14V4.11a2.11 2.11 0 0 0-2.11-2.11c-.48 0-.94.19-1.29.54L5 8.12v12.76l6.83 1.13c.44.07.89.11 1.34.11H19a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2z"></path></svg></div>' +
                         '</div></div></div></div>';
                     rc.insertAdjacentHTML('beforeend', html);
                     this.commentData[reply.uuid] = reply.content;
@@ -952,7 +952,7 @@
                                         {{-- Like --}}
                                         <button @click="toggleLike({{ $comment->id }}, $event)"
                                             class="group flex items-center gap-1.5 text-[13px] font-bold transition-colors whitespace-nowrap"
-                                            :class="likedComments[{{ $comment->id }}] ? 'text-blue-600' :
+                                            :class="likedComments[{{ $comment->id }}] ? 'text-rose-500' :
                                                 'text-gray-500 hover:text-gray-700 hover:underline'"
                                             id="like-btn-{{ $comment->id }}">
                                             <span>Thích</span>
@@ -996,7 +996,7 @@
                     <span x-text="likeCounts[{{ $comment->id }}]" class="text-[13px] text-gray-500 hover:underline">
                         {{ $comment->likes->count() }}
                     </span>
-                    <div class="w-4 h-4 rounded-full bg-blue-500 flex items-center justify-center shadow-sm">
+                    <div class="w-4 h-4 rounded-full bg-rose-500 flex items-center justify-center shadow-sm">
                         <svg class="w-2.5 h-2.5 text-white fill-current" viewBox="0 0 24 24">
                             <path
                                 d="M4 21h1V8H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2zM20.28 8H14V4.11a2.11 2.11 0 0 0-2.11-2.11c-.48 0-.94.19-1.29.54L5 8.12v12.76l6.83 1.13c.44.07.89.11 1.34.11H19a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2z">
@@ -1108,7 +1108,7 @@
                                                 {{-- Like --}}
                                                 <button @click="toggleLike({{ $reply->id }}, $event)"
                                                     class="group flex items-center gap-1.5 text-[13px] font-bold transition-colors whitespace-nowrap"
-                                                    :class="likedComments[{{ $reply->id }}] ? 'text-blue-600' :
+                                                    :class="likedComments[{{ $reply->id }}] ? 'text-rose-500' :
                                                         'text-gray-500 hover:text-gray-700 hover:underline'"
                                                     id="like-btn-{{ $reply->id }}">
                                                     <span>Thích</span>
@@ -1154,7 +1154,7 @@
                                 {{ $reply->likes->count() }}
                             </span>
                             <div
-                                class="w-[14px] h-[14px] rounded-full bg-blue-500 flex items-center justify-center shadow-sm">
+                                class="w-[14px] h-[14px] rounded-full bg-rose-500 flex items-center justify-center shadow-sm">
                                 <svg class="w-2 h-2 text-white fill-current" viewBox="0 0 24 24">
                                     <path
                                         d="M4 21h1V8H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2zM20.28 8H14V4.11a2.11 2.11 0 0 0-2.11-2.11c-.48 0-.94.19-1.29.54L5 8.12v12.76l6.83 1.13c.44.07.89.11 1.34.11H19a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2z">
@@ -1220,7 +1220,7 @@
                                                 </span>
                                                 <button @click="toggleLike({{ $nestedReply->id }}, $event)"
                                                     class="group flex items-center gap-1.5 text-[13px] font-bold transition-colors whitespace-nowrap"
-                                                    :class="likedComments[{{ $nestedReply->id }}] ? 'text-blue-600' :
+                                                    :class="likedComments[{{ $nestedReply->id }}] ? 'text-rose-500' :
                                                         'text-gray-500 hover:text-gray-700 hover:underline'"
                                                     id="like-btn-{{ $nestedReply->id }}">
                                                     <span>Thích</span>
@@ -1251,7 +1251,7 @@
                                 {{ $nestedReply->likes->count() }}
                             </span>
                             <div
-                                class="w-[14px] h-[14px] rounded-full bg-blue-500 flex items-center justify-center shadow-sm">
+                                class="w-[14px] h-[14px] rounded-full bg-rose-500 flex items-center justify-center shadow-sm">
                                 <svg class="w-2 h-2 text-white fill-current" viewBox="0 0 24 24">
                                     <path
                                         d="M4 21h1V8H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2zM20.28 8H14V4.11a2.11 2.11 0 0 0-2.11-2.11c-.48 0-.94.19-1.29.54L5 8.12v12.76l6.83 1.13c.44.07.89.11 1.34.11H19a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2z">

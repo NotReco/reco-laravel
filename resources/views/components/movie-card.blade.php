@@ -164,7 +164,7 @@ try {
                     <div class="border-t border-gray-100 py-1.5">
                         <button @click="toggleFavorite()"
                             class="w-full flex items-center gap-2.5 px-3 py-1.5 text-xs hover:bg-gray-50 transition-colors text-left"
-                            :class="isFavorited ? 'text-sky-600' : 'text-gray-700'">
+                            :class="isFavorited ? 'text-rose-500' : 'text-gray-700'">
                             <svg class="w-3.5 h-3.5 shrink-0" :fill="isFavorited ? 'currentColor' : 'none'"
                                 stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

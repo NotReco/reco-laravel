@@ -73,15 +73,25 @@
                                     </svg>
                                 </a>
                             @endif
-                            <form action="{{ route('forum.destroy', $thread) }}" method="POST"
-                                  onsubmit="return confirm('Bạn có chắc muốn xóa bài viết này?')">
-                                @csrf @method('DELETE')
-                                <button type="submit" class="text-gray-400 hover:text-red-500 transition-colors p-2 rounded-lg hover:bg-red-50" title="Xóa bài viết">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                    </svg>
-                                </button>
-                            </form>
+                            <button x-data="" x-on:click="$dispatch('open-modal', 'confirm-delete-thread')" type="button" class="text-gray-400 hover:text-red-500 transition-colors p-2 rounded-lg hover:bg-red-50" title="Xóa bài viết">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                </svg>
+                            </button>
+                            <x-modal name="confirm-delete-thread" focusable maxWidth="sm">
+                                <form method="post" action="{{ route('forum.destroy', $thread) }}" class="p-6">
+                                    @csrf @method('delete')
+                                    <div class="flex items-center gap-3 mb-4 text-red-600">
+                                        <svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                        <h2 class="text-lg font-bold text-gray-900">Xóa bài viết này?</h2>
+                                    </div>
+                                    <p class="text-sm text-gray-600">Bài viết cùng toàn bộ phản hồi sẽ bị xóa vĩnh viễn khỏi diễn đàn. Hành động này không thể hoàn tác đâu nhé!</p>
+                                    <div class="mt-6 flex justify-end gap-3">
+                                        <button type="button" x-on:click="$dispatch('close')" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">Hủy bỏ</button>
+                                        <button type="submit" class="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors">Đồng ý xóa</button>
+                                    </div>
+                                </form>
+                            </x-modal>
                         </div>
                     @endif
                 @endauth
@@ -89,7 +99,7 @@
 
             {{-- Body --}}
             <div class="mt-6 prose prose-sm prose-gray max-w-none text-gray-700 leading-relaxed">
-                {!! $thread->content !!}
+                {!! Purify::clean(Str::markdown($thread->content, ['html_input' => 'allow'])) !!}
             </div>
         </article>
 
@@ -104,7 +114,7 @@
 
             <div class="space-y-4">
                 @forelse($replies as $reply)
-                    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
+                    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5" id="reply-{{ $reply->id }}">
                         <div class="flex items-start gap-3">
                             <a href="{{ route('profile.show', $reply->user) }}" class="w-9 h-9 shrink-0 relative group">
                                 <div class="w-full h-full rounded-full bg-gradient-to-br from-gray-300 to-gray-500 flex items-center justify-center overflow-hidden transition-all duration-300 {{ $reply->user->activeFrame ? 'scale-[1.0475]' : 'ring-2 ring-white shadow-sm' }}">
@@ -129,12 +139,20 @@
                                                 {{ $reply->user->activeTitle->name }}
                                             </span>
                                         @endif
-                                        <span class="text-gray-300">·</span>
+                                        <span class="text-gray-300">&middot;</span>
                                         <span class="text-gray-400">{{ $reply->created_at->diffForHumans() }}</span>
                                     </div>
-                                    @auth
-                                        @if(auth()->id() === $reply->user_id || auth()->user()->isStaff())
-                                            <div class="flex items-center gap-1">
+                                    <div class="flex items-center gap-1">
+                                        @auth
+                                            @if(!$thread->is_locked)
+                                                <button type="button" onclick="setReplyParent({{ $reply->id }}, '{{ addslashes($reply->user->name) }}')"
+                                                        class="text-gray-400 hover:text-sky-500 transition-colors p-1.5 rounded-lg hover:bg-sky-50" title="Trả lời">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
+                                                    </svg>
+                                                </button>
+                                            @endif
+                                            @if(auth()->id() === $reply->user_id || auth()->user()->isStaff())
                                                 @if(auth()->id() === $reply->user_id)
                                                     <a href="{{ route('forum.editReply', $reply) }}"
                                                        class="text-gray-400 hover:text-sky-500 transition-colors p-1.5 rounded-lg hover:bg-sky-50" title="Sửa">
@@ -143,21 +161,39 @@
                                                         </svg>
                                                     </a>
                                                 @endif
-                                                <form action="{{ route('forum.destroyReply', $reply) }}" method="POST"
-                                                      onsubmit="return confirm('Bạn có chắc muốn xóa phản hồi này?')">
-                                                    @csrf @method('DELETE')
-                                                    <button type="submit" class="text-gray-400 hover:text-red-500 transition-colors p-1.5 rounded-lg hover:bg-red-50" title="Xóa">
-                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                                        </svg>
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        @endif
-                                    @endauth
+                                                <button type="button" x-data="" x-on:click="$dispatch('open-modal', 'confirm-delete-reply-{{ $reply->id }}')" class="text-gray-400 hover:text-red-500 transition-colors p-1.5 rounded-lg hover:bg-red-50" title="Xóa">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                    </svg>
+                                                </button>
+                                                <x-modal name="confirm-delete-reply-{{ $reply->id }}" focusable maxWidth="sm">
+                                                    <form method="post" action="{{ route('forum.destroyReply', $reply) }}" class="p-6">
+                                                        @csrf @method('delete')
+                                                        <div class="flex items-center gap-3 mb-4 text-red-600">
+                                                            <svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                                            <h2 class="text-lg font-bold text-gray-900">Xóa phản hồi này?</h2>
+                                                        </div>
+                                                        <p class="text-sm text-gray-600">Phản hồi sẽ được gỡ khỏi bài viết. Hành động này không thể hoàn tác.</p>
+                                                        <div class="mt-6 flex justify-end gap-3">
+                                                            <button type="button" x-on:click="$dispatch('close')" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">Hủy</button>
+                                                            <button type="submit" class="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors">Đồng ý xóa</button>
+                                                        </div>
+                                                    </form>
+                                                </x-modal>
+                                            @endif
+                                        @endauth
+                                    </div>
                                 </div>
+                                {{-- Nested reply indicator --}}
+                                @if($reply->parent_id && $reply->parent)
+                                    <div class="mt-1.5 mb-1 flex items-center gap-1.5 text-xs text-gray-400">
+                                        <svg class="w-3.5 h-3.5 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>
+                                        <span>Đã trả lời</span>
+                                        <a href="#reply-{{ $reply->parent_id }}" class="font-semibold text-sky-500 hover:text-sky-600 transition-colors">{{ $reply->parent->user->name ?? 'Ẩn danh' }}</a>
+                                    </div>
+                                @endif
                                 <div class="mt-2 text-sm text-gray-700 leading-relaxed prose prose-sm prose-gray max-w-none">
-                                    {!! $reply->content !!}
+                                    {!! Purify::clean(Str::markdown($reply->content, ['html_input' => 'allow'])) !!}
                                 </div>
                             </div>
                         </div>
@@ -178,20 +214,32 @@
         {{-- ── Reply Form ────────────────────────────────────────── --}}
         @auth
             @if(!$thread->is_locked)
-                <div class="mt-8 bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+                <div class="mt-8 bg-white rounded-2xl border border-gray-200 shadow-sm p-6" id="reply-form-area">
                     <h3 class="text-base font-semibold text-gray-900 mb-4">Viết trả lời</h3>
+
+                    {{-- Replying-to banner --}}
+                    <div id="replying-to-banner" class="hidden mb-3 items-center justify-between px-3 py-2 bg-sky-50 border border-sky-200 rounded-lg">
+                        <div class="flex items-center gap-2 text-sm text-sky-700">
+                            <svg class="w-4 h-4 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>
+                            <span>Đang trả lời <strong id="replying-to-name"></strong></span>
+                        </div>
+                        <button type="button" onclick="clearReplyParent()" class="text-sky-400 hover:text-sky-600 transition-colors p-1 rounded">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+
                     <form action="{{ route('forum.reply', $thread) }}" method="POST">
                         @csrf
-                        <textarea name="content" rows="4" required
-                              class="js-richtext-simple w-full"
-                              data-richtext-height="200"
+                        <input type="hidden" name="parent_id" id="reply-parent-id" value="">
+                        <textarea name="content" rows="4" required maxlength="10000"
+                              class="js-markdown-editor w-full"
                               placeholder="Chia sẻ ý kiến của bạn...">{!! old('content') !!}</textarea>
                         @error('content')
                             <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                         @enderror
-                        <div class="mt-3 flex justify-end">
+                        <div class="md-editor-footer">
                             <button type="submit"
-                                    class="px-6 py-2.5 bg-sky-500 text-white text-sm font-semibold rounded-xl
+                                    class="px-5 py-2 bg-sky-500 text-white text-sm font-semibold rounded-xl
                                            hover:bg-sky-600 transition-all duration-200 shadow-sm hover:shadow-md">
                                 Gửi trả lời
                             </button>
@@ -215,5 +263,22 @@
     </div>
 </div>
 
-@include('partials.tinymce-simple')
+@include('partials.markdown-editor')
+
+<script>
+    function setReplyParent(replyId, userName) {
+        document.getElementById('reply-parent-id').value = replyId;
+        document.getElementById('replying-to-name').textContent = userName;
+        const banner = document.getElementById('replying-to-banner');
+        banner.classList.remove('hidden');
+        banner.classList.add('flex');
+        document.getElementById('reply-form-area').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    function clearReplyParent() {
+        document.getElementById('reply-parent-id').value = '';
+        const banner = document.getElementById('replying-to-banner');
+        banner.classList.add('hidden');
+        banner.classList.remove('flex');
+    }
+</script>
 </x-app-layout>

@@ -135,7 +135,7 @@ class TmdbService
     public function getMovieDetail(int $tmdbId): ?array
     {
         return $this->getWithFallback("/movie/{$tmdbId}", [
-            'append_to_response' => 'credits,videos',
+            'append_to_response' => 'credits,videos,keywords',
         ]);
     }
 
@@ -159,15 +159,102 @@ class TmdbService
     }
 
     // ═══════════════════════════════════════
+    //  TV Shows
+    // ═══════════════════════════════════════
+
+    /**
+     * Lấy danh sách thể loại TV series.
+     */
+    public function getTvGenres(): ?array
+    {
+        $data = $this->get('/genre/tv/list');
+        return $data['genres'] ?? null;
+    }
+
+    /**
+     * Lấy TV series phổ biến.
+     */
+    public function getPopularTvShows(int $page = 1): ?array
+    {
+        return $this->get('/tv/popular', ['page' => $page]);
+    }
+
+    /**
+     * Lấy TV series được đánh giá cao.
+     */
+    public function getTopRatedTvShows(int $page = 1): ?array
+    {
+        return $this->get('/tv/top_rated', ['page' => $page]);
+    }
+
+    /**
+     * Lấy TV series đang chiếu hôm nay.
+     */
+    public function getAiringTodayTvShows(int $page = 1): ?array
+    {
+        return $this->get('/tv/airing_today', ['page' => $page]);
+    }
+
+    /**
+     * Lấy TV series đang phát sóng tuần này.
+     */
+    public function getOnTheAirTvShows(int $page = 1): ?array
+    {
+        return $this->get('/tv/on_the_air', ['page' => $page]);
+    }
+
+    /**
+     * Lấy chi tiết TV series theo TMDb ID (bao gồm credits, videos).
+     */
+    public function getTvShowDetail(int $tmdbId): ?array
+    {
+        return $this->getWithFallback("/tv/{$tmdbId}", [
+            'append_to_response' => 'credits,videos,keywords',
+        ]);
+    }
+
+    /**
+     * Tìm kiếm TV series.
+     */
+    public function searchTvShows(string $query, int $page = 1): ?array
+    {
+        return $this->get('/search/tv', [
+            'query' => $query,
+            'page'  => $page,
+        ]);
+    }
+
+    // ═══════════════════════════════════════
     //  People
     // ═══════════════════════════════════════
+
 
     /**
      * Lấy chi tiết người theo TMDb ID.
      */
     public function getPersonDetail(int $tmdbId): ?array
     {
-        return $this->getWithFallback("/person/{$tmdbId}");
+        $data = $this->get("/person/{$tmdbId}", [
+            'append_to_response' => 'external_ids',
+        ]);
+
+        if (!$data) {
+            return null;
+        }
+
+        // Nếu tiểu sử rỗng (TMDB không có bản dịch tiếng Việt),
+        // tự động lấy lại bằng tiếng Anh.
+        if (empty($data['biography']) && $this->fallbackLanguage !== $this->language) {
+            $en = $this->get("/person/{$tmdbId}", [
+                'language'           => $this->fallbackLanguage,
+                'append_to_response' => 'external_ids',
+            ]);
+            if (!empty($en['biography'])) {
+                $data['biography'] = $en['biography'];
+            }
+        }
+
+        return $data;
     }
 
     /**

@@ -30,60 +30,65 @@
     class="fixed top-0 left-0 right-0 z-50 transition-all duration-500 backdrop-blur-xl backdrop-saturate-150 bg-white/55 border-b border-gray-100">
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-3 items-center h-16">
+        <div class="flex items-center justify-between h-16">
 
-            <div class="hidden md:flex items-center gap-6">
-                @php
-                    $links = [
-                        ['label' => 'Trang chủ', 'route' => 'home', 'match' => 'home'],
-                        ['label' => 'Khám phá', 'route' => 'explore', 'match' => 'explore'],
-                        ['label' => 'Tin tức', 'route' => 'news.index', 'match' => 'news.*'],
-                        ['label' => 'Diễn đàn', 'route' => 'forum.index', 'match' => 'forum.*'],
-                    ];
-                @endphp
+            {{-- LEFT: MOBILE HAMBURGER + LOGO + DESKTOP LINKS --}}
+            <div class="flex items-center gap-4 lg:gap-8">
+                
+                {{-- Mobile: hamburger on the left --}}
+                <div class="md:hidden flex items-center">
+                    <button @click="mobileOpen = !mobileOpen"
+                        class="w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 -ml-2"
+                        :class="darkHero ? 'text-white/80 hover:text-white hover:bg-white/10' :
+                            'text-gray-500 hover:text-gray-900 hover:bg-gray-100'">
+                        <svg x-show="!mobileOpen" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                        <svg x-show="mobileOpen" class="w-5 h-5" style="display:none" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
 
-                @foreach ($links as $link)
-                    @php
-                        $active = $link['match'] && request()->routeIs($link['match']);
-                        $href = $link['route'] ? route($link['route']) : '#';
-                    @endphp
-                    <a href="{{ $href }}"
-                        class="text-[13px] uppercase tracking-wider font-medium transition-colors duration-300 {{ $active ? 'text-gray-900' : 'text-gray-500 hover:text-gray-900' }}"
-                        :class="{
-                            '{{ $active ? 'text-white' : 'text-white/70 hover:text-white' }}': darkHero,
-                            '{{ $active ? 'text-gray-900' : 'text-gray-500 hover:text-gray-900' }}': !darkHero
-                        }">
-                        {{ $link['label'] }}
-                    </a>
-                @endforeach
-            </div>
-
-            {{-- Mobile: hamburger on the left --}}
-            <div class="md:hidden flex items-center">
-                <button @click="mobileOpen = !mobileOpen"
-                    class="w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300"
-                    :class="darkHero ? 'text-white/80 hover:text-white hover:bg-white/10' :
-                        'text-gray-500 hover:text-gray-900 hover:bg-gray-100'">
-                    <svg x-show="!mobileOpen" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                            d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
-                    <svg x-show="mobileOpen" class="w-5 h-5" style="display:none" fill="none" stroke="currentColor"
-                        viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                            d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-
-            {{-- CENTER: LOGO --}}
-            <div class="flex items-center justify-center">
+                {{-- LOGO --}}
                 <a href="{{ route('home') }}" class="flex items-center shrink-0">
                     <img x-show="!darkHero" src="{{ asset('storage/images/logo.svg') }}" alt="RecoDB" height="28"
                         style="height: 28px; width: auto;">
                     <img x-cloak x-show="darkHero" src="{{ asset('storage/images/logo-dark.svg') }}" alt="RecoDB"
                         height="28" style="height: 28px; width: auto; display:none">
                 </a>
+
+                {{-- DESKTOP LINKS --}}
+                <div class="hidden md:flex items-center gap-5 lg:gap-6 ml-2">
+                    @php
+                        $links = [
+                            ['label' => 'Trang chủ', 'route' => 'home', 'match' => 'home'],
+                            ['label' => 'Phim lẻ', 'route' => 'explore', 'match' => 'explore'],
+                            ['label' => 'TV Series', 'route' => 'tv-shows.index', 'match' => 'tv-shows.*'],
+                            ['label' => 'Diễn viên', 'route' => 'person.index', 'match' => 'person.*'],
+                            ['label' => 'Tin tức', 'route' => 'news.index', 'match' => 'news.*'],
+                            ['label' => 'Diễn đàn', 'route' => 'forum.index', 'match' => 'forum.*'],
+                        ];
+                    @endphp
+
+                    @foreach ($links as $link)
+                        @php
+                            $active = $link['match'] && request()->routeIs($link['match']);
+                            $href = $link['route'] ? route($link['route']) : '#';
+                        @endphp
+                        <a href="{{ $href }}"
+                            class="text-[13px] uppercase tracking-wider font-medium transition-colors duration-300 {{ $active ? 'text-gray-900' : 'text-gray-500 hover:text-gray-900' }}"
+                            :class="{
+                                '{{ $active ? 'text-white' : 'text-white/70 hover:text-white' }}': darkHero,
+                                '{{ $active ? 'text-gray-900' : 'text-gray-500 hover:text-gray-900' }}': !darkHero
+                            }">
+                            {{ $link['label'] }}
+                        </a>
+                    @endforeach
+                </div>
             </div>
 
             {{-- RIGHT: SEARCH · NOTIFICATION · PROFILE --}}
@@ -803,7 +808,12 @@
             <a href="{{ route('explore') }}"
                 class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
                       {{ request()->routeIs('explore') ? 'bg-sky-50 text-sky-600' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50' }}">
-                Khám phá
+                Phim lẻ
+            </a>
+            <a href="{{ route('tv-shows.index') }}"
+                class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
+                      {{ request()->routeIs('tv-shows.*') ? 'bg-sky-50 text-sky-600' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50' }}">
+                TV Series
             </a>
             <a href="{{ route('news.index') }}"
                 class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
@@ -814,6 +824,11 @@
                 class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
                       {{ request()->routeIs('forum.*') ? 'bg-sky-50 text-sky-600' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50' }}">
                 Diễn đàn
+            </a>
+            <a href="{{ route('person.index') }}"
+                class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
+                      {{ request()->routeIs('person.*') ? 'bg-sky-50 text-sky-600' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50' }}">
+                Diễn viên
             </a>
 
             {{-- Mobile auth --}}
@@ -838,21 +853,34 @@
     results: [],
     loading: false,
     showResults: false,
+    abortController: null,
     async search() {
-        // Sanitize: strip +, -, %, _ from query
-        const cleanQuery = this.query.replace(/[+\-%_]/g, '').trim();
+        // Sanitize: allow letters, numbers, spaces, and punctuation
+        const cleanQuery = this.query.trim();
         if (cleanQuery.length < 2) {
             this.results = [];
             this.showResults = false;
             return;
         }
+
+        // Cancel previous request if any
+        if (this.abortController) {
+            this.abortController.abort();
+        }
+        this.abortController = new AbortController();
+
         this.loading = true;
         try {
-            const res = await fetch('{{ route('api.search') }}?q=' + encodeURIComponent(cleanQuery));
+            const res = await fetch('{{ route('api.search') }}?q=' + encodeURIComponent(cleanQuery), {
+                signal: this.abortController.signal
+            });
             this.results = await res.json();
             this.showResults = true;
-        } finally {
             this.loading = false;
+        } catch (e) {
+            if (e.name !== 'AbortError') {
+                this.loading = false;
+            }
         }
     },
     goToExplore() {
@@ -877,10 +905,11 @@
 
     {{-- Search Modal --}}
     <div x-show="open" x-transition:enter="transition ease-out duration-200"
-        x-transition:enter-start="opacity-0 scale-95 -translate-y-4"
-        x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-        x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 scale-100"
-        x-transition:leave-end="opacity-0 scale-95"
+        x-transition:enter-start="opacity-0 -translate-y-2"
+        x-transition:enter-end="opacity-100 translate-y-0"
+        x-transition:leave="transition ease-in duration-150"
+        x-transition:leave-start="opacity-100 translate-y-0"
+        x-transition:leave-end="opacity-0 -translate-y-2"
         class="fixed top-[15vh] left-1/2 -translate-x-1/2 w-full max-w-xl px-4" style="display:none">
 
         <div class="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden">
@@ -919,12 +948,12 @@
 
             {{-- Results --}}
             <div x-show="showResults && results.length > 0" class="max-h-[320px] overflow-y-auto">
-                <template x-for="movie in results" :key="movie.id">
-                    <a :href="'/movies/' + movie.slug" @click="reset()"
+                <template x-for="item in results" :key="item.id + '-' + item.title">
+                    <a :href="item.url" @click="reset()"
                         class="flex items-center gap-4 px-5 py-3 hover:bg-gray-50 transition-colors border-b border-gray-50 last:border-0 group">
                         <div class="w-10 h-14 bg-gray-100 rounded-lg bg-cover bg-center shrink-0 overflow-hidden"
-                            :style="movie.poster ? `background-image: url('${movie.poster}')` : ''">
-                            <template x-if="!movie.poster">
+                            :style="item.poster ? `background-image: url('${item.poster}')` : ''">
+                            <template x-if="!item.poster">
                                 <div class="w-full h-full flex items-center justify-center text-gray-300">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -935,9 +964,8 @@
                         </div>
                         <div class="min-w-0 flex-1">
                             <p class="text-sm font-semibold text-gray-900 truncate group-hover:text-sky-600 transition-colors"
-                                x-text="movie.title"></p>
-                            <p class="text-xs text-gray-400 mt-0.5"
-                                x-text="movie.release_date ? movie.release_date.substring(0, 4) : ''"></p>
+                                x-text="item.title"></p>
+                            <p class="text-xs text-gray-400 mt-0.5" x-text="item.release_year"></p>
                         </div>
                         <svg class="w-4 h-4 text-gray-300 group-hover:text-gray-500 shrink-0 transition-colors"
                             fill="none" stroke="currentColor" viewBox="0 0 24 24">

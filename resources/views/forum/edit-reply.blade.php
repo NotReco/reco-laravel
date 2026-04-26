@@ -24,9 +24,8 @@
                 <div>
                     <label for="content" class="block text-sm font-medium text-gray-700 mb-2">Nội dung</label>
                     <textarea id="content" name="content" rows="6"
-                              class="js-richtext-simple w-full"
-                              data-richtext-height="280"
-                              placeholder="Nội dung phản hồi..." required minlength="3">{!! old('content', $reply->content) !!}</textarea>
+                              class="js-markdown-editor w-full"
+                              placeholder="Nội dung phản hồi..." required maxlength="10000">{!! old('content', $reply->content) !!}</textarea>
                     @error('content')
                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                     @enderror
@@ -48,5 +47,5 @@
     </div>
 </div>
 
-@include('partials.tinymce-simple')
+@include('partials.markdown-editor')
 </x-app-layout>
