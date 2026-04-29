@@ -16,7 +16,7 @@
     <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('web-app-manifest-192x192.png') }}">
     <link rel="icon" type="image/png" sizes="512x512" href="{{ asset('web-app-manifest-512x512.png') }}">
     <link rel="manifest" href="{{ asset('site.webmanifest') }}">
-    <meta property="og:image" content="{{ asset('storage/images/logo-og.png') }}">
+    <meta property="og:image" content="https://i.ibb.co/ynjxvNhx/logo-dark.jpg">
 
     {{-- Google Fonts --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -135,6 +135,9 @@
     @if(session('success') || session('error') || session('info'))
         <x-toast />
     @endif
+
+    {{-- ── Global Report Modal ─────────────────────────── --}}
+    <x-report-modal />
 
     {{-- ── 2FA Remember Login Prompt ───────────────────── --}}
     @if(session('2fa_remember_prompt'))

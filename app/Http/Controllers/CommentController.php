@@ -80,4 +80,30 @@ class CommentController extends Controller
 
         return back()->with('success', 'Đã xóa bình luận.');
     }
+
+    /**
+     * Toggle like for the comment.
+     */
+    public function toggleLike(Comment $comment)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
+
+        $like = $comment->likes()->where('user_id', $user->id)->first();
+
+        if ($like) {
+            $like->delete();
+            $isLiked = false;
+        } else {
+            $comment->likes()->create(['user_id' => $user->id]);
+            $isLiked = true;
+        }
+
+        return response()->json([
+            'isLiked' => $isLiked,
+            'likesCount' => $comment->likes()->count(),
+        ]);
+    }
 }

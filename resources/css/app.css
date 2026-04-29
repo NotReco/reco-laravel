@@ -28,6 +28,22 @@
     ::-webkit-scrollbar-thumb:hover {
         @apply bg-gray-400;
     }
+
+    /* Admin Panel Dark Scrollbar */
+    html.admin-panel::-webkit-scrollbar-track,
+    html.admin-panel ::-webkit-scrollbar-track {
+        @apply bg-transparent;
+    }
+
+    html.admin-panel::-webkit-scrollbar-thumb,
+    html.admin-panel ::-webkit-scrollbar-thumb {
+        @apply bg-dark-700/80 border-dark-950;
+    }
+
+    html.admin-panel::-webkit-scrollbar-thumb:hover,
+    html.admin-panel ::-webkit-scrollbar-thumb:hover {
+        @apply bg-dark-600;
+    }
 }
 
 @layer components {

@@ -105,4 +105,12 @@ class Review extends Model
     {
         return is_null($this->content);
     }
+
+    /**
+     * Polymorphic relation for reports.
+     */
+    public function reports()
+    {
+        return $this->morphMany(Report::class, 'reportable');
+    }
 }

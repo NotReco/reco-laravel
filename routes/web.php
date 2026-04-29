@@ -74,16 +74,38 @@ Route::get('/api/search', function (\Illuminate\Http\Request $request) {
 
     $results = $movies->concat($tvShows);
 
-    // Sort in PHP to ensure exact literal match comes first, fallback to view_count
-    $results = $results->sortByDesc('view_count')->sortBy(function ($item) use ($q) {
-        // Strip accents for comparison
-        $cleanTitle = \Illuminate\Support\Str::ascii($item->title);
-        $cleanQ = \Illuminate\Support\Str::ascii($q);
+    // Calculate relevance score for sorting (1 is best match, 9 is worst)
+    $results = $results->map(function ($item) use ($q) {
+        $title = mb_strtolower(\Illuminate\Support\Str::ascii($item->title));
+        $orig = mb_strtolower(\Illuminate\Support\Str::ascii($item->original_title ?? ''));
+        $qLower = mb_strtolower(\Illuminate\Support\Str::ascii($q));
         
-        $titleMatch = mb_stripos($item->title, $q) !== false || mb_stripos($cleanTitle, $cleanQ) !== false;
-        $originalMatch = mb_stripos($item->original_title ?? '', $q) !== false;
-        return ($titleMatch || $originalMatch) ? 1 : 2;
-    })->take(8)->values();
+        if ($title === $qLower) {
+            $score = 1;
+        } elseif (str_starts_with($title, $qLower . ' ')) {
+            $score = 2;
+        } elseif (str_contains($title, ' ' . $qLower . ' ') || str_ends_with($title, ' ' . $qLower)) {
+            $score = 3;
+        } elseif (str_starts_with($title, $qLower)) {
+            $score = 4;
+        } elseif ($orig === $qLower) {
+            $score = 5;
+        } elseif (str_starts_with($orig, $qLower . ' ')) {
+            $score = 6;
+        } elseif (str_contains($orig, ' ' . $qLower . ' ') || str_ends_with($orig, ' ' . $qLower)) {
+            $score = 7;
+        } elseif (str_starts_with($orig, $qLower)) {
+            $score = 8;
+        } else {
+            $score = 9;
+        }
+        
+        $item->relevance_score = $score;
+        return $item;
+    });
+
+    // Sort by view_count DESC first, then by relevance score ASC
+    $results = $results->sortByDesc('view_count')->sortBy('relevance_score')->take(8)->values();
 
     // Map again to keep response small and clean
     $cleanResults = $results->map(function ($item) {
@@ -139,8 +161,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // ── Profile (private actions only) ──
     Route::get('/users/profile/edit', [\App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/users/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/users/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::patch('/users/profile', [\App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/users/profile', [\App\Http\Controllers\ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // ── Events / Quests ──
+    Route::get('/events', [\App\Http\Controllers\EventController::class, 'index'])->name('events.index');
+    Route::post('/events/{quest}/claim', [\App\Http\Controllers\EventController::class, 'claim'])->name('events.claim');
 
     // ── Favorites ──
     Route::post('/api/favorites/toggle', [\App\Http\Controllers\FavoriteController::class, 'toggle'])->name('favorites.toggle');
@@ -158,6 +184,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // ── Comments ──
     Route::post('/comments', [\App\Http\Controllers\CommentController::class, 'store'])->name('comments.store');
     Route::put('/comments/{comment}', [\App\Http\Controllers\CommentController::class, 'update'])->name('comments.update');
+    Route::post('/comments/{comment}/like', [\App\Http\Controllers\CommentController::class, 'toggleLike'])->name('comments.like');
     Route::delete('/comments/{comment}', [\App\Http\Controllers\CommentController::class, 'destroy'])->name('comments.destroy');
 
     // ── Article Comments ──
@@ -176,6 +203,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/api/notifications/{id}', [\App\Http\Controllers\NotificationController::class, 'destroy'])->name('notifications.destroy');
     Route::post('/api/notifications/{id}/turn-off', [\App\Http\Controllers\NotificationController::class, 'turnOff'])->name('notifications.turnOff');
     Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'all'])->name('notifications.all');
+
+    // ── Reports (General) ──
+    Route::post('/api/reports', [\App\Http\Controllers\ReportController::class, 'store'])->name('reports.store');
 
     // ── Forum (auth actions) ──
     Route::get('/forum/create', [ForumController::class, 'create'])->name('forum.create');
@@ -202,50 +232,97 @@ Route::middleware(['auth', 'verified'])->group(function () {
 //  GROUP 4: AUTH + ADMIN — Admin panel
 // ═══════════════════════════════════════════════════
 
-Route::middleware(['auth', 'role:staff'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'can:access_admin_panel'])->prefix('staff')->name('admin.')->group(function () {
     Route::get('/', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
 
     // Movies
-    Route::get('/movies', [\App\Http\Controllers\Admin\MovieController::class, 'index'])->name('movies.index');
-    Route::get('/movies/{movie}/edit', [\App\Http\Controllers\Admin\MovieController::class, 'edit'])->name('movies.edit');
-    Route::put('/movies/{movie}', [\App\Http\Controllers\Admin\MovieController::class, 'update'])->name('movies.update');
-    Route::delete('/movies/{movie}', [\App\Http\Controllers\Admin\MovieController::class, 'destroy'])->name('movies.destroy');
+    Route::middleware('can:manage_movies')->group(function () {
+        Route::get('/movies', [\App\Http\Controllers\Admin\MovieController::class, 'index'])->name('movies.index');
+        Route::get('/movies/{movie}/edit', [\App\Http\Controllers\Admin\MovieController::class, 'edit'])->name('movies.edit');
+        Route::put('/movies/{movie}', [\App\Http\Controllers\Admin\MovieController::class, 'update'])->name('movies.update');
+        Route::delete('/movies/{movie}', [\App\Http\Controllers\Admin\MovieController::class, 'destroy'])->name('movies.destroy');
+    });
 
     // TV Shows
-    Route::get('/tv-shows', [\App\Http\Controllers\Admin\TvShowController::class, 'index'])->name('tv-shows.index');
-    Route::get('/tv-shows/{tvShow}/edit', [\App\Http\Controllers\Admin\TvShowController::class, 'edit'])->name('tv-shows.edit');
-    Route::put('/tv-shows/{tvShow}', [\App\Http\Controllers\Admin\TvShowController::class, 'update'])->name('tv-shows.update');
-    Route::delete('/tv-shows/{tvShow}', [\App\Http\Controllers\Admin\TvShowController::class, 'destroy'])->name('tv-shows.destroy');
+    Route::middleware('can:manage_tv_shows')->group(function () {
+        Route::get('/tv-shows', [\App\Http\Controllers\Admin\TvShowController::class, 'index'])->name('tv-shows.index');
+        Route::get('/tv-shows/{tvShow}/edit', [\App\Http\Controllers\Admin\TvShowController::class, 'edit'])->name('tv-shows.edit');
+        Route::put('/tv-shows/{tvShow}', [\App\Http\Controllers\Admin\TvShowController::class, 'update'])->name('tv-shows.update');
+        Route::delete('/tv-shows/{tvShow}', [\App\Http\Controllers\Admin\TvShowController::class, 'destroy'])->name('tv-shows.destroy');
+    });
 
     // Reviews
-    Route::get('/reviews', [\App\Http\Controllers\Admin\ReviewController::class, 'index'])->name('reviews.index');
-    Route::post('/reviews/{review}/approve', [\App\Http\Controllers\Admin\ReviewController::class, 'approve'])->name('reviews.approve');
-    Route::post('/reviews/{review}/reject', [\App\Http\Controllers\Admin\ReviewController::class, 'reject'])->name('reviews.reject');
-    Route::delete('/reviews/{review}', [\App\Http\Controllers\Admin\ReviewController::class, 'destroy'])->name('reviews.destroy');
+    Route::middleware('can:manage_reviews')->group(function () {
+        Route::get('/reviews', [\App\Http\Controllers\Admin\ReviewController::class, 'index'])->name('reviews.index');
+        Route::post('/reviews/{review}/approve', [\App\Http\Controllers\Admin\ReviewController::class, 'approve'])->name('reviews.approve');
+        Route::post('/reviews/{review}/reject', [\App\Http\Controllers\Admin\ReviewController::class, 'reject'])->name('reviews.reject');
+        Route::delete('/reviews/{review}', [\App\Http\Controllers\Admin\ReviewController::class, 'destroy'])->name('reviews.destroy');
+    });
 
     // Users
-    Route::get('/users', [\App\Http\Controllers\Admin\UserController::class, 'index'])->name('users.index');
-    Route::get('/users/{user}/edit', [\App\Http\Controllers\Admin\UserController::class, 'edit'])->name('users.edit');
-    Route::put('/users/{user}', [\App\Http\Controllers\Admin\UserController::class, 'update'])->name('users.update');
-    Route::post('/users/{user}/toggle-ban', [\App\Http\Controllers\Admin\UserController::class, 'toggleBan'])->name('users.toggleBan');
+    Route::middleware('can:manage_users')->group(function () {
+        Route::get('/users', [\App\Http\Controllers\Admin\UserController::class, 'index'])->name('users.index');
+        Route::get('/users/{user}/edit', [\App\Http\Controllers\Admin\UserController::class, 'edit'])->name('users.edit');
+        Route::put('/users/{user}', [\App\Http\Controllers\Admin\UserController::class, 'update'])->name('users.update');
+        Route::post('/users/{user}/toggle-ban', [\App\Http\Controllers\Admin\UserController::class, 'toggleBan'])->name('users.toggleBan');
+    });
+
+    // Roles (RBAC) (Moved to super-admin group)
 
     // Articles
-    Route::post('articles/editor-upload', [\App\Http\Controllers\Admin\ArticleEditorUploadController::class, 'store'])
-        ->name('articles.editor-upload');
-    Route::resource('articles', \App\Http\Controllers\Admin\ArticleController::class);
+    Route::middleware('can:manage_articles')->group(function () {
+        Route::post('articles/editor-upload', [\App\Http\Controllers\Admin\ArticleEditorUploadController::class, 'store'])
+            ->name('articles.editor-upload');
+        Route::resource('articles', \App\Http\Controllers\Admin\ArticleController::class);
+    });
 
     // Forum Categories
-    Route::resource('forum-categories', \App\Http\Controllers\Admin\ForumCategoryController::class)->except(['show']);
+    Route::resource('forum-categories', \App\Http\Controllers\Admin\ForumCategoryController::class)->except(['show'])->middleware('can:manage_forum');
 
-    // User Titles & Avatar Frames
-    Route::resource('user-titles', \App\Http\Controllers\Admin\UserTitleController::class)->except(['show']);
-    Route::resource('avatar-frames', \App\Http\Controllers\Admin\AvatarFrameController::class)->except(['show']);
+    // User Titles & Avatar Frames (Managed by Super Admin or specific permission, we can just use manage_roles for now as it's sensitive, or a new permission. Let's let only Super Admin by default or define manage_users)
+    Route::resource('user-titles', \App\Http\Controllers\Admin\UserTitleController::class)->except(['show'])->middleware('can:manage_roles');
+    Route::resource('avatar-frames', \App\Http\Controllers\Admin\AvatarFrameController::class)->except(['show'])->middleware('can:manage_roles');
+
+    // Quests (nhiệm vụ nhận khung/danh hiệu)
+    Route::resource('quests', \App\Http\Controllers\Admin\QuestController::class)->except(['show']);
+
+    // Reports
+    Route::get('/reports', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');
+    Route::post('/reports/{report}/resolve', [\App\Http\Controllers\Admin\ReportController::class, 'resolve'])->name('reports.resolve');
+    Route::post('/reports/{report}/dismiss', [\App\Http\Controllers\Admin\ReportController::class, 'dismiss'])->name('reports.dismiss');
+    Route::post('/reports/{report}/reopen', [\App\Http\Controllers\Admin\ReportController::class, 'reopen'])->name('reports.reopen');
+    Route::delete('/reports/{report}', [\App\Http\Controllers\Admin\ReportController::class, 'destroy'])->name('reports.destroy');
 
     // Carousel
-    Route::get('/carousel', [\App\Http\Controllers\Admin\CarouselController::class, 'index'])->name('carousel.index');
-    Route::post('/carousel', [\App\Http\Controllers\Admin\CarouselController::class, 'store'])->name('carousel.store');
-    Route::post('/carousel/auto', [\App\Http\Controllers\Admin\CarouselController::class, 'autoUpdate'])->name('carousel.autoUpdate');
-    Route::post('/carousel/{movie}/up', [\App\Http\Controllers\Admin\CarouselController::class, 'moveUp'])->name('carousel.moveUp');
-    Route::post('/carousel/{movie}/down', [\App\Http\Controllers\Admin\CarouselController::class, 'moveDown'])->name('carousel.moveDown');
-    Route::delete('/carousel/{movie}', [\App\Http\Controllers\Admin\CarouselController::class, 'destroy'])->name('carousel.destroy');
+    Route::middleware('can:manage_carousel')->group(function () {
+        Route::get('/carousel', [\App\Http\Controllers\Admin\CarouselController::class, 'index'])->name('carousel.index');
+        Route::post('/carousel', [\App\Http\Controllers\Admin\CarouselController::class, 'store'])->name('carousel.store');
+        Route::post('/carousel/auto', [\App\Http\Controllers\Admin\CarouselController::class, 'autoUpdate'])->name('carousel.autoUpdate');
+        Route::post('/carousel/{movie}/up', [\App\Http\Controllers\Admin\CarouselController::class, 'moveUp'])->name('carousel.moveUp');
+        Route::post('/carousel/{movie}/down', [\App\Http\Controllers\Admin\CarouselController::class, 'moveDown'])->name('carousel.moveDown');
+        Route::delete('/carousel/{movie}', [\App\Http\Controllers\Admin\CarouselController::class, 'destroy'])->name('carousel.destroy');
+    });
+});
+
+// ═══════════════════════════════════════════════════
+//  GROUP 5: SUPER ADMIN — Core Settings & RBAC
+// ═══════════════════════════════════════════════════
+
+Route::middleware(['auth', 'can:manage_roles'])->prefix('admin')->name('super.')->group(function () {
+    // Tạm thời để dashboard là chuyển hướng sang roles hoặc có dashboard riêng.
+    Route::get('/', function () {
+        return redirect()->route('super.roles.index');
+    })->name('dashboard');
+
+    // Roles (RBAC)
+    Route::resource('roles', \App\Http\Controllers\Admin\RoleController::class)->except(['show']);
+
+    // Staff & Admin account management
+    Route::get('/staff-accounts', [\App\Http\Controllers\Admin\StaffController::class, 'index'])->name('staff.index');
+    Route::get('/staff-accounts/create', [\App\Http\Controllers\Admin\StaffController::class, 'create'])->name('staff.create');
+    Route::post('/staff-accounts', [\App\Http\Controllers\Admin\StaffController::class, 'store'])->name('staff.store');
+    Route::get('/staff-accounts/{user}/edit', [\App\Http\Controllers\Admin\StaffController::class, 'edit'])->name('staff.edit');
+    Route::put('/staff-accounts/{user}', [\App\Http\Controllers\Admin\StaffController::class, 'update'])->name('staff.update');
+    Route::post('/staff-accounts/{user}/reset-password', [\App\Http\Controllers\Admin\StaffController::class, 'resetPassword'])->name('staff.resetPassword');
+    Route::post('/staff-accounts/{user}/toggle-ban', [\App\Http\Controllers\Admin\StaffController::class, 'toggleBan'])->name('staff.toggleBan');
 });

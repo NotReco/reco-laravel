@@ -226,31 +226,15 @@
                     @endforeach
                 ].filter((v, i, a) => v && a.indexOf(v) === i),
 
-                reportModal: false,
-                reportCommentId: null,
-                selectedReason: '',
-                customReason: '',
-                submittingReport: false,
                 deleteModal: false,
                 deleteCommentId: null,
                 isDeleting: false,
                 deleteStep: 1,
                 deleteCountdown: 5,
                 countdownTimer: null,
-                reportReasons: [
-                    'Nội dung spam',
-                    'Ngôn từ thù ghét / quấy rối',
-                    'Thông tin sai lệch',
-                    'Nội dung không phù hợp',
-                    'Khác'
-                ],
 
                 currentUser: {
-                    id: @json(auth()->user()->id),
-                    name: @json(auth()->user()->name),
-                    avatar: @json(auth()->user()->avatar),
-                    initial: @json(strtoupper(substr(auth()->user()->name, 0, 1))),
-                    isStaff: {{ auth()->user()->isStaff() ? 'true' : 'false' }},
+                    id: @json(auth()->user()->id ?? null),
                 },
 
                 editingCommentId: null,
@@ -276,7 +260,7 @@
 
                     switch (res.status) {
                         case 401:
-                            return 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.';
+                            return 'Phiên đăng nhập đã hết hạn. V vui lòng đăng nhập lại.';
                         case 403:
                             return 'Bạn chưa xác minh email hoặc không có quyền thực hiện thao tác này.';
                         case 419:
@@ -434,42 +418,6 @@
                     }
                 },
 
-                openReport(commentId) {
-                    this.reportCommentId = commentId;
-                    this.selectedReason = '';
-                    this.customReason = '';
-                    this.reportModal = true;
-                },
-
-                async submitReport() {
-                    if (!this.selectedReason || this.submittingReport) return;
-                    const finalReason = this.selectedReason === 'Khác' ?
-                        (this.customReason.trim() || 'Khác') :
-                        this.selectedReason;
-                    if (this.selectedReason === 'Khác' && !this.customReason.trim()) return;
-                    this.submittingReport = true;
-                    try {
-                        const res = await fetch(this.baseUrl + '/article-comments/' + this
-                            .reportCommentId + '/report', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'X-CSRF-TOKEN': this.csrfToken,
-                                    'Accept': 'application/json'
-                                },
-                                body: JSON.stringify({
-                                    reason: finalReason
-                                }),
-                            });
-                        if (!res.ok) throw new Error('HTTP ' + res.status);
-                        const data = await res.json();
-                        alert(data.success ? data.message : (data.message || 'Có lỗi xảy ra.'));
-                        this.reportModal = false;
-                        this.selectedReason = '';
-                        this.customReason = '';
-                    } catch (err) {
-                        console.error('Error reporting:', err);
-                        alert('Không thể gửi báo cáo. Vui lòng thử lại.');
                     } finally {
                         this.submittingReport = false;
                     }
@@ -490,6 +438,12 @@
                             clearInterval(this.countdownTimer);
                         }
                     }, 1000);
+                },
+
+                openReport(id) {
+                    window.dispatchEvent(new CustomEvent('open-report', {
+                        detail: { type: 'ArticleComment', id: id }
+                    }));
                 },
 
                 cancelDelete() {
@@ -567,6 +521,10 @@
                         '';
                     const profileUrl = this.baseUrl + '/profile/' + (comment.user.slug || comment.user.id);
 
+                    const reportBtn = (this.currentUser.id && this.currentUser.id !== comment.user.id) ?
+                        '<button @click="openReport(' + comment.uuid +
+                        ')" class="text-[13px] font-semibold text-gray-500 hover:text-gray-700 hover:underline transition-colors whitespace-nowrap">Báo cáo</button>' : '';
+
                     const html = '<div class="flex gap-3" id="comment-' + comment.uuid +
                         '" data-depth="0" style="opacity:0;transform:translateY(10px);transition:all 0.3s">' +
                         '<a href="' + profileUrl +
@@ -603,8 +561,7 @@
                         '<button @click="focusReply(' + comment.uuid + ', ' + comment.uuid + ', \'' + this
                         .escapeHtml(comment.user.name) +
                         '\')" class="text-[13px] font-semibold text-gray-500 hover:text-gray-700 hover:underline transition-colors whitespace-nowrap">Trả lời</button>' +
-                        '<button @click="openReport(' + comment.uuid +
-                        ')" class="text-[13px] font-semibold text-gray-500 hover:text-gray-700 hover:underline transition-colors whitespace-nowrap">Báo cáo</button>' +
+                        reportBtn +
                         editBtn +
                         deleteBtn +
                         '</div>' +
@@ -705,8 +662,10 @@
                         '" alt="" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[126%] h-[126%] max-w-none object-contain pointer-events-none z-10 transition-all duration-300">' :
                         '';
                     const replyProfileUrl = this.baseUrl + '/profile/' + (reply.user.slug || reply.user.id);
-                    const ringClass = (reply.user.active_frame && reply.user.active_frame.image_path) ?
-                        'scale-[1.05]' : 'ring-2 ring-sky-300';
+                    const reportBtn = (this.currentUser.id && this.currentUser.id !== reply.user.id) ?
+                        '<button @click="openReport(' + reply.uuid +
+                        ')" class="text-[13px] font-semibold text-gray-500 hover:text-gray-700 hover:underline transition-colors whitespace-nowrap">Báo cáo</button>' : '';
+
                     const ringClass = (reply.user.active_frame && reply.user.active_frame.image_path) ?
                         'scale-[1.0475]' : 'ring-2 ring-sky-300';
                     const html = '<div class="flex gap-2.5" id="comment-' + reply.uuid + '" data-depth="' +
@@ -744,8 +703,7 @@
                         reply.uuid + '"><span>Thích</span></button>' +
                         replyBtn +
                         editBtn +
-                        '<button @click="openReport(' + reply.uuid +
-                        ')" class="text-[13px] font-semibold text-gray-500 hover:text-gray-700 hover:underline transition-colors whitespace-nowrap">Báo cáo</button>' +
+                        reportBtn +
                         deleteBtn +
                         '</div>' +
                         '<div x-show="likeCounts[' + reply.uuid +
@@ -966,10 +924,12 @@
                                         </button>
 
                                         {{-- Report --}}
-                                        <button @click="openReport({{ $comment->id }})"
-                                            class="text-[13px] font-semibold text-gray-500 hover:text-gray-700 hover:underline transition-colors whitespace-nowrap">
-                                            Báo cáo
-                                        </button>
+                                        @if(auth()->check() && auth()->id() !== $comment->user_id)
+                                            <button @click="openReport({{ $comment->id }})"
+                                                class="text-[13px] font-semibold text-gray-500 hover:text-gray-700 hover:underline transition-colors whitespace-nowrap">
+                                                Báo cáo
+                                            </button>
+                                        @endif
 
                                         {{-- Edit (owner) --}}
                                         @if (auth()->id() === $comment->user_id)
@@ -1122,10 +1082,12 @@
                                                 </button>
 
                                                 {{-- Report --}}
-                                                <button @click="openReport({{ $reply->id }})"
-                                                    class="text-[13px] font-semibold text-gray-500 hover:text-gray-700 hover:underline transition-colors whitespace-nowrap">
-                                                    Báo cáo
-                                                </button>
+                                                @if(auth()->check() && auth()->id() !== $reply->user_id)
+                                                    <button @click="openReport({{ $reply->id }})"
+                                                        class="text-[13px] font-semibold text-gray-500 hover:text-gray-700 hover:underline transition-colors whitespace-nowrap">
+                                                        Báo cáo
+                                                    </button>
+                                                @endif
 
                                                 {{-- Edit (owner) --}}
                                                 @if (auth()->id() === $reply->user_id)
@@ -1225,10 +1187,12 @@
                                                     id="like-btn-{{ $nestedReply->id }}">
                                                     <span>Thích</span>
                                                 </button>
-                                                <button @click="openReport({{ $nestedReply->id }})"
-                                                    class="text-[13px] font-semibold text-gray-500 hover:text-gray-700 hover:underline transition-colors whitespace-nowrap">
-                                                    Báo cáo
-                                                </button>
+                                                @if(auth()->check() && auth()->id() !== $nestedReply->user_id)
+                                                    <button @click="openReport({{ $nestedReply->id }})"
+                                                        class="text-[13px] font-semibold text-gray-500 hover:text-gray-700 hover:underline transition-colors whitespace-nowrap">
+                                                        Báo cáo
+                                                    </button>
+                                                @endif
                                                 @if (auth()->id() === $nestedReply->user_id)
                                                     <button @click="startEdit({{ $nestedReply->id }})"
                                                         class="text-[13px] font-semibold text-gray-500 hover:text-gray-700 hover:underline transition-colors whitespace-nowrap">
@@ -1338,44 +1302,6 @@
 
         </div>
 
-        {{-- ── Report Dialog ──────────────────────────────── --}}
-        <div x-show="reportModal" x-transition.opacity x-cloak
-            class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
-            @click.self="reportModal = false" style="display: none">
-            <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm mx-4 overflow-hidden" @click.stop>
-                <div class="px-5 py-4 border-b border-gray-100">
-                    <h3 class="text-base font-bold text-gray-900">Báo cáo bình luận</h3>
-                    <p class="text-xs text-gray-400 mt-0.5">Chọn lý do báo cáo</p>
-                </div>
-                <div class="px-5 py-3 space-y-1">
-                    <template x-for="reason in reportReasons" :key="reason">
-                        <label
-                            class="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-                            <input type="radio" name="report_reason" :value="reason"
-                                x-model="selectedReason" @change="if(reason !== 'Khác') customReason = ''"
-                                class="w-4 h-4 text-blue-500 border-gray-300 focus:ring-blue-500">
-                            <span class="text-sm text-gray-700" x-text="reason"></span>
-                        </label>
-                    </template>
-                    {{-- Custom reason input (shown when "Khác" is selected) --}}
-                    <div x-show="selectedReason === 'Khác'" x-transition x-cloak class="px-3 pt-1 pb-2">
-                        <textarea x-model="customReason" rows="3" maxlength="500" placeholder="Nhập lý do báo cáo của bạn..."
-                            class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-800 placeholder-gray-400
-                                   focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all resize-none"></textarea>
-                        <p class="text-[11px] text-gray-400 mt-1 text-right" x-text="customReason.length + '/500'">
-                        </p>
-                    </div>
-                </div>
-                <div class="px-5 py-4 border-t border-gray-100 flex gap-2 justify-end">
-                    <button @click="reportModal = false; selectedReason = ''; customReason = ''"
-                        class="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">Hủy</button>
-                    <button @click="submitReport()"
-                        :disabled="!selectedReason || (selectedReason === 'Khác' && !customReason.trim()) || submittingReport"
-                        class="px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50">
-                        <span x-text="submittingReport ? 'Đang gửi...' : 'Gửi báo cáo'"></span>
-                    </button>
-                </div>
-            </div>
         </div>
 
         @auth

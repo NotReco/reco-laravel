@@ -129,13 +129,13 @@
 {{-- ══════════════════ HERO ══════════════════ --}}
 <section class="person-hero">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-14">
-        {{-- Back --}}
+        {{-- Back Button --}}
         <a href="{{ route('person.index') }}"
-           class="inline-flex items-center gap-1.5 text-xs text-gray-500 hover:text-white transition-colors mb-6">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+           class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/5 hover:bg-white/20 text-slate-300 hover:text-white transition-all backdrop-blur-md border border-white/10 hover:border-white/30 hover:shadow-[0_0_15px_rgba(255,255,255,0.1)] mb-6"
+           title="Trở về danh sách">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
             </svg>
-            Diễn viên &amp; Đạo diễn
         </a>
 
         <div class="flex flex-col sm:flex-row gap-8 lg:gap-10 items-start">

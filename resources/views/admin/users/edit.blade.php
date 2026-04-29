@@ -35,7 +35,7 @@
 
                     <div class="space-y-4">
                         <div class="space-y-2">
-                            <label for="role" class="block text-sm font-medium text-dark-300">Quyền Hạn (Role) <span class="text-red-500">*</span></label>
+                            <label for="role" class="block text-sm font-medium text-dark-300">Danh xưng (Role) <span class="text-red-500">*</span></label>
                             <select name="role" id="role" class="w-full bg-dark-950 border border-dark-800 rounded-xl text-white focus:ring-sky-500 focus:border-sky-500 px-4 py-2.5 transition-colors">
                                 @foreach(\App\Enums\UserRole::cases() as $role)
                                     <option value="{{ $role->value }}" {{ $user->role === $role ? 'selected' : '' }}>
@@ -52,6 +52,29 @@
                                    value="{{ old('reputation_score', $user->reputation_score) }}" required>
                         </div>
                     </div>
+                </div>
+
+                {{-- Spatie Roles --}}
+                <div class="bg-dark-900 border border-dark-800 rounded-2xl shadow-sm p-6">
+                    <h3 class="text-lg font-medium text-white mb-2">Nhóm Quyền (Phân Quyền)</h3>
+                    <p class="text-xs text-dark-400 mb-4">Gán các nhóm quyền cụ thể để kiểm soát chức năng Mod có thể truy cập.</p>
+                    
+                    @if($user->hasRole('Super Admin'))
+                        <div class="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm">
+                            Tài khoản này là Super Admin, có toàn quyền trên hệ thống.
+                        </div>
+                    @else
+                        <div class="space-y-3">
+                            @foreach($roles as $roleOption)
+                                <label class="flex items-center gap-3 cursor-pointer">
+                                    <input type="checkbox" name="spatie_roles[]" value="{{ $roleOption->name }}"
+                                           class="rounded border-dark-600 bg-dark-900 text-sky-500 focus:ring-sky-500/50"
+                                        {{ $user->hasRole($roleOption->name) ? 'checked' : '' }}>
+                                    <span class="text-sm text-white">{{ $roleOption->name }}</span>
+                                </label>
+                            @endforeach
+                        </div>
+                    @endif
                 </div>
             </div>
 

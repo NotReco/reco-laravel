@@ -236,7 +236,7 @@
                                     </template>
                                 </div>
                             </div>
-                            <label class="flex items-center justify-center gap-3 w-full py-3.5 bg-gray-900 hover:bg-black text-white font-bold rounded-xl cursor-pointer transition-all active:scale-[0.98] shadow-sm">
+                            <label class="flex items-center justify-center gap-3 w-full py-3.5 bg-[#5865F2] hover:bg-[#4752c4] text-white font-bold rounded-xl cursor-pointer transition-all active:scale-[0.98] shadow-lg shadow-indigo-500/20">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
                                 Tải lên ảnh bìa mới
                                 <input type="file" accept="image/png,image/jpeg,image/gif,image/webp" class="sr-only" @change="handleCoverUpload($event)">

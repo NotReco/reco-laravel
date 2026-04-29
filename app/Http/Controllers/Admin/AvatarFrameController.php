@@ -43,7 +43,7 @@ class AvatarFrameController extends Controller
     public function edit(string $id)
     {
         $frame = AvatarFrame::findOrFail($id);
-        return view('admin.avatar_frames.edit', compact('frame'));
+        return view('admin.avatar_frames.create', compact('frame'));
     }
 
     public function update(Request $request, string $id)

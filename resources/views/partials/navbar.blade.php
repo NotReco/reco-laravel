@@ -23,11 +23,11 @@
     }
 }"
     x-bind:class="{
-        'bg-white/75 shadow-sm border-b border-gray-200': scrolled,
-        'bg-white/55 border-b border-gray-100': !scrolled && !darkHero,
+        '{{ request()->routeIs('events.index') ? 'bg-white' : 'bg-white/75' }} shadow-sm border-b border-gray-200': scrolled,
+        '{{ request()->routeIs('events.index') ? 'bg-white' : 'bg-white/55' }} border-b border-gray-100': !scrolled && !darkHero,
         'bg-black/30 border-b border-white/10': !scrolled && darkHero,
     }"
-    class="fixed top-0 left-0 right-0 z-50 transition-all duration-500 backdrop-blur-xl backdrop-saturate-150 bg-white/55 border-b border-gray-100">
+    class="fixed top-0 left-0 right-0 z-50 transition-all duration-500 backdrop-blur-xl backdrop-saturate-150 {{ request()->routeIs('events.index') ? 'bg-white' : 'bg-white/55' }} border-b border-gray-100">
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
@@ -55,9 +55,9 @@
 
                 {{-- LOGO --}}
                 <a href="{{ route('home') }}" class="flex items-center shrink-0">
-                    <img x-show="!darkHero" src="{{ asset('storage/images/logo.svg') }}" alt="RecoDB" height="28"
+                    <img x-show="!darkHero" src="{{ asset('storage/images/logo.png') }}" alt="RecoDB" height="28"
                         style="height: 28px; width: auto;">
-                    <img x-cloak x-show="darkHero" src="{{ asset('storage/images/logo-dark.svg') }}" alt="RecoDB"
+                    <img x-cloak x-show="darkHero" src="{{ asset('storage/images/logo-dark.png') }}" alt="RecoDB"
                         height="28" style="height: 28px; width: auto; display:none">
                 </a>
 
@@ -93,6 +93,26 @@
 
             {{-- RIGHT: SEARCH · NOTIFICATION · PROFILE --}}
             <div class="flex items-center justify-end gap-2">
+
+                @auth
+                    {{-- Gamified Event Button --}}
+                    <a href="{{ route('events.index') }}" 
+                        class="relative h-10 flex items-center gap-1.5 px-4 rounded-full transition-all duration-300 border bg-gray-100 border-gray-200 text-gray-600 hover:text-gray-900 hover:bg-gray-200/70 hover:border-gray-300 mr-1 group"
+                        :class="{
+                            'bg-white/10 border-white/20 text-white/80 hover:text-white hover:bg-white/20 hover:border-white/30': darkHero,
+                            'bg-gray-100 border-gray-200 text-gray-600 hover:text-gray-900 hover:bg-gray-200/70 hover:border-gray-300': !darkHero
+                        }">
+                        
+                        <svg class="w-[18px] h-[18px] shrink-0 text-amber-500 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/>
+                        </svg>
+                        <span class="hidden sm:inline text-[13px] font-bold uppercase tracking-wide mt-[1px]">Sự kiện</span>
+                        
+                        {{-- Unclaimed indicator --}}
+                        <span class="absolute top-0 right-1 w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping opacity-75"></span>
+                        <span class="absolute top-0 right-1 w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+                    </a>
+                @endauth
 
                 {{-- Search button --}}
                 <div x-data x-on:keydown.window.prevent.ctrl.k="$dispatch('open-search')"
@@ -748,9 +768,11 @@
                                                     d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                                             </svg>
                                         </div>
-                                        <span>Admin Panel</span>
+                                        <span>Control Panel</span>
                                     </a>
                                 @endif
+
+
 
                                 <form method="POST" action="{{ route('logout') }}" class="w-full block m-0 mt-1">
                                     @csrf
@@ -998,28 +1020,14 @@
                         class="px-1.5 py-0.5 bg-white border border-gray-200 shadow-sm rounded text-[10px] font-medium text-gray-600">Enter</kbd>
                     để tìm chi tiết
                 </span>
-                <a :href="'{{ route('explore') }}?q=' + encodeURIComponent(query)" @click="reset()"
-                    class="inline-flex items-center gap-1.5 text-[13px] font-medium text-sky-600 hover:text-sky-700 transition-colors">
-                    Tìm kiếm nâng cao
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                    </svg>
-                </a>
+
             </div>
 
             {{-- Empty state hint --}}
             <div x-show="!showResults && query.length === 0"
                 class="px-5 py-6 text-center flex flex-col items-center border-t border-gray-50">
                 <p class="text-[13px] text-gray-400 mb-3">Nhập tên phim để tìm kiếm nhanh</p>
-                <a href="{{ route('explore') }}" @click="reset()"
-                    class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-50 border border-gray-200 hover:bg-gray-100 hover:border-gray-300 text-gray-700 font-medium text-[13px] transition-all">
-                    <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-                    </svg>
-                    Sử dụng Tìm kiếm nâng cao
-                </a>
+
             </div>
         </div>
     </div>

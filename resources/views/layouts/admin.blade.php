@@ -1,6 +1,6 @@
-@props(['title' => '', 'pageTitle' => 'Dashboard'])
+@props(['title' => '', 'pageTitle' => 'Tổng quan'])
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="admin-panel">
 
 <head>
     <meta charset="utf-8">
@@ -22,7 +22,7 @@
     <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('web-app-manifest-192x192.png') }}">
     <link rel="icon" type="image/png" sizes="512x512" href="{{ asset('web-app-manifest-512x512.png') }}">
     <link rel="manifest" href="{{ asset('site.webmanifest') }}">
-    <meta property="og:image" content="{{ asset('storage/images/logo-og.png') }}">
+    <meta property="og:image" content="https://i.ibb.co/ynjxvNhx/logo-dark.jpg">
 
     {{-- Google Fonts --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -55,8 +55,7 @@
         }
 
         html.sidebar-collapsed .admin-sidebar .sidebar-label {
-            opacity: 0 !important;
-            pointer-events: none;
+            display: none !important;
         }
 
         html.sidebar-collapsed .admin-main {
@@ -65,6 +64,15 @@
 
         .sidebar-label {
             transition: opacity 200ms ease;
+        }
+
+        /* Hide sidebar nav scrollbar — still scrollable via mousewheel */
+        .admin-sidebar nav {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .admin-sidebar nav::-webkit-scrollbar {
+            display: none;
         }
 
         html.sidebar-ready .admin-sidebar,
@@ -94,13 +102,13 @@
 
             {{-- Logo --}}
             <div class="flex items-center h-16 px-4 border-b border-dark-800 shrink-0">
-                <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2.5">
+                <div class="flex items-center gap-2.5 cursor-pointer" onclick="window.location.href='{{ route('admin.dashboard') }}'">
                     <div class="w-8 h-8 flex items-center justify-center shrink-0">
                         <img src="{{ asset('storage/images/logo-icon.svg') }}" alt="Logo" class="w-8 h-8">
                     </div>
                     <span class="text-lg font-bold text-white whitespace-nowrap sidebar-label"
-                        :class="sidebarOpen ? 'opacity-100' : 'opacity-0'">Admin Panel</span>
-                </a>
+                        :class="sidebarOpen ? 'opacity-100' : 'opacity-0'">Control Panel</span>
+                </div>
             </div>
 
             {{-- Nav --}}
@@ -108,7 +116,7 @@
                 @php
                     $nav = [
                         [
-                            'label' => 'Dashboard',
+                            'label' => 'Tổng quan',
                             'route' => 'admin.dashboard',
                             'icon'  => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>',
                         ],
@@ -149,6 +157,12 @@
                             'icon'  => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>',
                         ],
                         [
+                            'label' => 'Báo cáo',
+                            'route' => 'admin.reports.index',
+                            'icon'  => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"/>',
+                            'badge' => \App\Models\Report::where('status', 'pending')->count(),
+                        ],
+                        [
                             'label' => 'Danh hiệu',
                             'route' => 'admin.user-titles.index',
                             'icon'  => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>',
@@ -158,14 +172,19 @@
                             'route' => 'admin.avatar-frames.index',
                             'icon'  => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>',
                         ],
+                        [
+                            'label' => 'Nhiệm vụ',
+                            'route' => 'admin.quests.index',
+                            'icon'  => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>',
+                        ],
                     ];
                 @endphp
 
                 @foreach ($nav as $item)
                     @php $active = request()->routeIs($item['route'] . '*') || request()->routeIs($item['route']); @endphp
-                    <a href="{{ route($item['route']) }}"
-                        class="flex items-center rounded-xl text-sm font-medium transition-all
-                              {{ $active ? 'bg-sky-600/20 text-sky-400 border border-sky-500/30' : 'text-dark-400 hover:text-white hover:bg-dark-800 border border-transparent' }}">
+                    <div onclick="window.location.href='{{ route($item['route']) }}'"
+                        class="flex items-center rounded-xl text-sm font-medium transition-all cursor-pointer
+                              {{ $active ? 'bg-sky-600/20 text-sky-400' : 'text-dark-400 hover:text-white hover:bg-dark-800' }}">
                         <div class="w-12 h-10 flex items-center justify-center shrink-0 {{ $active ? 'text-sky-400' : '' }}">
                             <svg class="w-5 h-5 shrink-0" fill="none"
                                 stroke="currentColor" viewBox="0 0 24 24">{!! $item['icon'] !!}</svg>
@@ -178,14 +197,14 @@
                                 {{ $item['badge'] > 99 ? '99+' : $item['badge'] }}
                             </span>
                         @endif
-                    </a>
+                    </div>
                 @endforeach
             </nav>
 
             {{-- Bottom: User + Back to Site --}}
             <div class="border-t border-dark-800 py-3 px-2 space-y-1">
-                <a href="{{ route('home') }}"
-                    class="flex items-center rounded-xl text-sm text-dark-500 hover:text-white hover:bg-dark-800 transition-colors">
+                <div onclick="window.location.href='{{ route('home') }}'"
+                    class="flex items-center rounded-xl text-sm text-dark-500 hover:text-white hover:bg-dark-800 transition-colors cursor-pointer">
                     <div class="w-12 h-10 flex items-center justify-center shrink-0">
                         <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -194,31 +213,45 @@
                     </div>
                     <span class="whitespace-nowrap sidebar-label pr-3" :class="sidebarOpen ? 'opacity-100' : 'opacity-0'">Về
                         trang chính</span>
-                </a>
-                <div class="flex items-center rounded-xl py-1 mt-1">
-                    <div class="w-12 flex items-center justify-center shrink-0">
-                        <div
-                            class="w-8 h-8 rounded-full bg-gradient-to-br from-sky-500 to-sky-700 flex items-center justify-center overflow-hidden shrink-0 ring-2 ring-dark-700">
-                            @if (Auth::user()->avatar)
-                                <img src="{{ Auth::user()->avatar }}" alt="" class="w-full h-full object-cover">
-                            @else
-                                <span
-                                    class="text-xs font-bold text-white">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</span>
-                            @endif
+                </div>
+                @if(Auth::user()->hasRole('Super Admin'))
+                    <div class="flex items-center rounded-xl py-1 mt-1 cursor-default" onclick="window.location.href='{{ route('super.dashboard') }}'">
+                        <div class="w-12 flex items-center justify-center shrink-0">
+                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-sky-500 to-sky-700 flex items-center justify-center overflow-hidden shrink-0 ring-2 ring-dark-700">
+                                @if (Auth::user()->avatar)
+                                    <img src="{{ Auth::user()->avatar }}" alt="" class="w-full h-full object-cover">
+                                @else
+                                    <span class="text-xs font-bold text-white">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</span>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="min-w-0 pr-3 sidebar-label" :class="sidebarOpen ? 'opacity-100' : 'opacity-0'">
+                            <p class="text-xs font-medium text-white truncate whitespace-nowrap">{{ Auth::user()->name }}</p>
+                            <p class="text-xs font-medium text-gray-400 truncate whitespace-nowrap">{{ Auth::user()->role->label() }}</p>
                         </div>
                     </div>
-                    <div class="min-w-0 pr-3 sidebar-label" :class="sidebarOpen ? 'opacity-100' : 'opacity-0'">
-                        <p class="text-xs font-medium text-white truncate whitespace-nowrap">{{ Auth::user()->name }}
-                        </p>
-                        <p class="text-xs font-medium text-gray-400 truncate whitespace-nowrap">
-                            {{ Auth::user()->role->label() }}</p>
+                @else
+                    <div class="flex items-center rounded-xl py-1 mt-1">
+                        <div class="w-12 flex items-center justify-center shrink-0">
+                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-sky-500 to-sky-700 flex items-center justify-center overflow-hidden shrink-0 ring-2 ring-dark-700">
+                                @if (Auth::user()->avatar)
+                                    <img src="{{ Auth::user()->avatar }}" alt="" class="w-full h-full object-cover">
+                                @else
+                                    <span class="text-xs font-bold text-white">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</span>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="min-w-0 pr-3 sidebar-label" :class="sidebarOpen ? 'opacity-100' : 'opacity-0'">
+                            <p class="text-xs font-medium text-white truncate whitespace-nowrap">{{ Auth::user()->name }}</p>
+                            <p class="text-xs font-medium text-gray-400 truncate whitespace-nowrap">{{ Auth::user()->role->label() }}</p>
+                        </div>
                     </div>
-                </div>
+                @endif
             </div>
         </aside>
 
         {{-- ══ MAIN CONTENT ══════════════════════════════════════════ --}}
-        <main class="admin-main flex-1">
+        <main class="admin-main flex-1 min-w-0">
 
             {{-- Top bar --}}
             <header
@@ -256,6 +289,89 @@
                 {{ $slot }}
             </div>
         </main>
+    </div>
+
+    {{-- ══ Global Admin Confirm Modal ════════════════════════════════ --}}
+    <div
+        x-data="{
+            show: false,
+            title: '',
+            message: '',
+            formId: '',
+            open(detail) {
+                this.title   = detail.title   || 'Xác nhận';
+                this.message = detail.message || 'Bạn có chắc chắn không?';
+                this.formId  = detail.formId  || '';
+                this.show    = true;
+            },
+            confirm() {
+                if (this.formId) {
+                    document.getElementById(this.formId)?.submit();
+                }
+                this.show = false;
+            }
+        }"
+        x-on:admin-confirm.window="open($event.detail)"
+        x-on:keydown.escape.window="show = false"
+        x-show="show"
+        x-cloak
+        class="fixed inset-0 z-[9999] flex items-center justify-center px-4"
+        style="display:none"
+    >
+        {{-- Backdrop --}}
+        <div
+            x-show="show"
+            x-transition:enter="ease-out duration-200"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="ease-in duration-150"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            class="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            @click="show = false"
+        ></div>
+
+        {{-- Dialog --}}
+        <div
+            x-show="show"
+            x-transition:enter="ease-out duration-200"
+            x-transition:enter-start="opacity-0 scale-95 translate-y-2"
+            x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+            x-transition:leave="ease-in duration-150"
+            x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+            x-transition:leave-end="opacity-0 scale-95 translate-y-2"
+            class="relative w-full max-w-sm bg-dark-900 border border-dark-700 rounded-2xl shadow-2xl shadow-black/50 overflow-hidden"
+        >
+            {{-- Top accent line --}}
+            <div class="h-0.5 w-full bg-gradient-to-r from-red-500/80 via-red-400 to-red-500/80"></div>
+
+            <div class="p-6">
+                {{-- Icon + Title --}}
+                <div class="flex items-start gap-3 mb-3">
+                    <div class="w-9 h-9 rounded-xl bg-red-500/15 flex items-center justify-center shrink-0 mt-0.5">
+                        <svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-semibold text-white" x-text="title"></h3>
+                        <p class="text-sm text-dark-400 mt-1" x-text="message"></p>
+                    </div>
+                </div>
+
+                {{-- Actions --}}
+                <div class="flex justify-end gap-2 mt-5">
+                    <button @click="show = false" type="button"
+                        class="px-4 py-2 text-sm font-medium text-dark-300 bg-dark-800 border border-dark-700 rounded-xl hover:bg-dark-700 hover:text-white transition-colors">
+                        Hủy bỏ
+                    </button>
+                    <button @click="confirm()" type="button"
+                        class="px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-xl hover:bg-red-500 transition-colors">
+                        Xác nhận xóa
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
     @stack('scripts')

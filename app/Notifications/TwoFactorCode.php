@@ -24,12 +24,7 @@ class TwoFactorCode extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('🔐 Mã xác thực đăng nhập — Reco')
-            ->greeting("Xin chào {$notifiable->name},")
-            ->line('Bạn vừa đăng nhập vào tài khoản quản trị. Đây là mã xác thực của bạn:')
-            ->line("**{$notifiable->two_factor_code}**")
-            ->line('Mã này có hiệu lực trong **10 phút**.')
-            ->line('Nếu bạn không thực hiện đăng nhập này, vui lòng đổi mật khẩu ngay.')
-            ->salutation('— Hệ thống Reco');
+            ->subject('Mã xác thực đăng nhập — RecoDB')
+            ->view('emails.two-factor-code', ['notifiable' => $notifiable]);
     }
 }

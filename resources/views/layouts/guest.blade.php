@@ -14,7 +14,7 @@
     <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('web-app-manifest-192x192.png') }}">
     <link rel="icon" type="image/png" sizes="512x512" href="{{ asset('web-app-manifest-512x512.png') }}">
     <link rel="manifest" href="{{ asset('site.webmanifest') }}">
-    <meta property="og:image" content="{{ asset('storage/images/logo-og.png') }}">
+    <meta property="og:image" content="https://i.ibb.co/ynjxvNhx/logo-dark.jpg">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -38,7 +38,7 @@
     @include('partials.navbar')
 
     {{-- ── Main Content ────────────────────────────────── --}}
-    <main class="flex-grow flex flex-col justify-center items-center py-12 px-4 sm:px-6 lg:px-8 mt-16">
+    <main class="flex-grow flex flex-col justify-center items-center py-20 px-4 sm:px-6 lg:px-8 mt-16 min-h-[calc(100vh-64px)]">
         
         {{-- Auth Card --}}
         <div class="w-full max-w-[420px] bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
@@ -56,6 +56,9 @@
     @if(session('success') || session('error') || session('info'))
         <x-toast />
     @endif
+
+    {{-- ── Status Toast (permanent, bottom-left) ────────── --}}
+    <x-status-toast />
 
 </body>
 </html>

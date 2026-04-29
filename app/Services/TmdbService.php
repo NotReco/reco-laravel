@@ -266,6 +266,35 @@ class TmdbService
     }
 
     // ═══════════════════════════════════════
+    //  Media
+    // ═══════════════════════════════════════
+
+    /**
+     * Lấy media (videos, backdrops, posters) từ TMDb (có cache).
+     */
+    public function getMedia(int $tmdbId, string $type = 'movie'): array
+    {
+        $cacheKey = "tmdb_media_{$type}_{$tmdbId}";
+
+        return \Illuminate\Support\Facades\Cache::remember($cacheKey, now()->addDays(7), function () use ($tmdbId, $type) {
+            $data = $this->getWithFallback("/{$type}/{$tmdbId}", [
+                'append_to_response' => 'videos,images',
+                'include_image_language' => 'vi,en,null',
+            ]);
+
+            if (!$data) {
+                return ['videos' => [], 'backdrops' => [], 'posters' => []];
+            }
+
+            return [
+                'videos' => $data['videos']['results'] ?? [],
+                'backdrops' => $data['images']['backdrops'] ?? [],
+                'posters' => $data['images']['posters'] ?? [],
+            ];
+        });
+    }
+
+    // ═══════════════════════════════════════
     //  Image URL Helpers
     // ═══════════════════════════════════════
 

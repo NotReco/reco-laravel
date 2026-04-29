@@ -68,7 +68,7 @@ class ArticleComment extends Model
 
     public function reports()
     {
-        return $this->hasMany(ArticleCommentReport::class, 'article_comment_id');
+        return $this->morphMany(Report::class, 'reportable');
     }
 
     public function isLikedBy($user)

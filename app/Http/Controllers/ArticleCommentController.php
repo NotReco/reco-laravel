@@ -196,6 +196,8 @@ class ArticleCommentController extends Controller
     {
         $request->validate([
             'reason' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string', 'max:1000'],
+            'is_public' => ['boolean'],
         ]);
 
         // Kiểm tra user đã báo cáo comment này chưa
@@ -210,6 +212,8 @@ class ArticleCommentController extends Controller
         $comment->reports()->create([
             'user_id' => Auth::id(),
             'reason' => $request->input('reason'),
+            'description' => $request->input('description'),
+            'is_public' => $request->boolean('is_public'),
         ]);
 
         if ($request->wantsJson() || $request->ajax()) {

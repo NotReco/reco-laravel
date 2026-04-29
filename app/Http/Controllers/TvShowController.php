@@ -26,10 +26,12 @@ class TvShowController extends Controller
             }
         }
 
-        // Lọc theo thể loại
+        // Lọc theo thể loại (logic AND)
         if ($request->has('genres') && is_array($request->input('genres')) && count($request->input('genres')) > 0) {
             $genreIds = $request->input('genres');
-            $query->whereHas('genres', fn($qb) => $qb->whereIn('genres.id', $genreIds));
+            foreach ($genreIds as $id) {
+                $query->whereHas('genres', fn($qb) => $qb->where('genres.id', $id));
+            }
         }
 
         // Lọc theo Năm phát hành (dựa trên first_air_date)
@@ -62,9 +64,30 @@ class TvShowController extends Controller
         if ($request->filled('q')) {
             $qStr = trim(str_replace(['%', '_'], '', $request->input('q')));
             if ($qStr !== '') {
+                $bindings = [
+                    $qStr,
+                    "{$qStr} %",
+                    "% {$qStr} %", "% {$qStr}",
+                    "{$qStr}%",
+                    $qStr,
+                    "{$qStr} %",
+                    "% {$qStr} %", "% {$qStr}",
+                    "{$qStr}%"
+                ];
+
                 $query->orderByRaw(
-                    "CASE WHEN title LIKE ? THEN 1 WHEN original_title LIKE ? THEN 2 ELSE 3 END",
-                    ["{$qStr}%", "{$qStr}%"]
+                    "CASE 
+                        WHEN title = ? THEN 1
+                        WHEN title LIKE ? THEN 2
+                        WHEN title LIKE ? OR title LIKE ? THEN 3
+                        WHEN title LIKE ? THEN 4
+                        WHEN original_title = ? THEN 5
+                        WHEN original_title LIKE ? THEN 6
+                        WHEN original_title LIKE ? OR original_title LIKE ? THEN 7
+                        WHEN original_title LIKE ? THEN 8
+                        ELSE 9 
+                    END",
+                    $bindings
                 );
             }
         }
@@ -120,6 +143,10 @@ class TvShowController extends Controller
         // Tính rating trung bình
         $avgRating = $tvShow->reviews()->whereNotNull('rating')->avg('rating');
         $ratingCount = $tvShow->reviews()->whereNotNull('rating')->count();
+
+        // Lấy media (Videos, Backdrops, Posters)
+        $tmdbService = app(\App\Services\TmdbService::class);
+        $media = $tmdbService->getMedia($tvShow->tmdb_id, 'tv');
 
         // Series liên quan (cùng thể loại)
         $relatedTvShows = TvShow::with('genres')
@@ -178,6 +205,7 @@ class TvShowController extends Controller
             'languageName',
             'distribution',
             'ratingHistory',
+            'media',
         ));
     }
 }

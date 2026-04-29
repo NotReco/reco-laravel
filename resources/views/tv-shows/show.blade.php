@@ -468,6 +468,39 @@
                                     </svg>
                                 </button>
 
+                                {{-- Share Button & Web Popup --}}
+                                <div x-data="{ showSharePopup: false }">
+                                    <button @click="navigator.clipboard.writeText(window.location.href).then(() => { showSharePopup = true; setTimeout(() => showSharePopup = false, 3000); })"
+                                        title="Chia sẻ"
+                                        class="p-2.5 rounded-xl border bg-white border-gray-200 text-gray-500 hover:text-sky-600 hover:border-sky-300 hover:bg-sky-50 transition-all shadow-sm flex items-center justify-center h-[46px] w-[46px]">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                                        </svg>
+                                    </button>
+
+                                    {{-- Web Toast Popup --}}
+                                    <template x-teleport="body">
+                                        <div x-show="showSharePopup" 
+                                            x-transition:enter="transition ease-out duration-300"
+                                            x-transition:enter-start="opacity-0 translate-y-4"
+                                            x-transition:enter-end="opacity-100 translate-y-0"
+                                            x-transition:leave="transition ease-in duration-200"
+                                            x-transition:leave-start="opacity-100 translate-y-0"
+                                            x-transition:leave-end="opacity-0 translate-y-4"
+                                            class="fixed bottom-6 right-6 z-[100] flex items-center gap-3 px-5 py-4 bg-gray-900 border border-gray-700/50 rounded-xl shadow-2xl backdrop-blur-sm"
+                                            style="display: none;">
+                                            <svg class="w-5 h-5 text-green-400 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                            </svg>
+                                            <p class="text-sm font-medium text-white">Đã sao chép liên kết TV Series!</p>
+                                            <button @click="showSharePopup = false" class="ml-2 text-gray-400 hover:text-white transition-colors shrink-0">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                            </button>
+                                        </div>
+                                    </template>
+                                </div>
+
                                 {{-- Watchlist Dropdown --}}
                                 @php
                                     $wlStatus = auth()->check()
@@ -591,7 +624,7 @@
                 {{-- ══════════════════════════════════════════════════ --}}
                 {{-- MAIN CONTENT GRID                                 --}}
                 {{-- ══════════════════════════════════════════════════ --}}
-                <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_260px] gap-8 pb-16">
+                <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_260px] gap-8 pb-8">
 
                     {{-- Left Column (main content) --}}
                     <div class="space-y-8">
@@ -664,37 +697,175 @@
                                     <span class="w-1 h-5 bg-sky-500 rounded-full inline-block"></span>
                                     Diễn viên
                                 </h2>
-                                <div class="flex gap-4 overflow-x-auto pb-3 scrollbar-hide snap-x -mx-1 px-1">
+                                <div class="flex gap-4 overflow-x-auto pb-4 snap-x -mx-1 px-1">
                                     @foreach ($cast as $person)
                                         <a href="{{ route('person.show', $person) }}"
-                                            class="shrink-0 w-24 text-center snap-start group">
-                                            <div
-                                                class="w-20 h-20 mx-auto rounded-full overflow-hidden mb-2 ring-2 ring-transparent group-hover:ring-sky-400 transition-all duration-200 shadow-md">
+                                            class="shrink-0 w-[140px] snap-start bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow group">
+                                            <div class="aspect-[2/3] w-full bg-gray-100 overflow-hidden relative">
                                                 @if ($person->photo)
                                                     <img src="{{ $person->photo }}" alt="{{ $person->name }}"
-                                                        class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                                                        loading="lazy">
+                                                        class="w-full h-full object-cover" loading="lazy">
                                                 @else
-                                                    <div
-                                                        class="w-full h-full bg-gray-100 flex items-center justify-center">
-                                                        <svg class="w-8 h-8 text-gray-400" fill="none"
-                                                            stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                stroke-width="1.5"
+                                                    <div class="w-full h-full flex items-center justify-center">
+                                                        <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                                                 d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                                         </svg>
                                                     </div>
                                                 @endif
                                             </div>
-                                            <p
-                                                class="text-xs font-semibold text-gray-800 line-clamp-1 group-hover:text-sky-500 transition-colors">
-                                                {{ $person->name }}</p>
-                                            @if ($person->pivot->character_name)
-                                                <p class="text-[10px] text-gray-400 line-clamp-1 mt-0.5">
-                                                    {{ $person->pivot->character_name }}</p>
-                                            @endif
+                                            <div class="p-3">
+                                                <p class="text-[15px] font-bold text-gray-900 leading-snug group-hover:text-sky-600 transition-colors">
+                                                    {{ $person->name }}
+                                                </p>
+                                                @if ($person->pivot->character_name)
+                                                    <p class="text-[13px] text-gray-600 mt-0.5 leading-snug">
+                                                        {{ $person->pivot->character_name }}
+                                                    </p>
+                                                @endif
+                                            </div>
                                         </a>
                                     @endforeach
+                                </div>
+                            </section>
+                        @endif
+
+                        {{-- Media --}}
+                        @if (count($media['videos']) > 0 || count($media['backdrops']) > 0 || count($media['posters']) > 0)
+                            <section x-data="{ activeTab: 'popular' }" class="mb-8">
+                                <div class="flex flex-wrap items-center gap-4 mb-4">
+                                    <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                                        <span class="w-1 h-5 bg-sky-500 rounded-full inline-block"></span>
+                                        Media
+                                    </h2>
+                                    <div class="flex bg-gray-100 p-1 rounded-lg overflow-x-auto scrollbar-hide">
+                                        <button @click="activeTab = 'popular'"
+                                            :class="{ 'bg-white shadow text-gray-900': activeTab === 'popular', 'text-gray-500 hover:text-gray-700': activeTab !== 'popular' }"
+                                            class="px-3 py-1.5 text-sm font-medium rounded-md transition-all shrink-0">
+                                            Phổ biến nhất
+                                        </button>
+                                        @if (count($media['videos']) > 0)
+                                            <button @click="activeTab = 'videos'"
+                                                :class="{ 'bg-white shadow text-gray-900': activeTab === 'videos', 'text-gray-500 hover:text-gray-700': activeTab !== 'videos' }"
+                                                class="px-3 py-1.5 text-sm font-medium rounded-md transition-all shrink-0">
+                                                Videos <span class="text-xs text-gray-400 ml-1">{{ count($media['videos']) }}</span>
+                                            </button>
+                                        @endif
+                                        @if (count($media['backdrops']) > 0)
+                                            <button @click="activeTab = 'backdrops'"
+                                                :class="{ 'bg-white shadow text-gray-900': activeTab === 'backdrops', 'text-gray-500 hover:text-gray-700': activeTab !== 'backdrops' }"
+                                                class="px-3 py-1.5 text-sm font-medium rounded-md transition-all shrink-0">
+                                                Backdrops <span class="text-xs text-gray-400 ml-1">{{ count($media['backdrops']) }}</span>
+                                            </button>
+                                        @endif
+                                        @if (count($media['posters']) > 0)
+                                            <button @click="activeTab = 'posters'"
+                                                :class="{ 'bg-white shadow text-gray-900': activeTab === 'posters', 'text-gray-500 hover:text-gray-700': activeTab !== 'posters' }"
+                                                class="px-3 py-1.5 text-sm font-medium rounded-md transition-all shrink-0">
+                                                Posters <span class="text-xs text-gray-400 ml-1">{{ count($media['posters']) }}</span>
+                                            </button>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                <div class="min-h-[260px]">
+                                    {{-- Most Popular --}}
+                                    <div x-show="activeTab === 'popular'" class="flex gap-4 overflow-x-auto pb-4 snap-x -mx-1 px-1">
+                                    {{-- 1 Top Video --}}
+                                    @php
+                                        $topVideo = collect($media['videos'])->firstWhere('site', 'YouTube');
+                                    @endphp
+                                    @if($topVideo)
+                                        <div class="shrink-0 w-72 sm:w-80 snap-start">
+                                            <div class="relative aspect-video rounded-xl overflow-hidden group cursor-pointer shadow-sm border border-gray-100"
+                                                @click="openTrailer('https://www.youtube.com/watch?v={{ $topVideo['key'] }}')">
+                                                <img src="https://img.youtube.com/vi/{{ $topVideo['key'] }}/mqdefault.jpg"
+                                                    alt="{{ $topVideo['name'] }}"
+                                                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                                                <div class="absolute inset-0 bg-black/20 flex items-center justify-center group-hover:bg-black/30 transition-colors">
+                                                    <div class="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                                                        <svg class="w-5 h-5 text-sky-600 translate-x-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path d="M4 4l12 6-12 6z" />
+                                                        </svg>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                    {{-- 2 Top Backdrops --}}
+                                    @foreach (array_slice($media['backdrops'], 0, 2) as $image)
+                                        <div class="shrink-0 w-72 sm:w-80 snap-start">
+                                            <div class="aspect-video rounded-xl overflow-hidden shadow-sm border border-gray-100 bg-gray-100">
+                                                <img src="https://image.tmdb.org/t/p/w780{{ $image['file_path'] }}"
+                                                    class="w-full h-full object-cover" loading="lazy">
+                                            </div>
+                                        </div>
+                                    @endforeach
+
+                                    {{-- 2 Top Posters --}}
+                                    @foreach (array_slice($media['posters'], 0, 2) as $image)
+                                        <div class="shrink-0 w-36 sm:w-40 snap-start">
+                                            <div class="aspect-[2/3] rounded-xl overflow-hidden shadow-sm border border-gray-100 bg-gray-100">
+                                                <img src="https://image.tmdb.org/t/p/w342{{ $image['file_path'] }}"
+                                                    class="w-full h-full object-cover" loading="lazy">
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+
+                                {{-- Videos --}}
+                                @if (count($media['videos']) > 0)
+                                    <div x-show="activeTab === 'videos'" class="flex gap-4 overflow-x-auto pb-4 snap-x -mx-1 px-1" style="display: none;">
+                                        @foreach ($media['videos'] as $video)
+                                            @if ($video['site'] === 'YouTube')
+                                                <div class="shrink-0 w-72 sm:w-80 snap-start">
+                                                    <div class="relative aspect-video rounded-xl overflow-hidden group cursor-pointer shadow-sm border border-gray-100"
+                                                        @click="openTrailer('https://www.youtube.com/watch?v={{ $video['key'] }}')">
+                                                        <img src="https://img.youtube.com/vi/{{ $video['key'] }}/mqdefault.jpg"
+                                                            alt="{{ $video['name'] }}"
+                                                            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                                                        <div class="absolute inset-0 bg-black/20 flex items-center justify-center group-hover:bg-black/30 transition-colors">
+                                                            <div class="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                                                                <svg class="w-5 h-5 text-sky-600 translate-x-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                                                    <path d="M4 4l12 6-12 6z" />
+                                                                </svg>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            @endif
+                                        @endforeach
+                                    </div>
+                                @endif
+
+                                {{-- Backdrops --}}
+                                @if (count($media['backdrops']) > 0)
+                                    <div x-show="activeTab === 'backdrops'" class="flex gap-4 overflow-x-auto pb-4 snap-x -mx-1 px-1" style="display: none;">
+                                        @foreach (array_slice($media['backdrops'], 0, 20) as $image)
+                                            <div class="shrink-0 w-72 sm:w-80 snap-start">
+                                                <div class="aspect-video rounded-xl overflow-hidden shadow-sm border border-gray-100 bg-gray-100">
+                                                    <img src="https://image.tmdb.org/t/p/w780{{ $image['file_path'] }}"
+                                                        class="w-full h-full object-cover" loading="lazy">
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
+
+                                {{-- Posters --}}
+                                @if (count($media['posters']) > 0)
+                                    <div x-show="activeTab === 'posters'" class="flex gap-4 overflow-x-auto pb-4 snap-x -mx-1 px-1" style="display: none;">
+                                        @foreach (array_slice($media['posters'], 0, 20) as $image)
+                                            <div class="shrink-0 w-36 sm:w-40 snap-start">
+                                                <div class="aspect-[2/3] rounded-xl overflow-hidden shadow-sm border border-gray-100 bg-gray-100">
+                                                    <img src="https://image.tmdb.org/t/p/w342{{ $image['file_path'] }}"
+                                                        class="w-full h-full object-cover" loading="lazy">
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
                                 </div>
                             </section>
                         @endif

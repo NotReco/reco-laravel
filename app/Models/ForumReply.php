@@ -45,4 +45,11 @@ class ForumReply extends Model
     {
         return $this->hasMany(ForumReply::class, 'parent_id');
     }
+
+
+
+    public function reports()
+    {
+        return $this->morphMany(Report::class, 'reportable');
+    }
 }

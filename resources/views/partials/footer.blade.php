@@ -7,7 +7,7 @@
             {{-- Left Side: Right-aligned (applies to md+ screens) --}}
             <div class="flex flex-col items-center md:items-end">
                 <a href="{{ route('home') }}" class="inline-block mb-6">
-                    <img src="{{ asset('storage/images/logo-dark.svg') }}" alt="RecoDB" class="h-10 w-auto">
+                    <img src="{{ asset('storage/images/logo-dark.png') }}" alt="RecoDB" class="h-10 w-auto">
                 </a>
                 <a href="{{ route('register') }}"
                     class="inline-block px-6 py-2 bg-white rounded-md text-sm font-bold tracking-wider text-[#01b4e4] hover:underline underline-offset-2 transition-all uppercase">

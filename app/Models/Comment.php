@@ -71,4 +71,9 @@ class Comment extends Model
     {
         return $this->belongsToMany(User::class, 'comment_likes')->withTimestamps();
     }
+
+    public function reports()
+    {
+        return $this->morphMany(Report::class, 'reportable');
+    }
 }

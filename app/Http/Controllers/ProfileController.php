@@ -57,6 +57,8 @@ class ProfileController extends Controller
         return view('profile.favorites', compact('user', 'favorites', 'isOwnProfile'));
     }
 
+
+
     /**
      * Display the user's profile form.
      */

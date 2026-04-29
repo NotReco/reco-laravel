@@ -1,12 +1,28 @@
 <x-admin-layout :title="'Phim'" pageTitle="Quản lý phim">
 
-    {{-- ── Search ────────────────────────────────────────────────── --}}
-    <div class="mb-6">
-        <form action="{{ route('admin.movies.index') }}" method="GET" class="flex gap-3 max-w-lg">
-            <input type="text" name="q" value="{{ request('q') }}" placeholder="Tìm kiếm phim..."
-                class="input-dark text-sm flex-1 py-2.5">
-            <button type="submit" class="btn-secondary py-2.5 px-5 text-sm">Tìm</button>
+    {{-- ── Toolbar ───────────────────────────────────────────────── --}}
+    <div class="flex items-center gap-3 mb-6">
+        <form action="{{ route('admin.movies.index') }}" method="GET" class="flex gap-2 flex-1 max-w-md">
+            <div class="relative flex-1">
+                <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-dark-500 pointer-events-none"
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0" />
+                </svg>
+                <input type="text" name="q" value="{{ request('q') }}" placeholder="Tìm theo tên phim..."
+                    class="input-dark text-sm pl-9 py-2.5 w-full" autocomplete="off">
+            </div>
+            <button type="submit" class="btn-secondary py-2.5 px-4 text-sm shrink-0">Tìm</button>
+            @if (request('q'))
+                <a href="{{ route('admin.movies.index') }}"
+                    class="py-2.5 px-3 text-sm text-dark-400 hover:text-white transition-colors shrink-0">✕ Xóa lọc</a>
+            @endif
         </form>
+        <div class="ml-auto flex items-center gap-2 shrink-0 px-3 py-1.5 rounded-xl bg-sky-600/15 border border-sky-500/30">
+            <svg class="w-3.5 h-3.5 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"/></svg>
+            <span class="text-sm font-semibold text-sky-300">{{ $movies->total() }}</span>
+            <span class="text-xs text-sky-400/70">phim</span>
+        </div>
     </div>
 
     {{-- ── Table ─────────────────────────────────────────────────── --}}
@@ -14,72 +30,149 @@
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
-                    <tr class="border-b border-dark-700 text-dark-400 text-left">
+                    <tr class="border-b border-dark-700 text-dark-400 text-left text-xs uppercase tracking-wide">
                         <th class="px-5 py-3 font-medium">Phim</th>
+                        <th class="px-5 py-3 font-medium">Thể loại</th>
                         <th class="px-5 py-3 font-medium">Năm</th>
+                        <th class="px-5 py-3 font-medium">Trạng thái</th>
                         <th class="px-5 py-3 font-medium">Đánh giá</th>
-                        <th class="px-5 py-3 font-medium">Reviews</th>
                         <th class="px-5 py-3 font-medium text-right">Thao tác</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-dark-800">
+                <tbody class="divide-y divide-dark-800/60">
                     @forelse($movies as $movie)
-                        <tr class="hover:bg-dark-800/30 transition-colors">
+                        <tr class="hover:bg-dark-800/40 transition-colors group">
+                            {{-- Tên phim --}}
                             <td class="px-5 py-3">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-10 h-14 rounded bg-dark-700 bg-cover bg-center shrink-0"
-                                        style="background-image: url('{{ $movie->poster }}')"></div>
+                                    <div class="w-10 h-14 rounded-lg bg-dark-700 bg-cover bg-center shrink-0 ring-1 ring-dark-700"
+                                        style="background-image: url('{{ $movie->poster }}')">
+                                        @if (!$movie->poster)
+                                            <div class="w-full h-full flex items-center justify-center">
+                                                <svg class="w-4 h-4 text-dark-600" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="1.5"
+                                                        d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
+                                                </svg>
+                                            </div>
+                                        @endif
+                                    </div>
                                     <div class="min-w-0">
                                         <a href="{{ route('movies.show', $movie) }}"
-                                            class="font-medium text-white hover:text-sky-400 transition-colors truncate block"
+                                            class="font-medium text-white hover:text-sky-400 transition-colors truncate block max-w-xs"
                                             target="_blank">
                                             {{ $movie->title }}
                                         </a>
                                         @if ($movie->original_title && $movie->original_title !== $movie->title)
-                                            <p class="text-xs text-dark-500 truncate">{{ $movie->original_title }}</p>
+                                            <p class="text-xs text-dark-500 truncate max-w-xs">
+                                                {{ $movie->original_title }}</p>
+                                        @endif
+                                        @if (!$movie->is_approved)
+                                            <span
+                                                class="inline-block mt-0.5 text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 font-medium">Chưa
+                                                duyệt</span>
                                         @endif
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-5 py-3 text-dark-400">
-                                {{ $movie->release_date ? $movie->release_date->format('Y') : '—' }}</td>
+
+                            {{-- Thể loại --}}
+                            <td class="px-5 py-3">
+                                <div class="flex flex-wrap gap-1 max-w-[180px]">
+                                    @foreach ($movie->genres->take(3) as $genre)
+                                        <span
+                                            class="text-[10px] px-1.5 py-0.5 rounded bg-dark-700 text-dark-300">{{ $genre->name }}</span>
+                                    @endforeach
+                                    @if ($movie->genres->count() > 3)
+                                        <span
+                                            class="text-[10px] text-dark-500">+{{ $movie->genres->count() - 3 }}</span>
+                                    @endif
+                                    @if ($movie->genres->isEmpty())
+                                        <span class="text-xs text-dark-600">—</span>
+                                    @endif
+                                </div>
+                            </td>
+
+                            {{-- Năm --}}
+                            <td class="px-5 py-3 text-dark-400 tabular-nums">
+                                {{ $movie->release_date ? $movie->release_date->format('Y') : '—' }}
+                            </td>
+
+                            {{-- Trạng thái --}}
+                            <td class="px-5 py-3">
+                                @php
+                                    $statusMap = [
+                                        'active' => ['Hoạt động', 'text-emerald-400 bg-emerald-500/10'],
+                                        'hidden' => ['Đã ẩn', 'text-dark-400 bg-dark-800'],
+                                        'upcoming' => ['Sắp chiếu', 'text-amber-400 bg-amber-500/10'],
+                                    ];
+                                    [$statusLabel, $statusCls] = $statusMap[$movie->status] ?? ['?', ''];
+                                @endphp
+                                <span
+                                    class="text-[11px] px-2 py-0.5 rounded-full font-medium {{ $statusCls }}">{{ $statusLabel }}</span>
+                            </td>
+
+                            {{-- Đánh giá --}}
                             <td class="px-5 py-3">
                                 @if ($movie->reviews_avg_rating)
-                                    <span
-                                        class="font-semibold text-amber-400">{{ number_format($movie->reviews_avg_rating, 1) }}</span>
+                                    <div class="flex items-center gap-1">
+                                        <span
+                                            class="font-semibold text-amber-400">{{ number_format($movie->reviews_avg_rating, 1) }}</span>
+                                        <span class="text-xs text-dark-500">({{ $movie->reviews_count }})</span>
+                                    </div>
                                 @else
                                     <span class="text-dark-600">—</span>
                                 @endif
                             </td>
-                            <td class="px-5 py-3 text-dark-400">{{ $movie->reviews_count }}</td>
+
+                            {{-- Thao tác --}}
                             <td class="px-5 py-3">
-                                <div class="flex items-center justify-end gap-2">
+                                <div class="flex items-center justify-end gap-1">
+                                    <a href="{{ route('movies.show', $movie) }}" target="_blank"
+                                        class="p-1.5 rounded-lg text-dark-500 hover:text-sky-400 hover:bg-dark-800 transition-colors"
+                                        title="Xem trang">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                        </svg>
+                                    </a>
                                     <a href="{{ route('admin.movies.edit', $movie) }}"
-                                        class="text-dark-400 hover:text-white transition-colors p-1" title="Sửa">
+                                        class="p-1.5 rounded-lg text-dark-500 hover:text-white hover:bg-dark-800 transition-colors"
+                                        title="Sửa">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                         </svg>
                                     </a>
-                                    <form action="{{ route('admin.movies.destroy', $movie) }}" method="POST"
-                                        onsubmit="return confirm('Xóa phim «{{ $movie->title }}»?')">
+                                    <button type="button"
+                                        @click="$dispatch('admin-confirm', { title: 'Xóa phim', message: 'Xóa phim \u00ab{{ addslashes($movie->title) }}\u00bb? Hành động này không thể hoàn tác.', formId: 'del-movie-{{ $movie->id }}' })"
+                                        class="p-1.5 rounded-lg text-dark-500 hover:text-red-400 hover:bg-dark-800 transition-colors"
+                                        title="Xóa">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                    <form id="del-movie-{{ $movie->id }}"
+                                        action="{{ route('admin.movies.destroy', $movie) }}" method="POST"
+                                        class="hidden">
                                         @csrf @method('DELETE')
-                                        <button type="submit"
-                                            class="text-dark-400 hover:text-red-400 transition-colors p-1"
-                                            title="Xóa">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor"
-                                                viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                            </svg>
-                                        </button>
                                     </form>
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-5 py-12 text-center text-dark-500">Không tìm thấy phim nào.
+                            <td colspan="6" class="px-5 py-16 text-center">
+                                <div class="flex flex-col items-center gap-3 text-dark-500">
+                                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
+                                            d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
+                                    </svg>
+                                    <p>Không tìm thấy phim nào{{ request('q') ? ' cho "' . request('q') . '"' : '' }}.
+                                    </p>
+                                </div>
                             </td>
                         </tr>
                     @endforelse

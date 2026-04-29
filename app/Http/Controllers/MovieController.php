@@ -28,10 +28,12 @@ class MovieController extends Controller
             }
         }
 
-        // Lọc theo nhiều thể loại (logic OR: phim chứa ít nhất 1 thể loại được chọn)
+        // Lọc theo nhiều thể loại (logic AND: phim chứa tất cả thể loại được chọn)
         if ($request->has('genres') && is_array($request->input('genres')) && count($request->input('genres')) > 0) {
             $genreIds = $request->input('genres');
-            $query->whereHas('genres', fn($qb) => $qb->whereIn('genres.id', $genreIds));
+            foreach ($genreIds as $id) {
+                $query->whereHas('genres', fn($qb) => $qb->where('genres.id', $id));
+            }
         } elseif ($genreId = $request->input('genre')) { // Keep for backward compatibility
             $query->whereHas('genres', fn($qb) => $qb->where('genres.id', $genreId));
         }
@@ -79,9 +81,30 @@ class MovieController extends Controller
         if ($request->filled('q')) {
             $qStr = trim(str_replace(['%', '_'], '', $request->input('q')));
             if ($qStr !== '') {
+                $bindings = [
+                    $qStr,
+                    "{$qStr} %",
+                    "% {$qStr} %", "% {$qStr}",
+                    "{$qStr}%",
+                    $qStr,
+                    "{$qStr} %",
+                    "% {$qStr} %", "% {$qStr}",
+                    "{$qStr}%"
+                ];
+
                 $query->orderByRaw(
-                    "CASE WHEN title LIKE ? THEN 1 WHEN original_title LIKE ? THEN 2 ELSE 3 END",
-                    ["{$qStr}%", "{$qStr}%"]
+                    "CASE 
+                        WHEN title = ? THEN 1
+                        WHEN title LIKE ? THEN 2
+                        WHEN title LIKE ? OR title LIKE ? THEN 3
+                        WHEN title LIKE ? THEN 4
+                        WHEN original_title = ? THEN 5
+                        WHEN original_title LIKE ? THEN 6
+                        WHEN original_title LIKE ? OR original_title LIKE ? THEN 7
+                        WHEN original_title LIKE ? THEN 8
+                        ELSE 9 
+                    END",
+                    $bindings
                 );
             }
         }
@@ -139,6 +162,10 @@ class MovieController extends Controller
         // Tính rating trung bình
         $avgRating = $movie->reviews()->whereNotNull('rating')->avg('rating');
         $ratingCount = $movie->reviews()->whereNotNull('rating')->count();
+
+        // Lấy media (Videos, Backdrops, Posters)
+        $tmdbService = app(\App\Services\TmdbService::class);
+        $media = $tmdbService->getMedia($movie->tmdb_id, 'movie');
 
         // Phim liên quan (cùng thể loại)
         $relatedMovies = Movie::with('genres')
@@ -199,6 +226,7 @@ class MovieController extends Controller
             'languageName',
             'distribution',
             'ratingHistory',
+            'media',
         ));
     }
 }

@@ -1,17 +1,14 @@
-<x-admin-layout title="Người dùng" pageTitle="Quản lý người dùng">
+<x-admin-layout title="Người dùng" pageTitle="Quản lý thành viên">
 
 {{-- ── Filters ───────────────────────────────────────────────── --}}
 <div class="mb-6">
     <form action="{{ route('admin.users.index') }}" method="GET" class="flex gap-3 max-w-2xl">
         <input type="text" name="q" value="{{ request('q') }}" placeholder="Tìm tên hoặc email..."
                class="input-dark text-sm flex-1 py-2.5">
-        <select name="role" class="input-dark text-sm w-40 py-2.5">
-            <option value="">Tất cả role</option>
-            @foreach(\App\Enums\UserRole::cases() as $role)
-                <option value="{{ $role->value }}" {{ request('role') === $role->value ? 'selected' : '' }}>
-                    {{ $role->label() }}
-                </option>
-            @endforeach
+        <select name="role" class="input-dark text-sm w-44 py-2.5">
+            <option value="">Tất cả (User & Tester)</option>
+            <option value="user"   {{ request('role') === 'user'   ? 'selected' : '' }}>Người dùng</option>
+            <option value="tester" {{ request('role') === 'tester' ? 'selected' : '' }}>Tester</option>
         </select>
         <button type="submit" class="btn-secondary py-2.5 px-5 text-sm">Lọc</button>
     </form>

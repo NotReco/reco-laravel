@@ -152,6 +152,14 @@
                                                     </svg>
                                                 </button>
                                             @endif
+                                            @if(auth()->check() && auth()->id() !== $reply->user_id)
+                                                <button type="button" x-data @click="$dispatch('open-report', { type: 'ForumReply', id: {{ $reply->id }} })"
+                                                        class="text-gray-400 hover:text-orange-500 transition-colors p-1.5 rounded-lg hover:bg-orange-50" title="Báo cáo">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"/>
+                                                    </svg>
+                                                </button>
+                                            @endif
                                             @if(auth()->id() === $reply->user_id || auth()->user()->isStaff())
                                                 @if(auth()->id() === $reply->user_id)
                                                     <a href="{{ route('forum.editReply', $reply) }}"

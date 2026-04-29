@@ -25,17 +25,41 @@
                 $pNames = $review->comments->pluck('user.name')->filter()->unique()->sortByDesc(function($n) { return mb_strlen($n); });
                 foreach($pNames as $nm) {
                     $pattern = '/(@' . preg_quote($nm, '/') . ')(?![\\p{L}\\p{N}_])/u';
-                    $formattedContent = preg_replace($pattern, '<span class="text-sky-600 bg-sky-100/80 px-1.5 py-0.5 rounded-md font-semibold cursor-pointer hover:bg-sky-200/60 transition-colors">$1</span>', $formattedContent);
+                    $formattedContent = preg_replace($pattern, '<span class="text-[#0866FF] font-semibold hover:underline cursor-pointer">$1</span>', $formattedContent);
                 }
             }
         @endphp
         <p class="text-sm text-gray-700 whitespace-pre-line break-words">{!! $formattedContent !!}</p>
         
-        <div class="mt-1.5 flex items-center gap-3">
-            <button type="button" @click="focusReply('{{ addslashes($comment->user?->name ?? 'Ẩn danh') }}')" class="text-[11px] font-semibold text-gray-500 hover:text-gray-700 transition-colors whitespace-nowrap">Trả lời</button>
-            @if(Auth::check() && Auth::id() === $comment->user_id)
-                <button type="button" @click="openDeleteModal('{{ $comment->uuid }}')" class="text-[11px] font-semibold text-red-500 hover:text-red-700 transition-colors whitespace-nowrap">Xóa</button>
-            @endif
+        <div class="mt-1.5 flex items-center justify-between" x-data="{ 
+            liked: {{ auth()->check() && $comment->likes->contains('user_id', auth()->id()) ? 'true' : 'false' }}, 
+            likesCount: {{ $comment->likes_count ?? 0 }}, 
+            isLiking: false 
+        }">
+            <div class="flex items-center gap-3">
+                <button type="button" 
+                    @click="if(isLiking) return; isLiking = true; fetch('{{ route('comments.like', $comment) }}', { method: 'POST', headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' } }).then(r => { if(r.status === 401) { window.location.href = '{{ route('login') }}'; return Promise.reject(); } return r.json(); }).then(d => { liked = d.isLiked; likesCount = d.likesCount; }).catch(e => console.error(e)).finally(() => isLiking = false);"
+                    class="text-[11px] font-semibold transition-colors whitespace-nowrap"
+                    :class="liked ? 'text-rose-500' : 'text-gray-500 hover:text-gray-700'">
+                    Thích
+                </button>
+                <button type="button" @click="focusReply('{{ addslashes($comment->user?->name ?? 'Ẩn danh') }}')" class="text-[11px] font-semibold text-gray-500 hover:text-gray-700 transition-colors whitespace-nowrap">Trả lời</button>
+                @if(auth()->check() && auth()->id() !== $comment->user_id)
+                    <button type="button" @click="$dispatch('open-report', { type: 'Comment', id: {{ $comment->id }} })" class="text-[11px] font-semibold text-gray-500 hover:text-gray-700 transition-colors whitespace-nowrap">Báo cáo</button>
+                @endif
+                @if(Auth::check() && Auth::id() === $comment->user_id)
+                    <button type="button" @click="openDeleteModal('{{ $comment->uuid }}')" class="text-[11px] font-semibold text-red-500 hover:text-red-700 transition-colors whitespace-nowrap">Xóa</button>
+                @endif
+            </div>
+
+            <div x-show="likesCount > 0" x-cloak style="{{ ($comment->likes_count ?? 0) > 0 ? '' : 'display: none;' }}" class="flex items-center gap-1 cursor-pointer">
+                <span x-text="likesCount" class="text-[11px] text-gray-500 hover:underline">{{ $comment->likes_count ?: '' }}</span>
+                <div class="w-[14px] h-[14px] rounded-full bg-rose-500 flex items-center justify-center shadow-sm">
+                    <svg class="w-2 h-2 text-white fill-current" viewBox="0 0 24 24">
+                        <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                    </svg>
+                </div>
+            </div>
         </div>
     </div>
 </div>

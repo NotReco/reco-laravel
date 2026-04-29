@@ -38,7 +38,7 @@ class UserTitleController extends Controller
     public function edit(string $id)
     {
         $userTitle = UserTitle::findOrFail($id);
-        return view('admin.user_titles.edit', compact('userTitle'));
+        return view('admin.user_titles.create', compact('userTitle'));
     }
 
     public function update(Request $request, string $id)
