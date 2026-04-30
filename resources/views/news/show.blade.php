@@ -56,6 +56,7 @@
             /* 2. Ép toàn bộ ẢNH và VIDEO (Iframe) thành khối chuẩn: Căn giữa, bo góc, cách lề đều đặn */
             /* Kể cả khi gõ nhiều ảnh dính chùm trong 1 thẻ <p> hoặc có width="NaN", nó vẫn tự dàn đều chữ dọc */
             .article-body img,
+            .article-body video,
             .article-body iframe {
                 display: block !important;
                 max-width: 100% !important;
@@ -70,6 +71,7 @@
 
             /* 3. Phá bỏ lỗi dấu xuống dòng (Shift+Enter / thẻ <br>) nằm án ngữ giữa hình ảnh/video và phụ đề */
             .article-body img+br,
+            .article-body video+br,
             .article-body iframe+br {
                 display: none !important;
             }
@@ -101,46 +103,46 @@
             {!! $article->content !!}
         </div>
 
-        {{-- Author --}}
-        <div class="mt-8 flex justify-end">
-            @if ($article->user)
-                <a href="{{ route('profile.show', $article->user->slug) }}"
-                    class="group flex items-center gap-2 hover:bg-gray-50 border border-transparent hover:border-gray-200 rounded-full pr-3 py-1 transition-all"
-                    title="Xem hồ sơ">
-                    <span
-                        class="text-base font-bold text-gray-900 group-hover:text-sky-600 transition-colors">{{ $article->user->name }}</span>
-                    @if ($article->user->avatar)
-                        <img src="{{ $article->user->avatar }}" alt="{{ $article->user->name }}"
-                            class="w-8 h-8 rounded-full object-cover border border-gray-200 ml-1">
-                    @else
-                        <div
-                            class="w-8 h-8 flex items-center justify-center rounded-full bg-sky-100 text-sky-600 font-bold text-sm ml-1">
-                            {{ strtoupper(substr($article->user->name, 0, 1)) }}
-                        </div>
-                    @endif
-                </a>
-            @else
-                <p class="text-base font-bold text-gray-900 pr-3 py-1">
-                    <strong>Ẩn danh</strong>
-                </p>
+        {{-- Author + Tags + Footer --}}
+        <div class="mt-6 pt-5 border-t border-gray-300">
+
+            {{-- Author --}}
+            <div class="flex justify-end mb-4">
+                @if ($article->user)
+                    <a href="{{ route('profile.show', $article->user->slug) }}"
+                        class="flex items-center gap-2.5 px-3 py-1.5 rounded-full border border-gray-200 bg-gray-50 hover:bg-white hover:border-sky-200 transition-all">
+                        @if ($article->user->avatar)
+                            <img src="{{ $article->user->avatar }}" alt="{{ $article->user->name }}"
+                                class="w-7 h-7 rounded-full object-cover">
+                        @else
+                            <div class="w-7 h-7 flex items-center justify-center rounded-full bg-sky-100 text-sky-600 font-bold text-xs">
+                                {{ strtoupper(substr($article->user->name, 0, 1)) }}
+                            </div>
+                        @endif
+                        <span class="text-sm font-semibold text-gray-800">{{ $article->user->name }}</span>
+                    </a>
+                @else
+                    <span class="text-sm font-semibold text-gray-500 pr-1">Ẩn danh</span>
+                @endif
+            </div>
+
+            {{-- Tags (Inline) --}}
+            @if ($article->tags->isNotEmpty())
+                <div class="flex flex-wrap items-center gap-1.5 text-sm text-gray-700 mb-5">
+                    <span class="font-bold">Từ khóa:</span>
+                    @foreach ($article->tags as $tag)
+                        <a href="{{ route('news.index', ['tag' => $tag->slug]) }}"
+                            class="uppercase hover:text-sky-600 transition-colors">
+                            {{ $tag->name }}
+                        </a>{{ !$loop->last ? ' ,' : '' }}
+                    @endforeach
+                </div>
             @endif
+
         </div>
 
-        {{-- Tags (Inline) --}}
-        @if ($article->tags->isNotEmpty())
-            <div class="mt-4 flex flex-wrap items-center gap-1.5 text-sm text-gray-800">
-                <span class="font-bold">Từ khóa:</span>
-                @foreach ($article->tags as $tag)
-                    <a href="{{ route('news.index', ['tag' => $tag->slug]) }}"
-                        class="uppercase hover:text-sky-600 transition-colors">
-                        {{ $tag->name }}
-                    </a>{{ !$loop->last ? ',' : '' }}
-                @endforeach
-            </div>
-        @endif
-
         {{-- Article Footer --}}
-        <div class="mt-10 pt-6 border-t border-gray-200 flex items-center justify-between text-sm text-gray-600">
+        <div class="pt-4 border-t border-gray-200 flex items-center justify-between text-sm text-gray-600">
             <span>{{ $article->views_count }} lượt xem</span>
             <a href="{{ route('news.index') }}"
                 class="flex items-center gap-1 text-gray-600 hover:text-gray-900 transition-colors font-medium">
@@ -158,7 +160,7 @@
         document.addEventListener('alpine:init', () => {
         Alpine.data('commentSection', () => (
                 @guest {
-                    totalComments: {{ $commentsCount }},
+                    totalComments: {{ $commentsCount ?? 0 }},
                     reportModal: false,
                     reportReasons: [],
                     selectedReason: '',
@@ -178,37 +180,37 @@
                 replyingToId: null,
                 replyContent: '',
                 submittingReply: false,
-                totalComments: {{ $commentsCount }},
+                totalComments: {{ $commentsCount ?? 0 }},
 
                 likedComments: {
                     @foreach ($article->comments as $c)
-                        {{ $c->id }}: {{ $c->isLikedBy(auth()->user()) ? 'true' : 'false' }},
+                        '{{ $c->uuid }}': {{ $c->isLikedBy(auth()->user()) ? 'true' : 'false' }},
                         @foreach ($c->replies as $r)
-                            {{ $r->id }}: {{ $r->isLikedBy(auth()->user()) ? 'true' : 'false' }},
+                            '{{ $r->uuid }}': {{ $r->isLikedBy(auth()->user()) ? 'true' : 'false' }},
                             @foreach ($r->replies as $rr)
-                                {{ $rr->id }}: {{ $rr->isLikedBy(auth()->user()) ? 'true' : 'false' }},
+                                '{{ $rr->uuid }}': {{ $rr->isLikedBy(auth()->user()) ? 'true' : 'false' }},
                             @endforeach
                         @endforeach
                     @endforeach
                 },
                 likeCounts: {
                     @foreach ($article->comments as $c)
-                        {{ $c->id }}: {{ $c->likes->count() }},
+                        '{{ $c->uuid }}': {{ $c->likes->count() }},
                         @foreach ($c->replies as $r)
-                            {{ $r->id }}: {{ $r->likes->count() }},
+                            '{{ $r->uuid }}': {{ $r->likes->count() }},
                             @foreach ($r->replies as $rr)
-                                {{ $rr->id }}: {{ $rr->likes->count() }},
+                                '{{ $rr->uuid }}': {{ $rr->likes->count() }},
                             @endforeach
                         @endforeach
                     @endforeach
                 },
                 commentData: {
                     @foreach ($article->comments as $c)
-                        {{ $c->id }}: @json($c->content),
+                        '{{ $c->uuid }}': @json($c->content),
                         @foreach ($c->replies as $r)
-                            {{ $r->id }}: @json($r->content),
+                            '{{ $r->uuid }}': @json($r->content),
                             @foreach ($r->replies as $rr)
-                                {{ $rr->id }}: @json($rr->content),
+                                '{{ $rr->uuid }}': @json($rr->content),
                             @endforeach
                         @endforeach
                     @endforeach
@@ -276,7 +278,7 @@
                     this.editingCommentId = uuid;
                     this.editingContent = this.commentData[uuid] || '';
                     this.$nextTick(() => {
-                        const el = document.getElementById('edit-input-' + id);
+                        const el = document.getElementById('edit-input-' + uuid);
                         if (el) {
                             el.focus();
                             el.setSelectionRange(el.value.length, el.value.length);
@@ -418,11 +420,6 @@
                     }
                 },
 
-                    } finally {
-                        this.submittingReport = false;
-                    }
-                },
-
                 openDeleteModal(commentId) {
                     this.deleteCommentId = commentId;
                     this.deleteStep = 1;
@@ -506,14 +503,6 @@
                         '<button @click="startEdit(' + comment.uuid +
                         ')" class="text-[13px] font-semibold text-gray-500 hover:text-gray-700 hover:underline transition-colors whitespace-nowrap">Sửa</button>' :
                         '';
-                    const ringClass = (comment.user.active_frame && comment.user.active_frame.image_path) ?
-                        'scale-[1.05]' : 'ring-2 ring-sky-300';
-                    const frameHtml = (comment.user.active_frame && comment.user.active_frame.image_path) ?
-                        '<img src="' + comment.user.active_frame.image_path +
-                        '" alt="" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[126%] h-[126%] max-w-none object-contain pointer-events-none z-10 transition-all duration-300">' :
-                        '';
-                    const profileUrl = this.baseUrl + '/profile/' + (comment.user.slug || comment.user.id);
-
                     const ringClass = (comment.user.active_frame && comment.user.active_frame.image_path) ? 'scale-[1.0475]' : 'ring-2 ring-sky-300';
                     const frameHtml = (comment.user.active_frame && comment.user.active_frame.image_path) ?
                         '<img src="' + comment.user.active_frame.image_path +
@@ -522,7 +511,7 @@
                     const profileUrl = this.baseUrl + '/profile/' + (comment.user.slug || comment.user.id);
 
                     const reportBtn = (this.currentUser.id && this.currentUser.id !== comment.user.id) ?
-                        '<button @click="openReport(' + comment.uuid +
+                        '<button @click="openReport(' + comment.id +
                         ')" class="text-[13px] font-semibold text-gray-500 hover:text-gray-700 hover:underline transition-colors whitespace-nowrap">Báo cáo</button>' : '';
 
                     const html = '<div class="flex gap-3" id="comment-' + comment.uuid +
@@ -558,7 +547,7 @@
                         comment.uuid +
                         '] ? \'text-rose-500\' : \'text-gray-500 hover:text-gray-700 hover:underline\'" id="like-btn-' +
                         comment.uuid + '"><span>Thích</span></button>' +
-                        '<button @click="focusReply(' + comment.uuid + ', ' + comment.uuid + ', \'' + this
+                        '<button @click="focusReply(\'' + comment.uuid + '\', \'' + comment.uuid + '\', ' + comment.id + ', \'' + this
                         .escapeHtml(comment.user.name) +
                         '\')" class="text-[13px] font-semibold text-gray-500 hover:text-gray-700 hover:underline transition-colors whitespace-nowrap">Trả lời</button>' +
                         reportBtn +
@@ -585,26 +574,26 @@
                 },
 
                 appendReply(reply) {
-                    const parentId = reply.parent_id;
-                    const parentEl = document.getElementById('comment-' + parentId);
+                    const parentUuid = reply.parent_uuid || reply.parent_id;
+                    const parentEl = document.getElementById('comment-' + parentUuid);
                     if (!parentEl) return;
                     const parentDepth = Number(parentEl.dataset.depth || 0);
                     const depth = parentDepth + 1;
                     if (depth > 2) return;
                     const rootCommentEl = parentEl.closest('[data-depth="0"]');
-                    const rootCommentId = rootCommentEl ? Number(String(rootCommentEl.id).replace(
-                        'comment-', '')) : parentId;
+                    const rootCommentId = rootCommentEl ? String(rootCommentEl.id).replace(
+                        'comment-', '') : parentUuid;
                     let rcContainer = parentEl.querySelector('.replies-container');
                     let rc;
                     if (depth === 1 && !rcContainer) {
                         const cd = parentEl.querySelector('.flex-1.min-w-0');
-                        const rf = cd.querySelector('[x-show="replyTo === ' + parentId + '"]') || cd
+                        const rf = cd.querySelector('[x-show="replyTo === \'' + parentUuid + '\'"]') || cd
                             .lastElementChild;
                         rcContainer = document.createElement('div');
                         rcContainer.className = 'mt-2 text-sm replies-container relative';
                         rcContainer.setAttribute('x-data', '{ expandedReplies: true }');
-                        rcContainer.setAttribute('@expand-replies.window', 'if($event.detail.id === ' +
-                            parentId + ') expandedReplies = true');
+                        rcContainer.setAttribute('@expand-replies.window', 'if($event.detail.id === \'' +
+                            parentUuid + '\') expandedReplies = true');
 
                         const wrapper = document.createElement('div');
                         wrapper.setAttribute('x-show', 'expandedReplies');
@@ -625,7 +614,7 @@
                         rc = rcContainer.querySelector('.space-y-3');
                         window.dispatchEvent(new CustomEvent('expand-replies', {
                             detail: {
-                                id: parentId
+                                id: parentUuid
                             }
                         }));
                     } else {
@@ -653,7 +642,7 @@
                         '';
 
                     const replyBtn = depth < 2 ?
-                        '<button @click="focusReply(' + rootCommentId + ', ' + reply.uuid + ', \'' + this
+                        '<button @click="focusReply(\'' + rootCommentId + '\', \'' + reply.uuid + '\', ' + reply.id + ', \'' + this
                         .escapeHtml(reply.user.name) +
                         '\')" class="text-[13px] font-semibold text-gray-500 hover:text-gray-700 hover:underline transition-colors whitespace-nowrap">Trả lời</button>' :
                         '';
@@ -663,7 +652,7 @@
                         '';
                     const replyProfileUrl = this.baseUrl + '/profile/' + (reply.user.slug || reply.user.id);
                     const reportBtn = (this.currentUser.id && this.currentUser.id !== reply.user.id) ?
-                        '<button @click="openReport(' + reply.uuid +
+                        '<button @click="openReport(' + reply.id +
                         ')" class="text-[13px] font-semibold text-gray-500 hover:text-gray-700 hover:underline transition-colors whitespace-nowrap">Báo cáo</button>' : '';
 
                     const ringClass = (reply.user.active_frame && reply.user.active_frame.image_path) ?
@@ -759,10 +748,10 @@
                         String(now.getMinutes()).padStart(2, '0');
                 },
 
-                focusReply(rootId, parentId, username) {
+                focusReply(rootId, parentUuid, parentId, username) {
                     this.replyTo = rootId;
                     this.replyParentId = parentId;
-                    this.replyingToId = parentId;
+                    this.replyingToId = parentUuid;
                     this.replyContent = '@' + username + ' ';
                     window.dispatchEvent(new CustomEvent('expand-replies', {
                         detail: {
@@ -790,14 +779,15 @@
         <div class="max-w-4xl mx-auto px-4 py-10">
 
             {{-- Comment Count Badge --}}
-            <div class="flex items-center gap-3 mb-8">
-                <div class="flex items-center gap-2 px-4 py-2 bg-white rounded-xl border border-gray-200 shadow-sm">
-                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="flex items-center gap-2 px-4 py-2.5 bg-white rounded-2xl border border-gray-200 shadow-sm">
+                    <svg class="w-5 h-5 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                     </svg>
-                    <span class="text-sm font-bold text-gray-900" x-text="totalComments">{{ $commentsCount }}</span>
-                    <span class="text-sm text-gray-500">bình luận</span>
+                    <span class="text-sm font-bold text-gray-500" x-text="(totalComments || 0) + ' bình luận'">
+                        {{ ($commentsCount ?? 0) . ' bình luận' }}
+                    </span>
                 </div>
             </div>
 
@@ -827,15 +817,12 @@
                                 class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm text-gray-800 placeholder-gray-400
                                          focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all resize-none"></textarea>
                             <div class="mt-2 flex justify-end">
-                                <button type="submit" :disabled="submitting || !newComment.trim()" title="Bình luận"
-                                    class="inline-flex items-center justify-center w-11 h-11 bg-blue-500 text-white rounded-xl shadow-sm shadow-blue-500/20
+                                <button type="submit" :disabled="submitting || !newComment.trim()"
+                                    class="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-blue-500 text-white rounded-xl shadow-sm shadow-blue-500/20
                                            hover:bg-blue-600 active:scale-[0.95] transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-                                    <svg x-show="!submitting" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                                        fill="currentColor" class="w-[22px] h-[22px] ml-1">
-                                        <path
-                                            d="M3.478 2.404a.75.75 0 0 0-.926.941l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.404Z" />
-                                    </svg>
-                                    <svg x-show="submitting" x-cloak class="animate-spin w-5 h-5 text-white"
+                                    <span x-show="!submitting" class="text-sm font-bold whitespace-nowrap">Gửi</span>
+                                    <span x-show="submitting" x-cloak class="text-sm font-bold whitespace-nowrap">Đang gửi...</span>
+                                    <svg x-show="submitting" x-cloak class="animate-spin w-[18px] h-[18px] text-white"
                                         xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                         <circle class="opacity-25" cx="12" cy="12" r="10"
                                             stroke="currentColor" stroke-width="4"></circle>
@@ -852,7 +839,7 @@
                 {{-- ── Comments List ───────────────────────────── --}}
                 <div class="space-y-5" id="comments-list">
                     @forelse($article->comments as $comment)
-                        <div class="flex gap-3" id="comment-{{ $comment->id }}" data-depth="0">
+                        <div class="flex gap-3" id="comment-{{ $comment->uuid }}" data-depth="0">
                             {{-- Avatar --}}
                             <a href="{{ route('profile.show', $comment->user) }}"
                                 class="w-9 h-9 shrink-0 relative group">
@@ -873,18 +860,18 @@
                             <div class="flex-1 min-w-0">
                                 {{-- Comment Bubble --}}
                                 <div class="bg-white rounded-xl px-3.5 py-2 border border-gray-200 transition-colors"
-                                    :class="replyingToId === {{ $comment->id }} ? '!bg-blue-50 !border-blue-200' : ''">
+                                    :class="replyingToId === '{{ $comment->uuid }}' ? '!bg-blue-50 !border-blue-200' : ''">
                                     <div class="flex items-center gap-2 mb-0.5">
                                         <a href="{{ route('profile.show', $comment->user) }}"
                                             class="text-[15px] font-bold text-gray-900 hover:text-sky-600 hover:underline transition-colors">{{ $comment->user->name ?? 'Ẩn danh' }}</a>
                                     </div>
-                                    <div x-show="editingCommentId !== {{ $comment->id }}">
-                                        <p id="comment-text-{{ $comment->id }}"
+                                    <div x-show="editingCommentId !== '{{ $comment->uuid }}'">
+                                        <p id="comment-text-{{ $comment->uuid }}"
                                             class="text-[15px] text-gray-800 leading-relaxed whitespace-pre-line break-words"
-                                            x-html='formatMentions(commentData[{{ $comment->id }}])'></p>
+                                            x-html="formatMentions(commentData['{{ $comment->uuid }}'])"></p>
                                     </div>
-                                    <div x-show="editingCommentId === {{ $comment->id }}" x-cloak style="display: none">
-                                        <textarea id="edit-input-{{ $comment->id }}" x-model="editingContent"
+                                    <div x-show="editingCommentId === '{{ $comment->uuid }}'" x-cloak style="display: none">
+                                        <textarea id="edit-input-{{ $comment->uuid }}" x-model="editingContent"
                                             @keydown.enter="if(!$event.shiftKey) { $event.preventDefault(); submitEdit(); }"
                                             class="w-full px-3 py-2 bg-white border border-blue-300 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all resize-none mt-1"
                                             rows="2"></textarea>
@@ -908,17 +895,17 @@
                                         </span>
 
                                         {{-- Like --}}
-                                        <button @click="toggleLike({{ $comment->id }}, $event)"
+                                        <button @click="toggleLike('{{ $comment->uuid }}', $event)"
                                             class="group flex items-center gap-1.5 text-[13px] font-bold transition-colors whitespace-nowrap"
-                                            :class="likedComments[{{ $comment->id }}] ? 'text-rose-500' :
+                                            :class="likedComments['{{ $comment->uuid }}'] ? 'text-rose-500' :
                                                 'text-gray-500 hover:text-gray-700 hover:underline'"
-                                            id="like-btn-{{ $comment->id }}">
+                                            id="like-btn-{{ $comment->uuid }}">
                                             <span>Thích</span>
                                         </button>
 
                                         {{-- Reply --}}
                                         <button
-                                            @click="focusReply({{ $comment->id }}, {{ $comment->id }}, '{{ addslashes($comment->user->name ?? 'Ẩn danh') }}')"
+                                            @click="focusReply('{{ $comment->uuid }}', '{{ $comment->uuid }}', {{ $comment->id }}, '{{ addslashes($comment->user->name ?? 'Ẩn danh') }}')"
                                             class="text-[13px] font-semibold text-gray-500 hover:text-gray-700 hover:underline transition-colors whitespace-nowrap">
                                             Trả lời
                                         </button>
@@ -933,7 +920,7 @@
 
                                         {{-- Edit (owner) --}}
                                         @if (auth()->id() === $comment->user_id)
-                                            <button @click="startEdit({{ $comment->id }})"
+                                            <button @click="startEdit('{{ $comment->uuid }}')"
                                                 class="text-[13px] font-semibold text-gray-500 hover:text-gray-700 hover:underline transition-colors whitespace-nowrap">
                                                 Sửa
                                             </button>
@@ -941,7 +928,7 @@
 
                                         {{-- Delete (owner or staff) --}}
                                         @if (auth()->id() === $comment->user_id || auth()->user()->isStaff())
-                                            <button @click="openDeleteModal({{ $comment->id }})"
+                                            <button @click="openDeleteModal('{{ $comment->uuid }}')"
                                                 class="text-[13px] font-semibold text-gray-500 hover:text-red-500 hover:underline transition-colors whitespace-nowrap">
                                                 Xóa
                                             </button>
@@ -949,11 +936,11 @@
                                     </div>
 
                                     {{-- Like Count Indicator --}}
-                                    <div x-show="likeCounts[{{ $comment->id }}] > 0" x-cloak
+                                    <div x-show="likeCounts['{{ $comment->uuid }}'] > 0" x-cloak
                                         class="flex items-center gap-1 cursor-pointer" @if ($comment->likes->count() == 0)
                                         style="display: none;"
                     @endif>
-                    <span x-text="likeCounts[{{ $comment->id }}]" class="text-[13px] text-gray-500 hover:underline">
+                    <span x-text="likeCounts['{{ $comment->uuid }}']" class="text-[13px] text-gray-500 hover:underline">
                         {{ $comment->likes->count() }}
                     </span>
                     <div class="w-4 h-4 rounded-full bg-rose-500 flex items-center justify-center shadow-sm">
@@ -969,7 +956,7 @@
             {{-- Replies --}}
             @if ($comment->replies->isNotEmpty())
                 <div class="mt-2 text-sm replies-container relative" x-data="{ expandedReplies: false }"
-                    @expand-replies.window="if($event.detail.id === {{ $comment->id }}) expandedReplies = true">
+                    @expand-replies.window="if($event.detail.id === '{{ $comment->uuid }}') expandedReplies = true">
 
                     <!-- Curve and button (Collapsed state) -->
                     <div x-show="!expandedReplies" class="relative flex items-center mb-2">
@@ -1008,7 +995,7 @@
                         <div class="absolute top-[-8px] bottom-4 left-[0px] border-l-2 border-gray-200"></div>
                         <div class="space-y-3 pl-[26px] mt-1">
                             @foreach ($comment->replies as $reply)
-                                <div class="flex gap-2.5" id="comment-{{ $reply->id }}" data-depth="1">
+                                <div class="flex gap-2.5" id="comment-{{ $reply->uuid }}" data-depth="1">
                                     <a href="{{ route('profile.show', $reply->user) }}"
                                         class="w-7 h-7 shrink-0 relative group">
                                         <div class="w-full h-full rounded-full bg-gradient-to-br from-gray-300 to-gray-400 overflow-hidden flex items-center justify-center transition-all duration-300 {{ $reply->user->activeFrame ?? false ? 'scale-[1.0475]' : 'group-hover:ring-2 group-hover:ring-sky-300' }}">
@@ -1028,20 +1015,20 @@
                                     </a>
                                     <div class="flex-1 min-w-0">
                                         <div class="bg-gray-50 rounded-lg px-3 py-2 border border-gray-200 transition-colors"
-                                            :class="replyingToId === {{ $reply->id }} ? '!bg-blue-50 !border-blue-100' : ''">
+                                            :class="replyingToId === '{{ $reply->uuid }}' ? '!bg-blue-50 !border-blue-100' : ''">
                                             <div class="flex items-center gap-2 mb-0.5">
                                                 <a href="{{ route('profile.show', $reply->user) }}"
                                                     class="text-sm font-bold text-gray-900 hover:text-sky-600 hover:underline transition-colors">{{ $reply->user->name ?? 'Ẩn danh' }}</a>
                                             </div>
-                                            <div x-show="editingCommentId !== {{ $reply->id }}">
-                                                <p id="comment-text-{{ $reply->id }}"
-                                                    x-html='formatMentions(commentData[{{ $reply->id }}])'
+                                            <div x-show="editingCommentId !== '{{ $reply->uuid }}'">
+                                                <p id="comment-text-{{ $reply->uuid }}"
+                                                    x-html="formatMentions(commentData['{{ $reply->uuid }}'])"
                                                     class="text-[15px] text-gray-800 leading-relaxed whitespace-pre-line break-words">
                                                 </p>
                                             </div>
-                                            <div x-show="editingCommentId === {{ $reply->id }}" x-cloak
+                                            <div x-show="editingCommentId === '{{ $reply->uuid }}'" x-cloak
                                                 style="display: none">
-                                                <textarea id="edit-input-{{ $reply->id }}" x-model="editingContent"
+                                                <textarea id="edit-input-{{ $reply->uuid }}" x-model="editingContent"
                                                     @keydown.enter="if(!$event.shiftKey) { $event.preventDefault(); submitEdit(); }"
                                                     class="w-full px-3 py-2 bg-white border border-blue-300 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all resize-none mt-1"
                                                     rows="2"></textarea>
@@ -1066,17 +1053,17 @@
                                                 </span>
 
                                                 {{-- Like --}}
-                                                <button @click="toggleLike({{ $reply->id }}, $event)"
+                                                <button @click="toggleLike('{{ $reply->uuid }}', $event)"
                                                     class="group flex items-center gap-1.5 text-[13px] font-bold transition-colors whitespace-nowrap"
-                                                    :class="likedComments[{{ $reply->id }}] ? 'text-rose-500' :
+                                                    :class="likedComments['{{ $reply->uuid }}'] ? 'text-rose-500' :
                                                         'text-gray-500 hover:text-gray-700 hover:underline'"
-                                                    id="like-btn-{{ $reply->id }}">
+                                                    id="like-btn-{{ $reply->uuid }}">
                                                     <span>Thích</span>
                                                 </button>
 
                                                 {{-- Reply --}}
                                                 <button
-                                                    @click="focusReply({{ $comment->id }}, {{ $reply->id }}, '{{ addslashes($reply->user->name ?? 'Ẩn danh') }}')"
+                                                    @click="focusReply('{{ $comment->uuid }}', '{{ $reply->uuid }}', {{ $reply->id }}, '{{ addslashes($reply->user->name ?? 'Ẩn danh') }}')"
                                                     class="text-[13px] font-semibold text-gray-500 hover:text-gray-700 hover:underline transition-colors whitespace-nowrap">
                                                     Trả lời
                                                 </button>
@@ -1091,7 +1078,7 @@
 
                                                 {{-- Edit (owner) --}}
                                                 @if (auth()->id() === $reply->user_id)
-                                                    <button @click="startEdit({{ $reply->id }})"
+                                                    <button @click="startEdit('{{ $reply->uuid }}')"
                                                         class="text-[13px] font-semibold text-gray-500 hover:text-gray-700 hover:underline transition-colors whitespace-nowrap">
                                                         Sửa
                                                     </button>
@@ -1099,7 +1086,7 @@
 
                                                 {{-- Delete (owner or staff) --}}
                                                 @if (auth()->id() === $reply->user_id || auth()->user()->isStaff())
-                                                    <button @click="openDeleteModal({{ $reply->id }})"
+                                                    <button @click="openDeleteModal('{{ $reply->uuid }}')"
                                                         class="text-[13px] font-semibold text-gray-500 hover:text-red-500 hover:underline transition-colors whitespace-nowrap">
                                                         Xóa
                                                     </button>
@@ -1107,11 +1094,11 @@
                                             </div>
 
                                             {{-- Like Count Indicator --}}
-                                            <div x-show="likeCounts[{{ $reply->id }}] > 0" x-cloak
+                                            <div x-show="likeCounts['{{ $reply->uuid }}'] > 0" x-cloak
                                                 class="flex items-center gap-1 cursor-pointer" @if ($reply->likes->count() == 0)
                                                 style="display: none;"
                             @endif>
-                            <span x-text="likeCounts[{{ $reply->id }}]"
+                            <span x-text="likeCounts['{{ $reply->uuid }}']"
                                 class="text-[13px] text-gray-500 hover:underline">
                                 {{ $reply->likes->count() }}
                             </span>
@@ -1128,7 +1115,7 @@
                     @if ($reply->replies->isNotEmpty())
                         <div class="nested-replies-container mt-2 pl-5 border-l-2 border-gray-200 space-y-3">
                             @foreach ($reply->replies as $nestedReply)
-                                <div class="flex gap-2.5" id="comment-{{ $nestedReply->id }}" data-depth="2">
+                                <div class="flex gap-2.5" id="comment-{{ $nestedReply->uuid }}" data-depth="2">
                                     <a href="{{ route('profile.show', $nestedReply->user) }}"
                                         class="w-7 h-7 shrink-0 relative group">
                                         <div class="w-full h-full rounded-full bg-gradient-to-br from-gray-300 to-gray-400 overflow-hidden flex items-center justify-center transition-all duration-300 {{ $nestedReply->user->activeFrame ?? false ? 'scale-[1.0475]' : 'group-hover:ring-2 group-hover:ring-sky-300' }}">
@@ -1152,15 +1139,15 @@
                                                 <a href="{{ route('profile.show', $nestedReply->user) }}"
                                                     class="text-sm font-bold text-gray-900 hover:text-sky-600 hover:underline transition-colors">{{ $nestedReply->user->name ?? 'Ẩn danh' }}</a>
                                             </div>
-                                            <div x-show="editingCommentId !== {{ $nestedReply->id }}">
-                                                <p id="comment-text-{{ $nestedReply->id }}"
-                                                    x-html='formatMentions(commentData[{{ $nestedReply->id }}])'
+                                            <div x-show="editingCommentId !== '{{ $nestedReply->uuid }}'">
+                                                <p id="comment-text-{{ $nestedReply->uuid }}"
+                                                    x-html="formatMentions(commentData['{{ $nestedReply->uuid }}'])"
                                                     class="text-[15px] text-gray-800 leading-relaxed whitespace-pre-line break-words">
                                                 </p>
                                             </div>
-                                            <div x-show="editingCommentId === {{ $nestedReply->id }}" x-cloak
+                                            <div x-show="editingCommentId === '{{ $nestedReply->uuid }}'" x-cloak
                                                 style="display: none">
-                                                <textarea id="edit-input-{{ $nestedReply->id }}" x-model="editingContent"
+                                                <textarea id="edit-input-{{ $nestedReply->uuid }}" x-model="editingContent"
                                                     @keydown.enter="if(!$event.shiftKey) { $event.preventDefault(); submitEdit(); }"
                                                     class="w-full px-3 py-2 bg-white border border-blue-300 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all resize-none mt-1"
                                                     rows="2"></textarea>
@@ -1180,11 +1167,11 @@
                                                     title="{{ ucfirst($nestedReply->created_at->isoFormat('dddd, D [tháng] M, Y [lúc] HH:mm')) }}">
                                                     {{ str_replace(' trước', '', $nestedReply->created_at->diffForHumans()) }}
                                                 </span>
-                                                <button @click="toggleLike({{ $nestedReply->id }}, $event)"
+                                                <button @click="toggleLike('{{ $nestedReply->uuid }}', $event)"
                                                     class="group flex items-center gap-1.5 text-[13px] font-bold transition-colors whitespace-nowrap"
-                                                    :class="likedComments[{{ $nestedReply->id }}] ? 'text-rose-500' :
+                                                    :class="likedComments['{{ $nestedReply->uuid }}'] ? 'text-rose-500' :
                                                         'text-gray-500 hover:text-gray-700 hover:underline'"
-                                                    id="like-btn-{{ $nestedReply->id }}">
+                                                    id="like-btn-{{ $nestedReply->uuid }}">
                                                     <span>Thích</span>
                                                 </button>
                                                 @if(auth()->check() && auth()->id() !== $nestedReply->user_id)
@@ -1194,23 +1181,23 @@
                                                     </button>
                                                 @endif
                                                 @if (auth()->id() === $nestedReply->user_id)
-                                                    <button @click="startEdit({{ $nestedReply->id }})"
+                                                    <button @click="startEdit('{{ $nestedReply->uuid }}')"
                                                         class="text-[13px] font-semibold text-gray-500 hover:text-gray-700 hover:underline transition-colors whitespace-nowrap">
                                                         Sửa
                                                     </button>
                                                 @endif
                                                 @if (auth()->id() === $nestedReply->user_id || auth()->user()->isStaff())
-                                                    <button @click="openDeleteModal({{ $nestedReply->id }})"
+                                                    <button @click="openDeleteModal('{{ $nestedReply->uuid }}')"
                                                         class="text-[13px] font-semibold text-gray-500 hover:text-red-500 hover:underline transition-colors whitespace-nowrap">
                                                         Xóa
                                                     </button>
                                                 @endif
                                             </div>
-                                            <div x-show="likeCounts[{{ $nestedReply->id }}] > 0" x-cloak
+                                            <div x-show="likeCounts['{{ $nestedReply->uuid }}'] > 0" x-cloak
                                                 class="flex items-center gap-1 cursor-pointer" @if ($nestedReply->likes->count() == 0)
                                                 style="display: none;"
                             @endif>
-                            <span x-text="likeCounts[{{ $nestedReply->id }}]"
+                            <span x-text="likeCounts['{{ $nestedReply->uuid }}']"
                                 class="text-[13px] text-gray-500 hover:underline">
                                 {{ $nestedReply->likes->count() }}
                             </span>
@@ -1238,12 +1225,12 @@
             @endif
 
             {{-- Reply Form (AJAX) --}}
-            <div x-show="replyTo === {{ $comment->id }}" x-cloak style="display: none"
+            <div x-show="replyTo === '{{ $comment->uuid }}'" x-cloak style="display: none"
                 class="mt-3 ml-2 pl-4 border-l-2 border-blue-200">
                 <form @submit.prevent="submitReply($event)">
                     <textarea x-model="replyContent"
                         @keydown.enter="if(!$event.shiftKey) { $event.preventDefault(); submitReply($event); }"
-                        id="reply-input-{{ $comment->id }}" rows="2" required maxlength="1000"
+                        id="reply-input-{{ $comment->uuid }}" rows="2" required maxlength="1000"
                         placeholder="Trả lời {{ $comment->user->name ?? '' }}..."
                         class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-800
                                                      focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all resize-none"></textarea>

@@ -482,23 +482,120 @@
                             </div>
 
                             {{-- Uy Tín --}}
-                            <div
-                                class="flex items-center gap-3 bg-gradient-to-br from-amber-500 to-orange-600 p-3 rounded-xl border border-amber-400/30 shadow-md shadow-amber-500/20 text-white col-span-2 lg:col-span-1">
-                                <div
-                                    class="w-[38px] h-[38px] rounded-lg bg-white/20 border border-white/30 backdrop-blur-sm flex items-center justify-center shadow-inner shrink-0">
-                                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                            clip-rule="evenodd" />
-                                    </svg>
+                            <div class="col-span-2 lg:col-span-1" x-data="{ uyTinModalOpen: false }">
+                                <div @click="uyTinModalOpen = true"
+                                    class="flex items-center gap-3 bg-gradient-to-br from-amber-500 to-orange-600 p-3 rounded-xl border border-amber-400/30 shadow-md shadow-amber-500/20 text-white cursor-pointer hover:shadow-lg hover:shadow-amber-500/30 transition-all hover:-translate-y-0.5 group relative">
+                                    <div
+                                        class="w-[38px] h-[38px] rounded-lg bg-white/20 border border-white/30 backdrop-blur-sm flex items-center justify-center shadow-inner shrink-0 group-hover:bg-white/30 transition-colors">
+                                        <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd"
+                                                d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div class="flex flex-col min-w-0">
+                                        <span
+                                            class="text-xl font-extrabold leading-none mb-1">{{ number_format($user->reputation_score) }}</span>
+                                        <span class="text-[10px] font-extrabold text-amber-100 uppercase tracking-widest truncate flex items-center gap-1">
+                                            Uy tín
+                                            <svg class="w-3 h-3 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                        </span>
+                                    </div>
                                 </div>
-                                <div class="flex flex-col min-w-0">
-                                    <span
-                                        class="text-xl font-extrabold leading-none mb-1">{{ number_format($user->reputation_score) }}</span>
-                                    <span
-                                        class="text-[10px] font-extrabold text-amber-100 uppercase tracking-widest truncate">Uy
-                                        tín</span>
-                                </div>
+
+                                {{-- Popup Chi tiết Uy Tín (Floating Centered) --}}
+                                <template x-teleport="body">
+                                    <div x-show="uyTinModalOpen" x-cloak
+                                        class="fixed inset-0 z-[100] flex items-center justify-center pointer-events-none p-4"
+                                        x-transition:enter="transition ease-out duration-200"
+                                        x-transition:enter-start="opacity-0"
+                                        x-transition:enter-end="opacity-100"
+                                        x-transition:leave="transition ease-in duration-150"
+                                        x-transition:leave-start="opacity-100"
+                                        x-transition:leave-end="opacity-0">
+                                        
+                                        <div @click.outside="uyTinModalOpen = false"
+                                            class="bg-white rounded-2xl shadow-[0_20px_60px_-10px_rgba(0,0,0,0.4)] border border-slate-200 w-full max-w-md overflow-hidden relative pointer-events-auto"
+                                            x-transition:enter="transition ease-out duration-300"
+                                            x-transition:enter-start="opacity-0 scale-90 translate-y-8"
+                                            x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                                            x-transition:leave="transition ease-in duration-200"
+                                            x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                                            x-transition:leave-end="opacity-0 scale-90 translate-y-8">
+                                            
+                                            {{-- Header --}}
+                                            <div class="bg-gradient-to-r from-amber-500 to-orange-600 p-5 text-white flex items-center justify-between">
+                                                <div class="flex items-center gap-3">
+                                                    <div class="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
+                                                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                                        </svg>
+                                                    </div>
+                                                    <div>
+                                                        <h3 class="font-bold text-lg leading-tight">Điểm Uy Tín</h3>
+                                                        <p class="text-amber-100 text-xs">Hệ thống đánh giá độ tin cậy</p>
+                                                    </div>
+                                                </div>
+                                                <button @click="uyTinModalOpen = false" class="text-amber-100 hover:text-white hover:bg-white/10 p-1.5 rounded-lg transition-colors">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                                </button>
+                                            </div>
+
+                                            {{-- Content --}}
+                                            <div class="p-5 max-h-[70vh] overflow-y-auto">
+                                                <p class="text-sm text-slate-600 mb-5 leading-relaxed">
+                                                    Điểm uy tín (Reputation Score) thể hiện mức độ đóng góp tích cực và độ tin cậy của bạn trong cộng đồng. 
+                                                    Điểm càng cao, bạn càng nhận được nhiều đặc quyền.
+                                                </p>
+
+                                                <div class="space-y-4">
+                                                    {{-- Cách tăng điểm --}}
+                                                    <div>
+                                                        <h4 class="text-xs font-bold text-emerald-600 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                                                            Cách tăng điểm
+                                                        </h4>
+                                                        <ul class="text-sm text-slate-600 space-y-1.5 pl-1">
+                                                            <li class="flex justify-between items-center bg-emerald-50 px-3 py-1.5 rounded-md"><span>Viết bài đánh giá (Review)</span> <span class="font-bold text-emerald-600">+5 điểm</span></li>
+                                                            <li class="flex justify-between items-center bg-emerald-50 px-3 py-1.5 rounded-md"><span>Đăng bài thảo luận Forum</span> <span class="font-bold text-emerald-600">+2 điểm</span></li>
+                                                            <li class="flex justify-between items-center bg-emerald-50 px-3 py-1.5 rounded-md"><span>Bình luận hợp lệ</span> <span class="font-bold text-emerald-600">+1 điểm</span></li>
+                                                            <li class="flex justify-between items-center bg-emerald-50 px-3 py-1.5 rounded-md"><span>Báo cáo vi phạm (được Admin xác nhận)</span> <span class="font-bold text-emerald-600">+5 điểm</span></li>
+                                                        </ul>
+                                                    </div>
+
+                                                    {{-- Tại sao bị trừ điểm --}}
+                                                    <div>
+                                                        <h4 class="text-xs font-bold text-red-500 uppercase tracking-wider mb-2 flex items-center gap-1.5 mt-4">
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path></svg>
+                                                            Tại sao bị trừ điểm?
+                                                        </h4>
+                                                        <ul class="text-sm text-slate-600 space-y-1.5 pl-1">
+                                                            <li class="flex justify-between items-center bg-red-50 px-3 py-1.5 rounded-md"><span>Gửi báo cáo sai sự thật / spam báo cáo</span> <span class="font-bold text-red-500">-15 điểm</span></li>
+                                                            <li class="flex justify-between items-center bg-red-50 px-3 py-1.5 rounded-md"><span>Đánh giá / bình luận vi phạm bị Admin xóa</span> <span class="font-bold text-red-500">Trừ nặng</span></li>
+                                                        </ul>
+                                                    </div>
+
+                                                    {{-- Hình phạt --}}
+                                                    <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mt-4">
+                                                        <h4 class="text-[11px] font-bold text-amber-700 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                                            Hình phạt lạm dụng
+                                                        </h4>
+                                                        <p class="text-xs text-amber-800 leading-relaxed">
+                                                            Nếu điểm uy tín của bạn <strong>rơi xuống dưới 0 (âm điểm)</strong> do báo cáo sai trái nhiều lần, 
+                                                            tài khoản sẽ bị <strong>khóa tính năng báo cáo</strong> trong 3-7 ngày. Vi phạm nghiêm trọng có thể dẫn đến cấm tài khoản vĩnh viễn.
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            {{-- Footer --}}
+                                            <div class="bg-slate-50 p-4 border-t border-slate-100 flex justify-end">
+                                                <button @click="uyTinModalOpen = false" class="px-5 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm font-semibold rounded-lg transition-colors">Đã hiểu</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
                             </div>
                         </div>
                     </div>

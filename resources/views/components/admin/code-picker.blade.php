@@ -106,9 +106,26 @@ $tvTypes = [
     ['code' => 'Video', 'name' => 'Video', 'en' => 'Video'],
 ];
 
+$statusList = [
+    ['code' => 'active', 'name' => '✅ Hoạt động', 'en' => 'Active'],
+    ['code' => 'hidden', 'name' => '🚫 Đã ẩn', 'en' => 'Hidden'],
+    ['code' => 'upcoming', 'name' => '🕐 Sắp chiếu', 'en' => 'Upcoming'],
+];
+
+$tmdbStatusList = [
+    ['code' => 'Returning Series', 'name' => 'Đang phát sóng', 'en' => 'Returning Series'],
+    ['code' => 'Ended', 'name' => 'Đã kết thúc', 'en' => 'Ended'],
+    ['code' => 'Canceled', 'name' => 'Đã hủy', 'en' => 'Canceled'],
+    ['code' => 'In Production', 'name' => 'Đang sản xuất', 'en' => 'In Production'],
+    ['code' => 'Planned', 'name' => 'Đã lên kế hoạch', 'en' => 'Planned'],
+    ['code' => 'Pilot', 'name' => 'Pilot', 'en' => 'Pilot'],
+];
+
 $items = match($type) {
     'language' => $languages,
     'tv_type' => $tvTypes,
+    'status' => $statusList,
+    'tmdb_status' => $tmdbStatusList,
     default => $countries,
 };
 $fieldId = $id ?? ($name . '_picker');
@@ -117,6 +134,8 @@ if (!isset($label)) {
     $label = match($type) {
         'language' => 'Ngôn ngữ gốc',
         'tv_type' => 'Loại',
+        'status' => 'Hiển thị',
+        'tmdb_status' => 'Trạng thái TMDb',
         default => 'Quốc gia',
     };
 }
@@ -124,13 +143,17 @@ if (!isset($label)) {
 $placeholderType = match($type) {
     'language' => 'ngôn ngữ',
     'tv_type' => 'loại',
+    'status' => 'trạng thái',
+    'tmdb_status' => 'trạng thái TMDb',
     default => 'quốc gia',
 };
+
+$hideCode = in_array($type, ['tv_type', 'status', 'tmdb_status']);
 
 // Tìm label hiện tại từ value
 $currentItem = collect($items)->firstWhere('code', $value);
 $displayLabel = $currentItem 
-    ? ($type === 'tv_type' ? $currentItem['name'] : "{$currentItem['code']} — {$currentItem['name']}") 
+    ? ($hideCode ? $currentItem['name'] : "{$currentItem['code']} — {$currentItem['name']}") 
     : '';
 @endphp
 
@@ -138,6 +161,8 @@ $displayLabel = $currentItem
     x-data="{
         open: false,
         search: '',
+        initialValue: '{{ old($name, $value) }}',
+        initialDisplay: '{{ $displayLabel }}',
         value: '{{ old($name, $value) }}',
         display: '{{ $displayLabel }}',
         items: {{ Js::from($items) }},
@@ -152,17 +177,24 @@ $displayLabel = $currentItem
         },
         select(item) {
             this.value   = item.code;
-            this.display = {{ $type === 'tv_type' ? 'true' : 'false' }} ? item.name : (item.code + ' — ' + item.name);
+            this.display = {{ $hideCode ? 'true' : 'false' }} ? item.name : (item.code + ' — ' + item.name);
             this.search  = '';
             this.open    = false;
+            this.$dispatch('input');
         },
         clear() {
             this.value   = '';
             this.display = '';
             this.search  = '';
+            this.$dispatch('input');
+        },
+        resetState() {
+            this.value = this.initialValue;
+            this.display = this.initialDisplay;
         }
     }"
     x-on:keydown.escape="open = false"
+    @reset.window="if ($event.target === $el.closest('form')) resetState()"
     class="relative"
 >
     <label class="block text-sm font-medium text-dark-200 mb-1.5">{{ $label }}</label>
@@ -234,7 +266,7 @@ $displayLabel = $currentItem
                     class="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-dark-800 transition-colors"
                     :class="value === item.code ? 'bg-sky-600/15' : ''"
                 >
-                    @if ($type !== 'tv_type')
+                    @if (!$hideCode)
                         <span class="text-xs font-mono font-semibold text-sky-400 w-7 shrink-0" x-text="item.code"></span>
                     @endif
                     <span class="text-sm text-dark-200" x-text="item.name"></span>

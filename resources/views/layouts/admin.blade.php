@@ -139,7 +139,7 @@
                             'label' => 'Đánh giá',
                             'route' => 'admin.reviews.index',
                             'icon'  => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>',
-                            'badge' => \App\Models\Review::where('status', 'pending')->count(),
+                            'badge' => \App\Models\Review::whereHas('reports', fn($q) => $q->where('status', 'pending'))->count(),
                         ],
                         [
                             'label' => 'Tin tức',
@@ -298,11 +298,15 @@
             title: '',
             message: '',
             formId: '',
+            confirmText: 'Xác nhận xóa',
+            type: 'danger',
             open(detail) {
-                this.title   = detail.title   || 'Xác nhận';
-                this.message = detail.message || 'Bạn có chắc chắn không?';
-                this.formId  = detail.formId  || '';
-                this.show    = true;
+                this.title       = detail.title       || 'Xác nhận';
+                this.message     = detail.message     || 'Bạn có chắc chắn không?';
+                this.formId      = detail.formId      || '';
+                this.confirmText = detail.confirmText || 'Xác nhận xóa';
+                this.type        = detail.type        || 'danger';
+                this.show        = true;
             },
             confirm() {
                 if (this.formId) {
@@ -343,14 +347,30 @@
             class="relative w-full max-w-sm bg-dark-900 border border-dark-700 rounded-2xl shadow-2xl shadow-black/50 overflow-hidden"
         >
             {{-- Top accent line --}}
-            <div class="h-0.5 w-full bg-gradient-to-r from-red-500/80 via-red-400 to-red-500/80"></div>
+            <div class="h-0.5 w-full"
+                 :class="{
+                     'bg-gradient-to-r from-red-500/80 via-red-400 to-red-500/80': type === 'danger',
+                     'bg-gradient-to-r from-orange-500/80 via-orange-400 to-orange-500/80': type === 'warning',
+                     'bg-gradient-to-r from-sky-500/80 via-sky-400 to-sky-500/80': type === 'info'
+                 }"></div>
 
             <div class="p-6">
                 {{-- Icon + Title --}}
                 <div class="flex items-start gap-3 mb-3">
-                    <div class="w-9 h-9 rounded-xl bg-red-500/15 flex items-center justify-center shrink-0 mt-0.5">
-                        <svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5"
+                         :class="{
+                             'bg-red-500/15 text-red-400': type === 'danger',
+                             'bg-orange-500/15 text-orange-400': type === 'warning',
+                             'bg-sky-500/15 text-sky-400': type === 'info'
+                         }">
+                        <svg x-show="type === 'danger'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                        <svg x-show="type === 'warning'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                        <svg x-show="type === 'info'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                     </div>
                     <div>
@@ -366,8 +386,13 @@
                         Hủy bỏ
                     </button>
                     <button @click="confirm()" type="button"
-                        class="px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-xl hover:bg-red-500 transition-colors">
-                        Xác nhận xóa
+                        class="px-4 py-2 text-sm font-semibold text-white rounded-xl transition-colors"
+                        :class="{
+                            'bg-red-600 hover:bg-red-500': type === 'danger',
+                            'bg-orange-600 hover:bg-orange-500': type === 'warning',
+                            'bg-sky-600 hover:bg-sky-500': type === 'info'
+                        }"
+                        x-text="confirmText">
                     </button>
                 </div>
             </div>

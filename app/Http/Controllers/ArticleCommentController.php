@@ -7,6 +7,7 @@ use App\Notifications\ArticleCommentMentioned;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class ArticleCommentController extends Controller
 {
@@ -53,7 +54,7 @@ class ArticleCommentController extends Controller
 
         Auth::user()->increment('reputation_score', 1);
 
-        $comment->load(['user', 'article']);
+        $comment->load(['user', 'user.activeFrame', 'article', 'parent']);
 
         // Xử lý gửi thông báo khi có @tên (mention)
         $content = $comment->content;
@@ -98,8 +99,10 @@ class ArticleCommentController extends Controller
                 'success' => true,
                 'comment' => [
                     'id'         => $comment->id,
+                    'uuid'       => $comment->uuid,
                     'content'    => $comment->content,
                     'parent_id'  => $comment->parent_id,
+                    'parent_uuid' => $comment->parent ? $comment->parent->uuid : null,
                     'created_at' => $comment->created_at->diffForHumans(),
                     'user'       => [
                         'id'     => $comment->user->id,
@@ -107,6 +110,9 @@ class ArticleCommentController extends Controller
                         'avatar' => $comment->user->avatar,
                         'initial' => strtoupper(substr($comment->user->name, 0, 1)),
                         'slug'   => $comment->user->slug,
+                        'active_frame' => $comment->user->activeFrame ? [
+                            'image_path' => Storage::url($comment->user->activeFrame->image_path),
+                        ] : null,
                     ],
                 ],
             ]);

@@ -27,7 +27,7 @@ return [
                 'section',
                 'article',
                 'iframe[src|width|height|frameborder|title|class|style]',
-                'video[src|width|height|class|style]',
+                'video[src|width|height|class|style|controls|autoplay|muted|loop|poster|preload|playsinline]',
                 'source[src|type]',
             ]),
             'HTML.ForbiddenElements' => '',

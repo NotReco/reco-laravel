@@ -12,9 +12,21 @@ use Illuminate\Http\Request;
 class UserController extends Controller
 {
     /**
-     * Roles mà staff được phép quản lý (không bao gồm moderator/admin).
+     * Roles mà staff được phép quản lý.
+     * Admin có thể quản lý cả moderator và admin, Mod chỉ quản lý user và tester.
      */
     private const MANAGEABLE_ROLES = ['user', 'tester'];
+    private const ADMIN_MANAGEABLE_ROLES = ['user', 'tester', 'moderator', 'admin'];
+
+    /**
+     * Trả về danh sách roles được phép chỉnh sửa dựa theo role người đang đăng nhập.
+     */
+    private function manageableRoles(): array
+    {
+        return auth()->user()->role->value === 'admin'
+            ? self::ADMIN_MANAGEABLE_ROLES
+            : self::MANAGEABLE_ROLES;
+    }
 
     /**
      * Danh sách users — chỉ hiển thị user & tester.
@@ -23,7 +35,7 @@ class UserController extends Controller
     {
         $query = User::query()
             ->withCount('reviews')
-            ->whereIn('role', self::MANAGEABLE_ROLES);
+            ->whereIn('role', $this->manageableRoles());
 
         if ($request->filled('q')) {
             $query->where(function ($q) use ($request) {
@@ -34,7 +46,7 @@ class UserController extends Controller
 
         if ($request->filled('role')) {
             // Chỉ cho filter trong phạm vi cho phép
-            if (in_array($request->role, self::MANAGEABLE_ROLES)) {
+            if (in_array($request->role, $this->manageableRoles())) {
                 $query->where('role', $request->role);
             }
         }
@@ -49,8 +61,8 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
-        // Staff không được chỉnh sửa tài khoản có quyền cao hơn
-        if (!in_array($user->role->value, self::MANAGEABLE_ROLES)) {
+        // Chỉ được chỉnh sửa tài khoản trong phạm vi cho phép
+        if (!in_array($user->role->value, $this->manageableRoles())) {
             abort(403, 'Bạn không có quyền chỉnh sửa tài khoản này.');
         }
 
@@ -66,14 +78,13 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
-        // Staff không được sửa tài khoản privileged
-        if (!in_array($user->role->value, self::MANAGEABLE_ROLES)) {
+        // Chỉ được sửa tài khoản trong phạm vi cho phép
+        if (!in_array($user->role->value, $this->manageableRoles())) {
             abort(403, 'Bạn không có quyền sửa tài khoản này.');
         }
 
         $validated = $request->validate([
-            // Staff chỉ được đổi role trong phạm vi user/tester
-            'role' => 'required|in:' . implode(',', self::MANAGEABLE_ROLES),
+            'role' => 'required|in:' . implode(',', $this->manageableRoles()),
             'reputation_score' => 'required|integer',
             'titles' => 'nullable|array',
             'titles.*' => 'exists:user_titles,id',
@@ -109,8 +120,8 @@ class UserController extends Controller
             return back()->with('error', 'Không thể ban chính mình.');
         }
 
-        // Staff không được ban tài khoản privileged
-        if (!in_array($user->role->value, self::MANAGEABLE_ROLES)) {
+        // Chỉ được ban tài khoản trong phạm vi cho phép
+        if (!in_array($user->role->value, $this->manageableRoles())) {
             abort(403, 'Bạn không có quyền khóa tài khoản này.');
         }
 

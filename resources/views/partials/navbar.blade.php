@@ -1000,16 +1000,8 @@
             {{-- No results --}}
             <div x-show="showResults && results.length === 0 && !loading && query.length >= 2"
                 class="px-5 py-8 text-center border-t border-gray-50">
-                <p class="text-gray-400 text-sm mb-4">Không tìm thấy kết quả cho "<span
+                <p class="text-gray-400 text-sm mb-0">Không tìm thấy kết quả cho "<span
                         class="text-gray-600 font-bold" x-text="query"></span>"</p>
-                <a :href="'{{ route('explore') }}?q=' + encodeURIComponent(query)" @click="reset()"
-                    class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-50 border border-gray-200 hover:bg-gray-100 hover:border-gray-300 text-gray-700 font-medium text-[13px] transition-all">
-                    <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-                    </svg>
-                    Tìm kiếm nâng cao
-                </a>
             </div>
 
             {{-- Footer --}}

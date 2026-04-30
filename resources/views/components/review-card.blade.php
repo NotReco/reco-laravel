@@ -348,4 +348,59 @@
             </div>
         @endauth
     </div>
+
+    {{-- ── Báo cáo công khai đã xác nhận ──────────────────────────── --}}
+    @php
+        $publicReports = $review->relationLoaded('reports') ? $review->reports : collect();
+    @endphp
+    @if($publicReports->isNotEmpty())
+        <div x-data="{ open: false }" class="mt-3 pt-3 border-t border-orange-100">
+            {{-- Toggle button --}}
+            <button @click="open = !open"
+                    class="flex items-center gap-1.5 text-xs font-medium text-orange-500 hover:text-orange-600 transition-colors group">
+                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"/>
+                </svg>
+                <span x-text="open ? 'Ẩn báo cáo' : '{{ $publicReports->count() }} báo cáo vi phạm từ cộng đồng'"></span>
+                <svg class="w-3 h-3 transition-transform duration-200" :class="open ? 'rotate-180' : ''"
+                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </button>
+
+            {{-- Report list --}}
+            <div x-show="open" x-collapse x-cloak class="mt-2 space-y-2">
+                @foreach($publicReports as $report)
+                    <div class="flex items-start gap-2.5 bg-orange-50 border border-orange-100 rounded-xl px-3 py-2.5">
+                        {{-- Avatar --}}
+                        <div class="w-6 h-6 rounded-full bg-orange-200 flex items-center justify-center shrink-0 overflow-hidden text-[10px] font-bold text-orange-700 mt-0.5">
+                            @if($report->user?->avatar)
+                                <img src="{{ $report->user->avatar }}" class="w-full h-full object-cover" alt="">
+                            @else
+                                {{ strtoupper(substr($report->user?->name ?? '?', 0, 1)) }}
+                            @endif
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                <span class="text-xs font-semibold text-orange-700">{{ $report->user?->name ?? 'Ẩn danh' }}</span>
+                                <span class="text-[10px] text-orange-400">·</span>
+                                <span class="text-[10px] text-orange-500 font-medium bg-orange-100 px-1.5 py-0.5 rounded-full">
+                                    {{ $report->reason }}
+                                </span>
+                                <span class="text-[10px] text-gray-400 ml-auto">{{ $report->created_at->diffForHumans() }}</span>
+                            </div>
+                            @if($report->description)
+                                <p class="text-xs text-orange-600/80 mt-1 leading-relaxed">{{ $report->description }}</p>
+                            @endif
+                        </div>
+                    </div>
+                @endforeach
+
+                <p class="text-[10px] text-gray-400 text-center pt-1">
+                    ✓ Đã được kiểm duyệt bởi Admin
+                </p>
+            </div>
+        </div>
+    @endif
 </div>

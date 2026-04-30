@@ -251,11 +251,12 @@ Route::middleware(['auth', 'can:access_admin_panel'])->prefix('staff')->name('ad
         Route::delete('/tv-shows/{tvShow}', [\App\Http\Controllers\Admin\TvShowController::class, 'destroy'])->name('tv-shows.destroy');
     });
 
-    // Reviews
+    // Reviews (post-moderation: chỉ xử lý vi phạm, không duyệt trước)
     Route::middleware('can:manage_reviews')->group(function () {
         Route::get('/reviews', [\App\Http\Controllers\Admin\ReviewController::class, 'index'])->name('reviews.index');
-        Route::post('/reviews/{review}/approve', [\App\Http\Controllers\Admin\ReviewController::class, 'approve'])->name('reviews.approve');
-        Route::post('/reviews/{review}/reject', [\App\Http\Controllers\Admin\ReviewController::class, 'reject'])->name('reviews.reject');
+        Route::post('/reviews/{review}/hide', [\App\Http\Controllers\Admin\ReviewController::class, 'hide'])->name('reviews.hide');
+        Route::post('/reviews/{review}/unhide', [\App\Http\Controllers\Admin\ReviewController::class, 'unhide'])->name('reviews.unhide');
+        Route::post('/reviews/{review}/dismiss-reports', [\App\Http\Controllers\Admin\ReviewController::class, 'dismissReports'])->name('reviews.dismissReports');
         Route::delete('/reviews/{review}', [\App\Http\Controllers\Admin\ReviewController::class, 'destroy'])->name('reviews.destroy');
     });
 
@@ -291,16 +292,20 @@ Route::middleware(['auth', 'can:access_admin_panel'])->prefix('staff')->name('ad
     Route::post('/reports/{report}/resolve', [\App\Http\Controllers\Admin\ReportController::class, 'resolve'])->name('reports.resolve');
     Route::post('/reports/{report}/dismiss', [\App\Http\Controllers\Admin\ReportController::class, 'dismiss'])->name('reports.dismiss');
     Route::post('/reports/{report}/reopen', [\App\Http\Controllers\Admin\ReportController::class, 'reopen'])->name('reports.reopen');
+    Route::post('/reports/{report}/ban-reporter', [\App\Http\Controllers\Admin\ReportController::class, 'banReporter'])->name('reports.banReporter');
     Route::delete('/reports/{report}', [\App\Http\Controllers\Admin\ReportController::class, 'destroy'])->name('reports.destroy');
+
 
     // Carousel
     Route::middleware('can:manage_carousel')->group(function () {
         Route::get('/carousel', [\App\Http\Controllers\Admin\CarouselController::class, 'index'])->name('carousel.index');
         Route::post('/carousel', [\App\Http\Controllers\Admin\CarouselController::class, 'store'])->name('carousel.store');
         Route::post('/carousel/auto', [\App\Http\Controllers\Admin\CarouselController::class, 'autoUpdate'])->name('carousel.autoUpdate');
-        Route::post('/carousel/{movie}/up', [\App\Http\Controllers\Admin\CarouselController::class, 'moveUp'])->name('carousel.moveUp');
-        Route::post('/carousel/{movie}/down', [\App\Http\Controllers\Admin\CarouselController::class, 'moveDown'])->name('carousel.moveDown');
-        Route::delete('/carousel/{movie}', [\App\Http\Controllers\Admin\CarouselController::class, 'destroy'])->name('carousel.destroy');
+        Route::post('/carousel/{type}/{id}/up', [\App\Http\Controllers\Admin\CarouselController::class, 'moveUp'])->name('carousel.moveUp');
+        Route::post('/carousel/{type}/{id}/down', [\App\Http\Controllers\Admin\CarouselController::class, 'moveDown'])->name('carousel.moveDown');
+        Route::delete('/carousel/{type}/{id}', [\App\Http\Controllers\Admin\CarouselController::class, 'destroy'])->name('carousel.destroy');
+        // AJAX reorder endpoints
+        Route::post('/carousel/{type}/{id}/move', [\App\Http\Controllers\Admin\CarouselController::class, 'moveAjax'])->name('carousel.moveAjax');
     });
 });
 

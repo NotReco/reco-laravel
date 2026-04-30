@@ -55,7 +55,7 @@
             </div>
         </div>
 
-        <form action="{{ route('admin.tv-shows.update', $tvShow) }}" method="POST">
+        <form x-data="{ isDirty: false }" @input="isDirty = true" @change="isDirty = true" @reset="setTimeout(() => isDirty = false, 50)" action="{{ route('admin.tv-shows.update', $tvShow) }}" method="POST">
             @csrf @method('PUT')
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -205,32 +205,8 @@
                     <div class="card p-5">
                         <h3 class="text-sm font-semibold text-dark-300 uppercase tracking-wide mb-4">Trạng thái</h3>
                         <div class="space-y-4">
-                            <div>
-                                <label for="status" class="block text-sm font-medium text-dark-200 mb-1.5">Hiển
-                                    thị</label>
-                                <select id="status" name="status" class="input-dark text-sm">
-                                    <option value="active"
-                                        {{ old('status', $tvShow->status) === 'active' ? 'selected' : '' }}>✅ Hoạt động
-                                    </option>
-                                    <option value="hidden"
-                                        {{ old('status', $tvShow->status) === 'hidden' ? 'selected' : '' }}>🚫 Đã ẩn
-                                    </option>
-                                    <option value="upcoming"
-                                        {{ old('status', $tvShow->status) === 'upcoming' ? 'selected' : '' }}>🕐 Sắp
-                                        chiếu</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="tmdb_status" class="block text-sm font-medium text-dark-200 mb-1.5">Trạng
-                                    thái TMDb</label>
-                                <select id="tmdb_status" name="tmdb_status" class="input-dark text-sm">
-                                    @foreach (['Returning Series' => 'Đang phát sóng', 'Ended' => 'Đã kết thúc', 'Canceled' => 'Đã hủy', 'In Production' => 'Đang sản xuất', 'Planned' => 'Đã lên kế hoạch', 'Pilot' => 'Pilot'] as $val => $label)
-                                        <option value="{{ $val }}"
-                                            {{ old('tmdb_status', $tvShow->tmdb_status) === $val ? 'selected' : '' }}>
-                                            {{ $label }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
+                            <x-admin.code-picker name="status" type="status" label="Hiển thị" :value="old('status', $tvShow->status)" />
+                            <x-admin.code-picker name="tmdb_status" type="tmdb_status" label="Trạng thái TMDb" :value="old('tmdb_status', $tvShow->tmdb_status)" />
                             <label class="flex items-center gap-2.5 cursor-pointer">
                                 <input type="hidden" name="is_approved" value="0">
                                 <input type="checkbox" name="is_approved" value="1"
@@ -286,6 +262,13 @@
                                     d="M5 13l4 4L19 7" />
                             </svg>
                             Lưu thay đổi
+                        </button>
+                    </div>
+
+                    {{-- Bỏ thay đổi --}}
+                    <div class="card p-3" x-show="isDirty" x-cloak x-transition>
+                        <button type="reset" class="w-full text-sm py-2 font-semibold bg-red-500 text-white hover:bg-red-600 rounded-lg transition-colors">
+                            Bỏ thay đổi
                         </button>
                     </div>
 

@@ -19,12 +19,37 @@ class ReportController extends Controller
             'is_public'       => ['boolean'],
         ]);
 
+        $user = Auth::user();
+
+        // Kiểm tra xem user có đang bị cấm báo cáo không
+        if ($user->isReportBanned()) {
+            $until = $user->report_banned_until->locale('vi')->diffForHumans();
+            return response()->json([
+                'success' => false,
+                'banned'  => true,
+                'message' => "Tính năng báo cáo của bạn đang tạm dừng do một số báo cáo gần đây không phù hợp. Sẽ mở lại {$until}.",
+            ], 403);
+        }
+
+        // Kiểm tra điểm uy tín âm (tự động cấm tạm thời)
+        if ($user->reputation_score < 0) {
+            $banDays = $user->reputation_score < -30 ? 7 : 3;
+            $until   = now()->addDays($banDays);
+            $user->update(['report_banned_until' => $until]);
+
+            return response()->json([
+                'success' => false,
+                'banned'  => true,
+                'message' => "Tính năng báo cáo của bạn đang tạm dừng trong {$banDays} ngày do nhiều báo cáo gần đây không phù hợp.",
+            ], 403);
+        }
+
         $type = $request->input('reportable_type');
-        $id = $request->input('reportable_id');
+        $id   = $request->input('reportable_id');
 
         // Resolve morph class
         $morphClass = Relation::getMorphedModel($type) ?? $type;
-        
+
         if (!class_exists($morphClass)) {
             return response()->json([
                 'success' => false,
@@ -40,25 +65,26 @@ class ReportController extends Controller
             ], 404);
         }
 
-        // Check if user is reporting their own content
-        if ($model->user_id === Auth::id()) {
+        // Không cho báo cáo nội dung của chính mình
+        if ($model->user_id === $user->id) {
             return response()->json([
                 'success' => false,
                 'message' => 'Bạn không thể báo cáo nội dung của chính mình.',
             ], 403);
         }
 
-        // Check if already reported
-        $alreadyReported = $model->reports()->where('user_id', Auth::id())->exists();
+        // Đã báo cáo rồi — chặn nhưng giọng thân thiện
+        $alreadyReported = $model->reports()->where('user_id', $user->id)->exists();
         if ($alreadyReported) {
             return response()->json([
-                'success' => false,
-                'message' => 'Bạn đã báo cáo nội dung này rồi.',
+                'success'  => false,
+                'already'  => true,
+                'message'  => 'Bạn đã gửi báo cáo về nội dung này rồi. Cảm ơn bạn đã đóng góp cho cộng đồng!',
             ], 422);
         }
 
         $model->reports()->create([
-            'user_id'     => Auth::id(),
+            'user_id'     => $user->id,
             'reason'      => $request->input('reason'),
             'description' => $request->input('description'),
             'is_public'   => $request->boolean('is_public'),
@@ -66,7 +92,7 @@ class ReportController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Đã gửi báo cáo. Cảm ơn bạn!',
+            'message' => 'Đã gửi báo cáo thành công. Cảm ơn bạn!',
         ]);
     }
 }

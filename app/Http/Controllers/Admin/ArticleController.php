@@ -25,7 +25,7 @@ class ArticleController extends Controller
 
     public function create()
     {
-        $tags = Tag::orderBy('name')->get();
+        $tags = Tag::whereHas('articles')->orderBy('name')->get();
         return view('admin.articles.create', compact('tags'));
     }
 
@@ -111,7 +111,7 @@ class ArticleController extends Controller
     public function edit(Article $article)
     {
         $article->load('tags');
-        $tags = Tag::orderBy('name')->get();
+        $tags = Tag::whereHas('articles')->orderBy('name')->get();
         return view('admin.articles.edit', compact('article', 'tags'));
     }
 

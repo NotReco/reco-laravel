@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Report;
+use App\Models\Review;
 use Illuminate\Http\Request;
 
 class ReportController extends Controller
@@ -57,22 +58,47 @@ class ReportController extends Controller
 
     /**
      * Đánh dấu báo cáo là đã xử lý (resolved).
+     * Cộng +5 uy tín cho người báo cáo.
+     * Nếu báo cáo liên quan đến Review, tự động ẩn review đó.
      */
     public function resolve(Report $report)
     {
         $report->update(['status' => 'resolved']);
 
-        return back()->with('success', 'Báo cáo đã được đánh dấu là đã xử lý.');
+        // +5 uy tín cho người báo cáo vì đã báo cáo chính xác
+        if ($report->user) {
+            $report->user->increment('reputation_score', 5);
+        }
+
+        // Nếu report là về đánh giá (Review) → ẩn review và resolve tất cả reports còn lại
+        if ($report->reportable_type === 'App\\Models\\Review' && $report->reportable) {
+            $review = $report->reportable;
+            if ($review->status !== 'hidden') {
+                $review->update(['status' => 'hidden']);
+            }
+            // Resolve các reports pending khác của review này
+            $review->reports()->where('status', 'pending')->update(['status' => 'resolved']);
+
+            return back()->with('success', 'Báo cáo đã xử lý. Đánh giá vi phạm đã được ẩn, người báo cáo được +5 uy tín.');
+        }
+
+        return back()->with('success', 'Báo cáo đã được xác nhận, người báo cáo được +5 uy tín.');
     }
 
     /**
      * Bác bỏ báo cáo (dismissed — không có vấn đề).
+     * Trừ -15 uy tín của người báo cáo.
      */
     public function dismiss(Report $report)
     {
         $report->update(['status' => 'dismissed']);
 
-        return back()->with('success', 'Báo cáo đã bị bác bỏ.');
+        // -15 uy tín vì báo cáo không phù hợp
+        if ($report->user) {
+            $report->user->decrement('reputation_score', 15);
+        }
+
+        return back()->with('success', 'Báo cáo đã bị bác bỏ, uy tín người báo cáo bị trừ 15 điểm.');
     }
 
     /**
@@ -93,5 +119,25 @@ class ReportController extends Controller
         $report->delete();
 
         return back()->with('success', 'Báo cáo đã bị xóa.');
+    }
+
+    /**
+     * Phạt thủ công: cấm người dùng sử dụng tính năng báo cáo.
+     * Admin có thể chọn 3 ngày hoặc 7 ngày.
+     */
+    public function banReporter(Report $report, Request $request)
+    {
+        $days = in_array((int) $request->input('days'), [3, 7]) ? (int) $request->input('days') : 3;
+
+        $reporter = $report->user;
+        if (!$reporter) {
+            return back()->with('error', 'Không tìm thấy người dùng.');
+        }
+
+        $reporter->update([
+            'report_banned_until' => now()->addDays($days),
+        ]);
+
+        return back()->with('success', "Đã cấm {$reporter->name} sử dụng tính năng báo cáo trong {$days} ngày.");
     }
 }

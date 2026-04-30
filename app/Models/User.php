@@ -42,6 +42,7 @@ class User extends Authenticatable
         'reputation_score',
         'active_title_id',
         'active_frame_id',
+        'report_banned_until',
     ];
 
     protected $hidden = [
@@ -52,18 +53,29 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-            'date_of_birth' => 'date',
-            'is_active' => 'boolean',
-            'last_login_at' => 'datetime',
-            'role' => UserRole::class,
-            'two_factor_expires_at' => 'datetime',
-            'two_factor_enabled' => 'boolean',
-            'two_factor_remember_enabled' => 'boolean',
-            'two_factor_trusted_until' => 'datetime',
-            'notification_preferences' => 'array',
+            'email_verified_at'               => 'datetime',
+            'password'                         => 'hashed',
+            'date_of_birth'                    => 'date',
+            'is_active'                        => 'boolean',
+            'last_login_at'                    => 'datetime',
+            'role'                             => UserRole::class,
+            'two_factor_expires_at'            => 'datetime',
+            'two_factor_enabled'               => 'boolean',
+            'two_factor_remember_enabled'      => 'boolean',
+            'two_factor_trusted_until'         => 'datetime',
+            'notification_preferences'         => 'array',
+            'report_banned_until'              => 'datetime',
         ];
+    }
+
+    // ── Report Ban Helpers ──
+
+    /**
+     * Kiểm tra user hiện có đang bị cấm báo cáo không.
+     */
+    public function isReportBanned(): bool
+    {
+        return $this->report_banned_until !== null && $this->report_banned_until->isFuture();
     }
 
     // ── Notifications ──

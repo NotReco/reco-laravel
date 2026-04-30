@@ -1,11 +1,10 @@
-<x-admin-layout title="Diễn đàn" pageTitle="Quản lý chuyên mục diễn đàn">
+<x-admin-layout title="Diễn đàn" pageTitle="Quản lý diễn đàn">
 
     <div class="flex justify-between items-center mb-6">
         <div>
             <h2 class="text-xl font-semibold text-white">Danh sách chuyên mục</h2>
             <p class="text-sm text-dark-400 mt-1">
-                Quản lý thứ tự và trạng thái chuyên mục trên diễn đàn
-                — thứ tự là duy nhất và liên tục.
+                Quản lý thứ tự và trạng thái của chuyên mục trên trang diễn đàn.
             </p>
         </div>
         <a href="{{ route('admin.forum-categories.create') }}"
@@ -22,7 +21,7 @@
             <table class="w-full text-left text-sm whitespace-nowrap">
                 <thead class="bg-dark-800/50 text-dark-300">
                     <tr>
-                        <th class="px-6 py-4 font-medium w-16 text-center">#</th>
+                        <th class="px-6 py-4 font-medium w-16 text-center">Thứ tự</th>
                         <th class="px-6 py-4 font-medium">Thông tin</th>
                         <th class="px-6 py-4 font-medium text-center">Trạng thái</th>
                         <th class="px-6 py-4 font-medium text-center">Bài viết</th>
@@ -131,16 +130,16 @@
                                         </svg>
                                     </a>
 
-                                    <form action="{{ route('admin.forum-categories.destroy', $category) }}" method="POST" class="inline-block"
-                                          onsubmit="return confirm('Bạn có chắc muốn xóa chuyên mục này?')">
+                                    <button type="button"
+                                            @click="$dispatch('admin-confirm', { title: 'Xóa chuyên mục', message: 'Bạn có chắc muốn xóa chuyên mục \u00ab{{ addslashes($category->name) }}\u00bb?', formId: 'del-forum-category-{{ $category->id }}' })"
+                                            class="p-2 text-dark-400 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors"
+                                            title="Xóa">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
+                                    </button>
+                                    <form id="del-forum-category-{{ $category->id }}" action="{{ route('admin.forum-categories.destroy', $category) }}" method="POST" class="hidden">
                                         @csrf @method('DELETE')
-                                        <button type="submit"
-                                                class="p-2 text-dark-400 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors"
-                                                title="Xóa">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                            </svg>
-                                        </button>
                                     </form>
                                 </div>
                             </td>
