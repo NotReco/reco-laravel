@@ -22,15 +22,15 @@
                 {{-- Frame preview --}}
                 <div class="relative flex items-center justify-center bg-gradient-to-br from-dark-800 to-dark-950 py-6 px-4">
                     {{-- Mock avatar underneath --}}
-                    <div class="relative w-20 h-20">
+                    <div class="relative w-20 h-20 shrink-0">
                         {{-- Avatar bg --}}
-                        <div class="absolute inset-0 rounded-full bg-gradient-to-br from-sky-500 to-blue-700 flex items-center justify-center text-2xl font-bold text-white">
+                        <div class="w-full h-full rounded-full bg-gradient-to-br from-sky-500 to-blue-700 flex items-center justify-center text-3xl font-bold text-white scale-[1.0475]">
                             A
                         </div>
                         {{-- Frame overlay --}}
                         <img src="{{ Storage::url($frame->image_path) }}"
                              alt="{{ $frame->name }}"
-                             class="absolute inset-0 w-full h-full object-contain pointer-events-none"
+                             class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[126%] h-[126%] max-w-none object-contain pointer-events-none"
                              loading="lazy">
                     </div>
 

@@ -71,6 +71,7 @@
             scrollbar-width: none;
             -ms-overflow-style: none;
         }
+
         .admin-sidebar nav::-webkit-scrollbar {
             display: none;
         }
@@ -102,7 +103,8 @@
 
             {{-- Logo --}}
             <div class="flex items-center h-16 px-4 border-b border-dark-800 shrink-0">
-                <div class="flex items-center gap-2.5 cursor-pointer" onclick="window.location.href='{{ route('admin.dashboard') }}'">
+                <div class="flex items-center gap-2.5 cursor-pointer"
+                    onclick="window.location.href='{{ route('admin.dashboard') }}'">
                     <div class="w-8 h-8 flex items-center justify-center shrink-0">
                         <img src="{{ asset('storage/images/logo-icon.svg') }}" alt="Logo" class="w-8 h-8">
                     </div>
@@ -116,19 +118,16 @@
                 @php
                     $nav = [
                         [
-                            'label' => 'Tổng quan',
-                            'route' => 'super.dashboard',
-                            'icon'  => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>',
-                        ],
-                        [
-                            'label' => 'Nhóm Quyền (RBAC)',
+                            'label' => 'Nhóm quyền hạn',
                             'route' => 'super.roles.index',
-                            'icon'  => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>',
+                            'icon' =>
+                                '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>',
                         ],
                         [
-                            'label' => 'Tài khoản Staff',
+                            'label' => 'Nhân viên nội bộ',
                             'route' => 'super.staff.index',
-                            'icon'  => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>',
+                            'icon' =>
+                                '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>',
                         ],
                     ];
                 @endphp
@@ -138,14 +137,16 @@
                     <div onclick="window.location.href='{{ route($item['route']) }}'"
                         class="flex items-center rounded-xl text-sm font-medium transition-all cursor-pointer
                               {{ $active ? 'bg-indigo-600/20 text-indigo-400' : 'text-dark-400 hover:text-white hover:bg-dark-800' }}">
-                        <div class="w-12 h-10 flex items-center justify-center shrink-0 {{ $active ? 'text-indigo-400' : '' }}">
-                            <svg class="w-5 h-5 shrink-0" fill="none"
-                                stroke="currentColor" viewBox="0 0 24 24">{!! $item['icon'] !!}</svg>
+                        <div
+                            class="w-12 h-10 flex items-center justify-center shrink-0 {{ $active ? 'text-indigo-400' : '' }}">
+                            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">{!! $item['icon'] !!}</svg>
                         </div>
                         <span class="whitespace-nowrap sidebar-label flex-1 pr-3"
                             :class="sidebarOpen ? 'opacity-100' : 'opacity-0'">{{ $item['label'] }}</span>
                         @if (!empty($item['badge']) && $item['badge'] > 0)
-                            <span class="sidebar-label mr-2 min-w-[20px] h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1"
+                            <span
+                                class="sidebar-label mr-2 min-w-[20px] h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1"
                                 :class="sidebarOpen ? 'opacity-100' : 'opacity-0'">
                                 {{ $item['badge'] > 99 ? '99+' : $item['badge'] }}
                             </span>
@@ -164,21 +165,27 @@
                                 d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                         </svg>
                     </div>
-                    <span class="whitespace-nowrap sidebar-label pr-3" :class="sidebarOpen ? 'opacity-100' : 'opacity-0'">Về Control Panel</span>
+                    <span class="whitespace-nowrap sidebar-label pr-3"
+                        :class="sidebarOpen ? 'opacity-100' : 'opacity-0'">Về Control Panel</span>
                 </div>
                 <div class="flex items-center rounded-xl py-1 mt-1">
                     <div class="w-12 flex items-center justify-center shrink-0">
-                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center overflow-hidden shrink-0 ring-2 ring-dark-700">
+                        <div
+                            class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center overflow-hidden shrink-0 ring-2 ring-dark-700">
                             @if (Auth::user()->avatar)
-                                <img src="{{ Auth::user()->avatar }}" alt="" class="w-full h-full object-cover">
+                                <img src="{{ Auth::user()->avatar }}" alt=""
+                                    class="w-full h-full object-cover">
                             @else
-                                <span class="text-xs font-bold text-white">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</span>
+                                <span
+                                    class="text-xs font-bold text-white">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</span>
                             @endif
                         </div>
                     </div>
                     <div class="min-w-0 pr-3 sidebar-label" :class="sidebarOpen ? 'opacity-100' : 'opacity-0'">
-                        <p class="text-xs font-medium text-white truncate whitespace-nowrap">{{ Auth::user()->name }}</p>
-                        <p class="text-xs font-medium text-gray-400 truncate whitespace-nowrap">{{ Auth::user()->role->label() }}</p>
+                        <p class="text-xs font-medium text-white truncate whitespace-nowrap">{{ Auth::user()->name }}
+                        </p>
+                        <p class="text-xs font-medium text-gray-400 truncate whitespace-nowrap">
+                            {{ Auth::user()->role->label() }}</p>
                     </div>
                 </div>
             </div>

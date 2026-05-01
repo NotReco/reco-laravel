@@ -45,7 +45,7 @@ return [
 
     ],
 
-    'definitions' => Html5Definition::class,
+    'definitions' => \App\Purify\Html5Definition::class,
 
     'css-definitions' => null,
 
