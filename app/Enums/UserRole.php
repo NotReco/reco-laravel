@@ -17,8 +17,8 @@ enum UserRole: string
         return match ($this) {
             self::USER => 'Người dùng',
             self::TESTER => 'Tester',
-            self::MODERATOR => 'Quản trị viên',
-            self::ADMIN => 'Admin',
+            self::MODERATOR => 'Kiểm duyệt viên',
+            self::ADMIN => 'Quản trị viên',
         };
     }
 
@@ -30,7 +30,7 @@ enum UserRole: string
         return match ($this) {
             self::USER => 'gray',
             self::TESTER => 'blue',
-            self::MODERATOR => 'yellow',
+            self::MODERATOR => 'amber',
             self::ADMIN => 'red',
         };
     }

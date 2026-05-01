@@ -9,8 +9,8 @@
 @else
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         @foreach ($articles as $article)
-            <a href="{{ route('news.show', $article) }}"
-                class="group bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-lg hover:shadow-gray-200/60 hover:border-gray-300 transition-all duration-300">
+            <div class="relative group bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-lg hover:shadow-gray-200/60 hover:border-gray-300 transition-all duration-300 flex flex-col">
+                <a href="{{ route('news.show', $article) }}" class="absolute inset-0 z-10" aria-label="{{ $article->title }}"></a>
 
                 {{-- Thumbnail --}}
                 <div class="aspect-[16/9] bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
@@ -50,7 +50,7 @@
 
                     {{-- Title --}}
                     <h2
-                        class="text-lg font-bold text-gray-900 line-clamp-2 group-hover:text-rose-600 transition-colors leading-snug">
+                        class="text-lg font-bold text-gray-900 line-clamp-2 group-hover:text-sky-600 transition-colors leading-snug">
                         {{ $article->title }}
                     </h2>
 
@@ -61,14 +61,33 @@
 
                     {{-- Meta --}}
                     <div class="mt-4 flex items-center gap-2 text-xs text-gray-400">
-                        <span class="font-medium text-gray-600">{{ $article->user->name ?? 'Ẩn danh' }}</span>
+                        @if($article->user)
+                            <a href="{{ route('profile.show', $article->user->slug) }}" class="relative z-20 group/author flex items-center gap-1.5 transition-colors" title="Xem hồ sơ">
+                                <div class="relative group w-5 h-5 shrink-0">
+                                    <div class="w-full h-full rounded-full flex items-center justify-center overflow-hidden transition-all duration-300 {{ $article->user->activeFrame ? 'scale-[1.0475]' : 'bg-sky-100 text-sky-600 font-bold text-[10px]' }}">
+                                        @if($article->user->avatar)
+                                            <img src="{{ $article->user->avatar }}" alt="{{ $article->user->name }}" class="w-full h-full object-cover shadow-sm">
+                                        @else
+                                            {{ strtoupper(substr($article->user->name, 0, 1)) }}
+                                        @endif
+                                    </div>
+                                    @if($article->user->activeFrame)
+                                        <img src="{{ Storage::url($article->user->activeFrame->image_path) }}" alt="" 
+                                             class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[126%] h-[126%] max-w-none object-contain pointer-events-none z-10 transition-all duration-300">
+                                    @endif
+                                </div>
+                                <span class="font-medium text-gray-600 group-hover/author:text-sky-600">{{ $article->user->name }}</span>
+                            </a>
+                        @else
+                            <span class="font-medium text-gray-600">Ẩn danh</span>
+                        @endif
                         <span>-</span>
                         <span>{{ $article->published_at?->format('d/m/Y') }}</span>
                         <span>-</span>
                         <span>{{ $article->published_at?->format('H:i') }}</span>
                     </div>
                 </div>
-            </a>
+            </div>
         @endforeach
     </div>
 

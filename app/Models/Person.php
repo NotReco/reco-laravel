@@ -20,18 +20,49 @@ class Person extends Model
         'name',
         'photo',
         'bio',
+        'biography',
         'date_of_birth',
         'date_of_death',
         'nationality',
         'known_for',
+        'gender',
+        'place_of_birth',
+        'also_known_as',
+        'homepage',
+        'imdb_id',
+        'instagram_id',
+        'twitter_id',
     ];
 
     protected function casts(): array
     {
         return [
-            'date_of_birth' => 'date',
-            'date_of_death' => 'date',
+            'date_of_birth'  => 'date',
+            'date_of_death'  => 'date',
+            'also_known_as'  => 'array',
+            'gender'         => 'integer',
         ];
+    }
+
+    /**
+     * Trả về tiểu sử (ưu tiên biography mới, fallback sang bio cũ)
+     */
+    public function getBioTextAttribute(): string
+    {
+        return $this->biography ?? $this->bio ?? '';
+    }
+
+    /**
+     * Nhãn giới tính bằng tiếng Việt
+     */
+    public function getGenderLabelAttribute(): string
+    {
+        return match ($this->gender) {
+            1 => 'Nữ',
+            2 => 'Nam',
+            3 => 'Phi nhị giới',
+            default => '',
+        };
     }
 
     public function movies()

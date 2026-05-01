@@ -67,7 +67,8 @@ trait HasSlug
         }
 
         // Kiểm tra trùng lặp (bỏ qua bản ghi hiện tại nếu đang update)
-        $query = static::withTrashed()->where('slug', $slug);
+        $query = method_exists(static::class, 'withTrashed') ? static::withTrashed() : static::query();
+        $query->where('slug', $slug);
         if ($this->exists) {
             $query->where('id', '!=', $this->id);
         }
@@ -77,7 +78,7 @@ trait HasSlug
         }
 
         // Tìm hậu tố lớn nhất đã tồn tại
-        $count = static::withTrashed()
+        $count = (method_exists(static::class, 'withTrashed') ? static::withTrashed() : static::query())
             ->where('slug', 'LIKE', $slug . '-%')
             ->orWhere('slug', $slug)
             ->count();

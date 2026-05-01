@@ -4,7 +4,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
         <div class="mb-10 lg:mb-12 border-b border-gray-200 pb-6">
             <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Chính Sách Bảo Mật</h1>
-            <p class="text-[13px] text-gray-500">Ngày có hiệu lực: 05/03/2026</p>
+            <p class="text-[13px] text-gray-500">Ngày có hiệu lực: 01/04/2026</p>
         </div>
 
         <div class="flex flex-col lg:flex-row gap-8 lg:gap-16">
@@ -48,8 +48,9 @@
                             </li>
                             <li class="pl-2">
                                 <span class="font-semibold text-gray-900">Dữ liệu tương tác:</span>
-                                Nội dung các bài đánh giá (review), xếp hạng (rating) phim, bình luận và danh sách phim
-                                yêu thích mà bạn tạo ra trên trang web.
+                                Nội dung các bài đánh giá (review), xếp hạng (rating) phim, danh sách phim yêu thích,
+                                cũng như các bình luận của bạn tại mục tin tức và toàn bộ nội dung bạn tạo/thảo luận
+                                trong khu vực diễn đàn của RecoDB.
                             </li>
                             <li class="pl-2">
                                 <span class="font-semibold text-gray-900">Dữ liệu hệ thống tự động:</span>
@@ -86,7 +87,9 @@
                         <ul class="list-disc pl-6 space-y-3">
                             <li class="pl-2">Bạn có thể xem, chỉnh sửa hoặc cập nhật thông tin cá nhân trong phần Cài
                                 đặt tài khoản.</li>
-                            <li class="pl-2">Bạn có quyền tự xóa các bài review, xếp hạng của mình bất kỳ lúc nào.
+                            <li class="pl-2">Bạn có quyền tự xóa hoặc chỉnh sửa các bài review, xếp hạng, cũng như các
+                                bình luận tin tức và bài đăng trên diễn đàn của mình bất kỳ lúc nào thông qua các công
+                                cụ được cung cấp trên giao diện.
                             </li>
                             <li class="pl-2">Nếu muốn xóa hoàn toàn tài khoản và toàn bộ dữ liệu liên quan, bạn có thể
                                 thực hiện thông qua trang Cài đặt hoặc liên hệ trực tiếp với ban quản trị.</li>

@@ -10,16 +10,23 @@ class NotificationController extends Controller
     /**
      * Lấy danh sách thông báo qua API (dùng cho dropdown).
      */
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
+        $query = $user->notifications();
         
-        $notifications = $user->notifications()->take(10)->get()->map(function ($notification) {
+        if ($request->query('filter') === 'unread') {
+            $query->whereNull('read_at');
+        }
+
+        $notifications = $query->take(30)->get()->map(function ($notification) {
             return [
                 'id' => $notification->id,
+                'type' => $notification->type,
                 'data' => $notification->data, // [message => '', url => '']
                 'read_at' => $notification->read_at,
                 'created_at' => $notification->created_at->diffForHumans(),
+                'is_new' => $notification->created_at >= now()->subDay(),
             ];
         });
 
@@ -29,12 +36,15 @@ class NotificationController extends Controller
         ]);
     }
 
-    /**
-     * Xem tất cả thông báo (Trang riêng)
-     */
-    public function all()
+    public function all(Request $request)
     {
-        $notifications = Auth::user()->notifications()->paginate(15);
+        $query = Auth::user()->notifications();
+        
+        if ($request->query('filter') === 'unread') {
+            $query->whereNull('read_at');
+        }
+        
+        $notifications = $query->paginate(15);
         
         return view('profile.notifications', compact('notifications'));
     }
@@ -52,6 +62,104 @@ class NotificationController extends Controller
         }
 
         return response()->json(['success' => false], 404);
+    }
+
+    /**
+     * Đánh dấu 1 thông báo là chưa đọc.
+     */
+    public function markAsUnread(Request $request, $id)
+    {
+        $notification = Auth::user()->notifications()->where('id', $id)->first();
+        
+        if ($notification) {
+            $notification->markAsUnread();
+            return response()->json(['success' => true]);
+        }
+
+        return response()->json(['success' => false], 404);
+    }
+
+    /**
+     * Xóa 1 thông báo.
+     */
+    public function destroy(Request $request, $id)
+    {
+        $notification = Auth::user()->notifications()->where('id', $id)->first();
+        
+        if ($notification) {
+            $notification->delete();
+            return response()->json(['success' => true]);
+        }
+
+        return response()->json(['success' => false], 404);
+    }
+
+    /**
+     * Tắt nhận loại thông báo này.
+     */
+    public function turnOff(Request $request, $id)
+    {
+        $user = Auth::user();
+        $notification = $user->notifications()->where('id', $id)->first();
+        
+        if ($notification) {
+            $type = $notification->type;
+            
+            $prefs = $user->notification_preferences ?? [];
+            if (!isset($prefs['disabled_types'])) {
+                $prefs['disabled_types'] = [];
+            }
+            
+            if (!in_array($type, $prefs['disabled_types'])) {
+                $prefs['disabled_types'][] = $type;
+                $user->notification_preferences = $prefs;
+                $user->save();
+            }
+            
+            return response()->json(['success' => true, 'type' => $type]);
+        }
+
+        return response()->json(['success' => false], 404);
+    }
+    
+    /**
+     * Bật lại một loại thông báo.
+     */
+    public function turnOn(Request $request)
+    {
+        $request->validate([
+            'type' => 'required|string'
+        ]);
+        
+        $type = $request->input('type');
+        $user = Auth::user();
+        
+        $prefs = $user->notification_preferences ?? [];
+        if (isset($prefs['disabled_types'])) {
+            $prefs['disabled_types'] = array_values(array_filter($prefs['disabled_types'], function($t) use ($type) {
+                return $t !== $type;
+            }));
+            $user->notification_preferences = $prefs;
+            $user->save();
+        }
+        
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * Cập nhật danh sách các loại thông báo bị tắt (form-based).
+     */
+    public function updatePreferences(Request $request)
+    {
+        $user = Auth::user();
+        $disabledTypes = $request->input('disabled_types', []);
+        
+        $prefs = $user->notification_preferences ?? [];
+        $prefs['disabled_types'] = array_values(array_filter($disabledTypes));
+        $user->notification_preferences = $prefs;
+        $user->save();
+
+        return redirect()->route('settings.index')->with('success', 'Đã cập nhật tùy chọn thông báo.');
     }
 
     /**

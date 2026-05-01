@@ -16,14 +16,16 @@ class ProfileController extends Controller
     /**
      * Display the specified user's public profile.
      */
-    public function show($id)
+    public function show(User $user)
     {
-        $user = User::withCount(['followers', 'following', 'reviews'])
-            ->with([
+        $user->loadCount(['followers', 'following', 'reviews'])
+            ->load([
                 'favorites' => fn($q) => $q->latest()->take(6),
-                'reviews' => fn($q) => $q->with('movie')->latest()->take(5)
-            ])
-            ->findOrFail($id);
+                'reviews' => fn($q) => $q->with('movie')->latest()->take(5),
+                'activeTitle',
+                'activeFrame',
+                'topMovies' => fn($q) => $q->orderBy('user_top_movies.order'),
+            ]);
 
         $isOwnProfile = Auth::check() && Auth::id() === $user->id;
         /** @var \App\Models\User|null $authUser */
@@ -44,12 +46,29 @@ class ProfileController extends Controller
     }
 
     /**
+     * Display the specified user's favorite movies.
+     */
+    public function favorites(User $user)
+    {
+        $favorites = $user->favorites()->latest()->paginate(24);
+        
+        $isOwnProfile = Auth::check() && Auth::id() === $user->id;
+        
+        return view('profile.favorites', compact('user', 'favorites', 'isOwnProfile'));
+    }
+
+
+
+    /**
      * Display the user's profile form.
      */
     public function edit(Request $request): View
     {
+        $user = $request->user();
+        $user->load(['titles', 'frames', 'topMovies' => fn($q) => $q->orderBy('user_top_movies.order')]);
+
         return view('profile.edit', [
-            'user' => $request->user(),
+            'user' => $user,
         ]);
     }
 
@@ -66,6 +85,11 @@ class ProfileController extends Controller
             }
             $path = $request->file('avatar')->store('avatars', 'public');
             $data['avatar'] = '/storage/' . $path;
+        } elseif ($request->boolean('remove_avatar')) {
+            if ($request->user()->avatar && !str_starts_with($request->user()->avatar, 'http')) {
+                Storage::disk('public')->delete(str_replace('/storage/', '', $request->user()->avatar));
+            }
+            $data['avatar'] = null;
         }
 
         if ($request->hasFile('cover_photo')) {
@@ -74,6 +98,11 @@ class ProfileController extends Controller
             }
             $path = $request->file('cover_photo')->store('covers', 'public');
             $data['cover_photo'] = '/storage/' . $path;
+        } elseif ($request->boolean('remove_cover')) {
+            if ($request->user()->cover_photo && !str_starts_with($request->user()->cover_photo, 'http')) {
+                Storage::disk('public')->delete(str_replace('/storage/', '', $request->user()->cover_photo));
+            }
+            $data['cover_photo'] = null;
         }
 
         $request->user()->fill($data);
@@ -83,6 +112,23 @@ class ProfileController extends Controller
         }
 
         $request->user()->save();
+
+        // Sync Top 4 Movies
+        if ($request->has('top_movies')) {
+            $syncData = [];
+            foreach ($request->top_movies as $index => $movieId) {
+                if ($movieId) {
+                    $syncData[$movieId] = ['order' => $index + 1];
+                }
+            }
+            $request->user()->topMovies()->sync($syncData);
+        } else {
+            // Nếu không gửi top_movies, có thể người dùng đã clear (trống array)
+            // Hoặc form không chứa, cần check
+            if ($request->exists('top_movies_submitted')) {
+                $request->user()->topMovies()->sync([]);
+            }
+        }
 
         return Redirect::route('profile.edit')->with('success', 'Hồ sơ đã được cập nhật.');
     }

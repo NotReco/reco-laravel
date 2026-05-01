@@ -14,7 +14,7 @@ class ArticleController extends Controller
     public function index(Request $request)
     {
         $query = Article::published()
-            ->with(['user', 'tags'])
+            ->with(['user.activeFrame', 'tags'])
             ->withCount('comments')
             ->orderByDesc('published_at');
 
@@ -55,14 +55,14 @@ class ArticleController extends Controller
         // Tăng lượt xem
         $article->increment('views_count');
 
-        $article->load(['user', 'tags', 'comments' => function ($q) {
+        $article->load(['user.activeFrame', 'tags', 'comments' => function ($q) {
             $q->whereNull('parent_id')
               ->with([
-                  'user',
+                  'user.activeFrame',
                   'likes',
-                  'replies.user',
+                  'replies.user.activeFrame',
                   'replies.likes',
-                  'replies.replies.user',
+                  'replies.replies.user.activeFrame',
                   'replies.replies.likes',
               ])
               ->orderByDesc('created_at');

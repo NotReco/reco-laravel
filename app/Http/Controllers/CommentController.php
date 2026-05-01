@@ -27,6 +27,17 @@ class CommentController extends Controller
             'content' => $request->input('content'),
         ]);
 
+        Auth::user()->increment('reputation_score', 1);
+
+        if ($request->wantsJson()) {
+            $comment->load(['user.activeFrame', 'review.comments.user']);
+            $html = view('components.reviews.comment-item', ['comment' => $comment, 'review' => $comment->review])->render();
+            return response()->json([
+                'success' => true,
+                'html' => $html
+            ]);
+        }
+
         return back()->with('success', 'Bình luận của bạn đã được đăng thành công.');
     }
 
@@ -63,6 +74,36 @@ class CommentController extends Controller
         // Parent comment will cascade delete its children due to database constraint
         $comment->delete();
 
+        if (request()->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
+
         return back()->with('success', 'Đã xóa bình luận.');
+    }
+
+    /**
+     * Toggle like for the comment.
+     */
+    public function toggleLike(Comment $comment)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
+
+        $like = $comment->likes()->where('user_id', $user->id)->first();
+
+        if ($like) {
+            $like->delete();
+            $isLiked = false;
+        } else {
+            $comment->likes()->create(['user_id' => $user->id]);
+            $isLiked = true;
+        }
+
+        return response()->json([
+            'isLiked' => $isLiked,
+            'likesCount' => $comment->likes()->count(),
+        ]);
     }
 }

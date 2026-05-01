@@ -3,25 +3,21 @@
         <!-- Responsive simple links for mobile -->
         <div class="flex justify-between flex-1 sm:hidden">
             @if ($paginator->onFirstPage())
-                <span
-                    class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-400 bg-gray-50 border border-gray-200 cursor-default leading-5 rounded-xl">
+                <span class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-dark-600 bg-dark-900/50 border border-dark-800 cursor-default leading-5 rounded-xl">
                     &laquo; Trước
                 </span>
             @else
-                <a href="{{ $paginator->previousPageUrl() }}"
-                    class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 leading-5 rounded-xl hover:text-gray-900 hover:bg-gray-50 focus:outline-none transition ease-in-out duration-150">
+                <a href="{{ $paginator->previousPageUrl() }}" class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-dark-300 bg-dark-800 border border-dark-700 leading-5 rounded-xl hover:text-white hover:bg-dark-700 hover:z-10 focus:outline-none transition ease-in-out duration-150">
                     &laquo; Trước
                 </a>
             @endif
 
             @if ($paginator->hasMorePages())
-                <a href="{{ $paginator->nextPageUrl() }}"
-                    class="relative inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-gray-700 bg-white border border-gray-200 leading-5 rounded-xl hover:text-gray-900 hover:bg-gray-50 focus:outline-none transition ease-in-out duration-150">
+                <a href="{{ $paginator->nextPageUrl() }}" class="relative inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-dark-300 bg-dark-800 border border-dark-700 leading-5 rounded-xl hover:text-white hover:bg-dark-700 hover:z-10 focus:outline-none transition ease-in-out duration-150">
                     Sau &raquo;
                 </a>
             @else
-                <span
-                    class="relative inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-gray-400 bg-gray-50 border border-gray-200 cursor-default leading-5 rounded-xl">
+                <span class="relative inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-dark-600 bg-dark-900/50 border border-dark-800 cursor-default leading-5 rounded-xl">
                     Sau &raquo;
                 </span>
             @endif
@@ -30,43 +26,29 @@
         <!-- Full pagination for desktop -->
         <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-center">
             <div>
-                <span class="inline-flex gap-1">
+                <span class="inline-flex gap-1.5">
                     {{-- First Page Link --}}
                     @if ($paginator->onFirstPage())
-                        <span aria-disabled="true" aria-label="First">
-                            <span
-                                class="relative flex items-center justify-center w-auto px-3 h-10 text-sm font-medium text-gray-400 bg-gray-50 border border-gray-200 cursor-default rounded-xl leading-5"
-                                aria-hidden="true">
-                                &lt;&lt;
-                            </span>
+                        <span aria-disabled="true" aria-label="First" class="relative flex items-center justify-center w-auto px-3 h-10 text-sm font-medium text-dark-600 bg-dark-900/50 border border-dark-800 cursor-default rounded-xl leading-5">
+                            &lt;&lt;
                         </span>
                     @else
-                        <a href="{{ $paginator->url(1) }}" rel="first"
-                            class="relative flex items-center justify-center w-auto px-3 h-10 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl leading-5 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-200 focus:z-10 focus:outline-none transition ease-in-out duration-200 shadow-sm"
-                            aria-label="First">
+                        <a href="{{ $paginator->url(1) }}" rel="first" aria-label="First" class="relative flex items-center justify-center w-auto px-3 h-10 text-sm font-medium text-dark-300 bg-dark-800 border border-dark-700 rounded-xl leading-5 hover:text-sky-400 hover:bg-dark-700 hover:border-sky-500/50 hover:z-10 focus:z-10 focus:outline-none transition ease-in-out duration-200 shadow-sm">
                             &lt;&lt;
                         </a>
                     @endif
 
                     {{-- Previous Page Link --}}
                     @if ($paginator->onFirstPage())
-                        <span aria-disabled="true" aria-label="Previous">
-                            <span
-                                class="relative flex items-center justify-center w-10 h-10 text-sm font-medium text-gray-400 bg-gray-50 border border-gray-200 cursor-default rounded-xl leading-5"
-                                aria-hidden="true">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M15 19l-7-7 7-7" />
-                                </svg>
-                            </span>
+                        <span aria-disabled="true" aria-label="Previous" class="relative flex items-center justify-center w-10 h-10 text-sm font-medium text-dark-600 bg-dark-900/50 border border-dark-800 cursor-default rounded-xl leading-5">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                            </svg>
                         </span>
                     @else
-                        <a href="{{ $paginator->previousPageUrl() }}" rel="prev"
-                            class="relative flex items-center justify-center w-10 h-10 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl leading-5 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-200 focus:z-10 focus:outline-none transition ease-in-out duration-200 shadow-sm"
-                            aria-label="Previous">
+                        <a href="{{ $paginator->previousPageUrl() }}" rel="prev" aria-label="Previous" class="relative flex items-center justify-center w-10 h-10 text-sm font-medium text-dark-300 bg-dark-800 border border-dark-700 rounded-xl leading-5 hover:text-sky-400 hover:bg-dark-700 hover:border-sky-500/50 hover:z-10 focus:z-10 focus:outline-none transition ease-in-out duration-200 shadow-sm">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 19l-7-7 7-7" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                             </svg>
                         </a>
                     @endif
@@ -75,9 +57,8 @@
                     @foreach ($elements as $element)
                         {{-- "Three Dots" Separator --}}
                         @if (is_string($element))
-                            <span aria-disabled="true">
-                                <span
-                                    class="relative flex items-center justify-center w-10 h-10 text-sm font-medium text-gray-500 cursor-default leading-5">{{ $element }}</span>
+                            <span aria-disabled="true" class="relative flex items-center justify-center w-10 h-10 text-sm font-medium text-dark-500 cursor-default leading-5">
+                                {{ $element }}
                             </span>
                         @endif
 
@@ -85,14 +66,11 @@
                         @if (is_array($element))
                             @foreach ($element as $page => $url)
                                 @if ($page == $paginator->currentPage())
-                                    <span aria-current="page">
-                                        <span
-                                            class="relative flex items-center justify-center w-10 h-10 text-sm font-bold text-white bg-rose-600 border border-rose-600 cursor-default leading-5 rounded-xl shadow-md shadow-rose-600/30">{{ $page }}</span>
+                                    <span aria-current="page" class="relative z-20 flex items-center justify-center w-10 h-10 text-sm font-bold text-white bg-sky-600 border border-sky-500 cursor-default leading-5 rounded-xl shadow-[0_0_15px_rgba(2,132,199,0.5)]">
+                                        {{ $page }}
                                     </span>
                                 @else
-                                    <a href="{{ $url }}"
-                                        class="relative flex items-center justify-center w-10 h-10 text-sm font-medium text-gray-700 bg-white border border-gray-200 leading-5 rounded-xl hover:text-rose-600 hover:bg-rose-50 hover:border-rose-200 focus:z-10 focus:outline-none transition ease-in-out duration-200 shadow-sm"
-                                        aria-label="{{ __('Go to page :page', ['page' => $page]) }}">
+                                    <a href="{{ $url }}" aria-label="{{ __('Go to page :page', ['page' => $page]) }}" class="relative flex items-center justify-center w-10 h-10 text-sm font-medium text-dark-300 bg-dark-800 border border-dark-700 leading-5 rounded-xl hover:text-sky-400 hover:bg-dark-700 hover:border-sky-500/50 hover:z-10 focus:z-10 focus:outline-none transition ease-in-out duration-200 shadow-sm">
                                         {{ $page }}
                                     </a>
                                 @endif
@@ -102,38 +80,25 @@
 
                     {{-- Next Page Link --}}
                     @if ($paginator->hasMorePages())
-                        <a href="{{ $paginator->nextPageUrl() }}" rel="next"
-                            class="relative flex items-center justify-center w-10 h-10 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl leading-5 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-200 focus:z-10 focus:outline-none transition ease-in-out duration-200 shadow-sm"
-                            aria-label="Next">
+                        <a href="{{ $paginator->nextPageUrl() }}" rel="next" aria-label="Next" class="relative flex items-center justify-center w-10 h-10 text-sm font-medium text-dark-300 bg-dark-800 border border-dark-700 rounded-xl leading-5 hover:text-sky-400 hover:bg-dark-700 hover:border-sky-500/50 hover:z-10 focus:z-10 focus:outline-none transition ease-in-out duration-200 shadow-sm">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 5l7 7-7 7" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                             </svg>
                         </a>
                         {{-- Last Page Link --}}
-                        <a href="{{ $paginator->url($paginator->lastPage()) }}" rel="last"
-                            class="relative flex items-center justify-center w-auto px-3 h-10 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl leading-5 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-200 focus:z-10 focus:outline-none transition ease-in-out duration-200 shadow-sm"
-                            aria-label="Last">
+                        <a href="{{ $paginator->url($paginator->lastPage()) }}" rel="last" aria-label="Last" class="relative flex items-center justify-center w-auto px-3 h-10 text-sm font-medium text-dark-300 bg-dark-800 border border-dark-700 rounded-xl leading-5 hover:text-sky-400 hover:bg-dark-700 hover:border-sky-500/50 hover:z-10 focus:z-10 focus:outline-none transition ease-in-out duration-200 shadow-sm">
                             &gt;&gt;
                         </a>
                     @else
-                        <span aria-disabled="true" aria-label="Next">
-                            <span
-                                class="relative flex items-center justify-center w-10 h-10 text-sm font-medium text-gray-400 bg-gray-50 border border-gray-200 cursor-default rounded-xl leading-5"
-                                aria-hidden="true">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M9 5l7 7-7 7" />
-                                </svg>
-                            </span>
+                        <span aria-disabled="true" aria-label="Next" class="relative flex items-center justify-center w-10 h-10 text-sm font-medium text-dark-600 bg-dark-900/50 border border-dark-800 cursor-default rounded-xl leading-5">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
                         </span>
                         {{-- Last Page Link --}}
-                        <span aria-disabled="true" aria-label="Last">
-                            <span
-                                class="relative flex items-center justify-center w-auto px-3 h-10 text-sm font-medium text-gray-400 bg-gray-50 border border-gray-200 cursor-default rounded-xl leading-5"
-                                aria-hidden="true">
-                                &gt;&gt;
-                            </span>
+                        <span aria-disabled="true" aria-label="Last" class="relative flex items-center justify-center w-auto px-3 h-10 text-sm font-medium text-dark-600 bg-dark-900/50 border border-dark-800 cursor-default rounded-xl leading-5">
+                            &gt;&gt;
+                        </span>
                     @endif
                 </span>
             </div>

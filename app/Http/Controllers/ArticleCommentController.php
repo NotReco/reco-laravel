@@ -7,6 +7,7 @@ use App\Notifications\ArticleCommentMentioned;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class ArticleCommentController extends Controller
 {
@@ -51,7 +52,9 @@ class ArticleCommentController extends Controller
             'content'    => $request->input('content'),
         ]);
 
-        $comment->load(['user', 'article']);
+        Auth::user()->increment('reputation_score', 1);
+
+        $comment->load(['user', 'user.activeFrame', 'article', 'parent']);
 
         // Xử lý gửi thông báo khi có @tên (mention)
         $content = $comment->content;
@@ -96,14 +99,20 @@ class ArticleCommentController extends Controller
                 'success' => true,
                 'comment' => [
                     'id'         => $comment->id,
+                    'uuid'       => $comment->uuid,
                     'content'    => $comment->content,
                     'parent_id'  => $comment->parent_id,
+                    'parent_uuid' => $comment->parent ? $comment->parent->uuid : null,
                     'created_at' => $comment->created_at->diffForHumans(),
                     'user'       => [
                         'id'     => $comment->user->id,
                         'name'   => $comment->user->name,
                         'avatar' => $comment->user->avatar,
                         'initial' => strtoupper(substr($comment->user->name, 0, 1)),
+                        'slug'   => $comment->user->slug,
+                        'active_frame' => $comment->user->activeFrame ? [
+                            'image_path' => Storage::url($comment->user->activeFrame->image_path),
+                        ] : null,
                     ],
                 ],
             ]);
@@ -113,15 +122,42 @@ class ArticleCommentController extends Controller
     }
 
     /**
-     * Xóa bình luận (chỉ staff: admin/mod).
+     * Cập nhật bình luận (chủ bình luận).
+     */
+    public function update(Request $request, ArticleComment $comment)
+    {
+        if ($comment->user_id !== Auth::id()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Bạn không có quyền sửa bình luận này.',
+            ], 403);
+        }
+
+        $request->validate([
+            'content' => ['required', 'string', 'max:1000'],
+        ]);
+
+        $comment->update([
+            'content' => $request->input('content'),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Đã cập nhật bình luận.',
+            'content' => $comment->content,
+        ]);
+    }
+
+    /**
+     * Xóa bình luận (chủ bình luận hoặc staff).
      */
     public function destroy(ArticleComment $comment)
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
 
-        if (!$user->isStaff()) {
-            abort(403, 'Chỉ quản trị viên mới có thể xóa bình luận.');
+        if ($comment->user_id !== $user->id && !$user->isStaff()) {
+            abort(403, 'Bạn không có quyền xóa bình luận này.');
         }
 
         $comment->delete();
@@ -166,6 +202,8 @@ class ArticleCommentController extends Controller
     {
         $request->validate([
             'reason' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string', 'max:1000'],
+            'is_public' => ['boolean'],
         ]);
 
         // Kiểm tra user đã báo cáo comment này chưa
@@ -180,6 +218,8 @@ class ArticleCommentController extends Controller
         $comment->reports()->create([
             'user_id' => Auth::id(),
             'reason' => $request->input('reason'),
+            'description' => $request->input('description'),
+            'is_public' => $request->boolean('is_public'),
         ]);
 
         if ($request->wantsJson() || $request->ajax()) {

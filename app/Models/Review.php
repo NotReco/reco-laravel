@@ -17,6 +17,7 @@ class Review extends Model
     protected $fillable = [
         'user_id',
         'movie_id',
+        'tv_show_id',
         'title',
         'thumbnail',
         'excerpt',
@@ -51,6 +52,19 @@ class Review extends Model
         return $this->belongsTo(Movie::class);
     }
 
+    public function tvShow()
+    {
+        return $this->belongsTo(TvShow::class);
+    }
+
+    /**
+     * Trả về model phim/series được đánh giá.
+     */
+    public function reviewable()
+    {
+        return $this->movie ?? $this->tvShow;
+    }
+
     public function comments()
     {
         return $this->hasMany(Comment::class);
@@ -83,9 +97,9 @@ class Review extends Model
         return $query->where('status', 'published');
     }
 
-    public function scopePending($query)
+    public function scopeHidden($query)
     {
-        return $query->where('status', 'pending');
+        return $query->where('status', 'hidden');
     }
 
     public function scopeQuickRating($query)
@@ -99,10 +113,42 @@ class Review extends Model
     }
 
     /**
+     * Chỉ hiển thị review chưa bị ẩn.
+     */
+    public function scopeVisible($query)
+    {
+        return $query->where('status', 'published');
+    }
+
+    /**
      * Kiểm tra đây là chấm điểm nhanh (không có bài viết) hay review đầy đủ.
      */
     public function isQuickRating(): bool
     {
         return is_null($this->content);
+    }
+
+    /**
+     * Kiểm tra review có đang bị ẩn không.
+     */
+    public function isHidden(): bool
+    {
+        return $this->status === 'hidden';
+    }
+
+    /**
+     * Số lượt báo cáo đang chờ xử lý.
+     */
+    public function pendingReportsCount(): int
+    {
+        return $this->reports()->where('status', 'pending')->count();
+    }
+
+    /**
+     * Polymorphic relation for reports.
+     */
+    public function reports()
+    {
+        return $this->morphMany(Report::class, 'reportable');
     }
 }

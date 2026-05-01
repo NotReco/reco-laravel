@@ -4,29 +4,50 @@
 
 
 @layer base {
-    body {
-        @apply bg-dark-950 text-dark-100;
+    [x-cloak] {
+        display: none !important;
     }
 
+    body {
+        @apply bg-gray-50 text-gray-900;
+    }
 
     ::-webkit-scrollbar {
-        width: 8px;
+        width: 10px;
+        height: 10px;
     }
 
     ::-webkit-scrollbar-track {
-        @apply bg-dark-900;
+        @apply bg-transparent;
     }
 
     ::-webkit-scrollbar-thumb {
-        @apply bg-dark-600 rounded-full;
+        @apply bg-gray-300/80 rounded-full border-[3px] border-solid border-white bg-clip-padding;
     }
 
     ::-webkit-scrollbar-thumb:hover {
-        @apply bg-dark-500;
+        @apply bg-gray-400;
+    }
+
+    /* Admin Panel Dark Scrollbar */
+    html.admin-panel::-webkit-scrollbar-track,
+    html.admin-panel ::-webkit-scrollbar-track {
+        @apply bg-transparent;
+    }
+
+    html.admin-panel::-webkit-scrollbar-thumb,
+    html.admin-panel ::-webkit-scrollbar-thumb {
+        @apply bg-dark-700/80 border-dark-950;
+    }
+
+    html.admin-panel::-webkit-scrollbar-thumb:hover,
+    html.admin-panel ::-webkit-scrollbar-thumb:hover {
+        @apply bg-dark-600;
     }
 }
 
 @layer components {
+
     /* ── Buttons ── */
     .btn-primary {
         @apply inline-flex items-center justify-center px-6 py-3 bg-accent-500 text-white font-semibold rounded-xl hover:bg-accent-600 focus:outline-none focus:ring-2 focus:ring-accent-500 focus:ring-offset-2 focus:ring-offset-dark-900 transition-all duration-200 ease-out;
@@ -36,8 +57,12 @@
         @apply inline-flex items-center justify-center px-6 py-3 bg-dark-700 text-dark-100 font-semibold rounded-xl border border-dark-600 hover:bg-dark-600 hover:border-dark-500 focus:outline-none focus:ring-2 focus:ring-dark-500 focus:ring-offset-2 focus:ring-offset-dark-900 transition-all duration-200 ease-out;
     }
 
-    .btn-rose {
-        @apply inline-flex items-center justify-center px-6 py-3 bg-rose-600 text-white font-semibold rounded-xl hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 focus:ring-offset-dark-900 transition-all duration-200 ease-out shadow-lg shadow-rose-600/25;
+    .btn-sky {
+        @apply inline-flex items-center justify-center px-6 py-3 bg-sky-600 text-white font-semibold rounded-xl hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-dark-900 transition-all duration-200 ease-out shadow-lg shadow-sky-600/25;
+    }
+
+    .btn-danger {
+        @apply inline-flex items-center justify-center px-6 py-3 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-dark-900 transition-all duration-200 ease-out shadow-lg shadow-red-600/25;
     }
 
     .btn-ghost {
@@ -50,7 +75,7 @@
     }
 
     .card-hover {
-        @apply card hover:border-rose-500/30 transition-all duration-300;
+        @apply card hover:border-sky-500/30 transition-all duration-300;
     }
 
     /* ── Inputs ── */
@@ -70,32 +95,46 @@
     /* ── Rating Colors (1-10 scale) ── */
     .rating-terrible {
         color: #E63946;
-    }           /* 1-2: Rất tệ / Tệ */
+    }
+
+    /* 1-2: Rất tệ / Tệ */
     .rating-below-avg {
         color: #E63946;
-    }          /* 3-4: Dưới TB / Tạm được */
+    }
+
+    /* 3-4: Dưới TB / Tạm được */
     .rating-average {
         color: #d97b2a;
-    }            /* 5-6: Trung bình / Khá */
+    }
+
+    /* 5-6: Trung bình / Khá */
     .rating-good {
         color: #2A9D8F;
-    }               /* 7-8: Tốt / Rất tốt */
+    }
+
+    /* 7-8: Tốt / Rất tốt */
     .rating-excellent {
         color: #f5c518;
-    }          /* 9-10: Xuất sắc / Kiệt tác */
+    }
+
+    /* 9-10: Xuất sắc / Kiệt tác */
 
     .rating-bg-terrible {
         background-color: #E63946;
     }
+
     .rating-bg-below-avg {
         background-color: #E63946;
     }
+
     .rating-bg-average {
         background-color: #d97b2a;
     }
+
     .rating-bg-good {
         background-color: #2A9D8F;
     }
+
     .rating-bg-excellent {
         background-color: #f5c518;
     }
@@ -118,8 +157,8 @@
         @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold;
     }
 
-    .badge-rose {
-        @apply badge bg-rose-600 text-white;
+    .badge-sky {
+        @apply badge bg-sky-600 text-white;
     }
 
     .badge-dark {
@@ -132,7 +171,7 @@
     }
 
     .genre-pill-active {
-        @apply px-5 py-2.5 rounded-full text-sm font-medium bg-rose-600 text-white hover:bg-rose-700 transition-colors shadow-md;
+        @apply px-5 py-2.5 rounded-full text-sm font-medium bg-sky-600 text-white hover:bg-sky-700 transition-colors shadow-md;
     }
 }
 
@@ -141,8 +180,8 @@
         @apply bg-gradient-to-r from-accent-400 to-accent-600 bg-clip-text text-transparent;
     }
 
-    .text-gradient-rose {
-        @apply bg-gradient-to-r from-rose-400 to-rose-600 bg-clip-text text-transparent;
+    .text-gradient-sky {
+        @apply bg-gradient-to-r from-sky-400 to-sky-600 bg-clip-text text-transparent;
     }
 
     .animate-fade-in {
@@ -185,6 +224,21 @@
         -webkit-line-clamp: 3;
         -webkit-box-orient: vertical;
         overflow: hidden;
+    }
+
+    /* Rich article HTML (TinyMCE): ảnh/video/chú thích giữa bài */
+    .article-body figure {
+        @apply my-8 mx-0;
+    }
+
+    .article-body figcaption {
+        @apply text-center text-sm text-gray-500 mt-2 italic;
+    }
+
+    .article-body iframe {
+        @apply w-full max-w-full rounded-xl border border-gray-100;
+        aspect-ratio: 16 / 9;
+        height: auto;
     }
 }
 

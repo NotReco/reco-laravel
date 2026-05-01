@@ -29,7 +29,7 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('register') }}" class="space-y-5">
+        <form method="POST" action="{{ route('register') }}" class="space-y-5" novalidate>
             @csrf
 
             {{-- Name --}}

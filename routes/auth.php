@@ -42,6 +42,11 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
+    // ── 2FA trust device ──
+    // Keep these under `auth` (not `verified`) because the prompt can appear immediately after login/2FA.
+    Route::post('api/2fa/trust-device', [\App\Http\Controllers\SettingsController::class, 'trustTwoFactorDevice'])->name('2fa.trustDevice');
+    Route::post('api/2fa/dismiss-trust', [\App\Http\Controllers\SettingsController::class, 'dismissTwoFactorTrustPrompt'])->name('2fa.dismissTrust');
+
     Route::get('verify-email', EmailVerificationPromptController::class)
         ->name('verification.notice');
 

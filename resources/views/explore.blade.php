@@ -18,11 +18,11 @@
                         <template x-if="searchQuery">
                             <div class="mb-4">
                                 <div class="text-sm font-medium text-gray-700 mb-2">Kết quả tìm kiếm cho:</div>
-                                <div class="flex items-center justify-between bg-rose-50 border border-rose-200 text-rose-700 px-3 py-2 rounded-lg">
+                                <div class="flex items-center justify-between bg-sky-50 border border-sky-200 text-sky-700 px-3 py-2 rounded-lg">
                                     <span class="font-semibold truncate">
                                         "<span x-text="searchQuery"></span>"
                                     </span>
-                                    <button type="button" @click="clearSearchQuery()" class="text-rose-500 hover:text-rose-700 focus:outline-none ml-2 shrink-0">
+                                    <button type="button" @click="clearSearchQuery()" class="text-sky-500 hover:text-sky-700 focus:outline-none ml-2 shrink-0">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                                         </svg>
@@ -51,7 +51,7 @@
                                         <label class="block text-sm text-gray-700 font-medium mb-2">Sắp xếp kết quả
                                             theo</label>
                                         <select name="sort"
-                                            class="w-full text-sm rounded-lg border-gray-300 focus:border-rose-500 focus:ring-rose-500 shadow-sm"
+                                            class="w-full text-sm rounded-lg border-gray-300 focus:border-sky-500 focus:ring-sky-500 shadow-sm"
                                             @change="fetchResults()">
                                             <option value="popularity_desc"
                                                 {{ in_array($sort, ['popularity_desc', 'latest']) ? 'selected' : '' }}>Phổ biến nhất
@@ -99,7 +99,7 @@
                                                             value="{{ $genre->id }}" class="peer sr-only"
                                                             {{ in_array($genre->id, request('genres', [])) || request('genre') == $genre->id ? 'checked' : '' }}
                                                             @change="fetchResults()">
-                                                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-[13px] rounded-full border border-gray-200 bg-white text-gray-700 font-medium transition-all duration-200 group-hover:border-gray-300 group-hover:bg-gray-50 peer-checked:bg-rose-500 peer-checked:border-rose-500 peer-checked:text-white shadow-sm hover:shadow peer-checked:shadow-rose-200">
+                                                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-[13px] rounded-full border border-gray-200 bg-white text-gray-700 font-medium transition-all duration-200 group-hover:border-gray-300 group-hover:bg-gray-50 peer-checked:bg-sky-500 peer-checked:border-sky-500 peer-checked:text-white shadow-sm hover:shadow peer-checked:shadow-sky-200">
                                                             {{ $genre->name }}
                                                             <span class="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-gray-100 text-gray-500 transition-colors peer-checked:bg-white/20 peer-checked:text-white">
                                                                 {{ $genre->movies_count }}
@@ -119,13 +119,13 @@
                                             <div class="flex items-center gap-2">
                                                 <input type="number" name="year_from"
                                                     value="{{ request('year_from') }}" placeholder="Từ năm"
-                                                    class="w-full text-sm rounded-lg border-gray-300 focus:border-rose-500 focus:ring-rose-500 shadow-sm"
-                                                    min="1800" max="{{ date('Y') + 5 }}" @change="fetchResults()">
+                                                    class="w-full text-sm rounded-lg border-gray-300 focus:border-sky-500 focus:ring-sky-500 shadow-sm"
+                                                    min="1800" max="{{ date('Y') + 5 }}" step="1" onkeydown="if(['-','+','e','E','.'].includes(event.key)) event.preventDefault();" @change="fetchResults()">
                                                 <span class="text-gray-500">-</span>
                                                 <input type="number" name="year_to" value="{{ request('year_to') }}"
                                                     placeholder="Đến năm"
-                                                    class="w-full text-sm rounded-lg border-gray-300 focus:border-rose-500 focus:ring-rose-500 shadow-sm"
-                                                    min="1800" max="{{ date('Y') + 5 }}" @change="fetchResults()">
+                                                    class="w-full text-sm rounded-lg border-gray-300 focus:border-sky-500 focus:ring-sky-500 shadow-sm"
+                                                    min="1800" max="{{ date('Y') + 5 }}" step="1" onkeydown="if(['-','+','e','E','.'].includes(event.key)) event.preventDefault();" @change="fetchResults()">
                                             </div>
                                         </div>
 
@@ -135,7 +135,7 @@
                                         <div>
                                             <label class="block text-sm font-medium text-gray-900 mb-3">Quốc gia</label>
                                             <select name="country"
-                                                class="w-full text-sm rounded-lg border-gray-300 focus:border-rose-500 focus:ring-rose-500 shadow-sm"
+                                                class="w-full text-sm rounded-lg border-gray-300 focus:border-sky-500 focus:ring-sky-500 shadow-sm"
                                                 @change="fetchResults()">
                                                 <option value="">Tất cả quốc gia</option>
                                                 @foreach ($countries as $code => $name)
@@ -158,7 +158,7 @@
                                                     x-text="minRating > 0 ? '≥ ' + minRating : 'Tất cả'"></span>
                                             </div>
                                             <input type="range" name="min_rating" min="0" max="10"
-                                                step="1" x-model="minRating" class="w-full accent-rose-600"
+                                                step="1" x-model="minRating" class="w-full accent-sky-600"
                                                 @change="fetchResults()">
                                             <div class="flex justify-between text-xs text-gray-500 mt-1">
                                                 <span>0</span>
@@ -175,12 +175,12 @@
                                             <div class="flex items-center gap-2">
                                                 <input type="number" name="min_runtime"
                                                     value="{{ request('min_runtime') }}" placeholder="Tối thiểu"
-                                                    class="w-full text-sm rounded-lg border-gray-300 focus:border-rose-500 focus:ring-rose-500 shadow-sm"
+                                                    class="w-full text-sm rounded-lg border-gray-300 focus:border-sky-500 focus:ring-sky-500 shadow-sm"
                                                     min="0" @change="fetchResults()">
                                                 <span class="text-gray-500">-</span>
                                                 <input type="number" name="max_runtime"
                                                     value="{{ request('max_runtime') }}" placeholder="Tối đa"
-                                                    class="w-full text-sm rounded-lg border-gray-300 focus:border-rose-500 focus:ring-rose-500 shadow-sm"
+                                                    class="w-full text-sm rounded-lg border-gray-300 focus:border-sky-500 focus:ring-sky-500 shadow-sm"
                                                     min="0" @change="fetchResults()">
                                             </div>
                                         </div>

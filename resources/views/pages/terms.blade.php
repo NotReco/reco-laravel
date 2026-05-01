@@ -4,7 +4,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
         <div class="mb-10 lg:mb-12 border-b border-gray-200 pb-6">
             <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Điều Khoản Dịch Vụ</h1>
-            <p class="text-[13px] text-gray-500">Ngày cập nhật gần nhất: {{ date('d/m/Y') }}</p>
+            <p class="text-[13px] text-gray-500">Ngày cập nhật gần nhất: 01/04/2026</p>
         </div>
 
         <div class="flex flex-col lg:flex-row gap-8 lg:gap-16">
@@ -53,8 +53,9 @@
 
                     <section id="quy-tac-cong-dong" class="scroll-mt-24 space-y-4">
                         <h2 class="font-bold text-[16px] text-gray-900">2. Quy tắc cộng đồng và Nội dung người dùng</h2>
-                        <p>RecoDB là một không gian mở để chia sẻ đam mê điện ảnh. Khi đăng tải bài đánh giá (review),
-                            bình luận hoặc bất kỳ nội dung nào khác, bạn cam kết tuân thủ các nguyên tắc sau:</p>
+                        <p>RecoDB là một không gian mở để chia sẻ đam mê điện ảnh. Khi đăng tải bài đánh giá (review)
+                            phim, bình luận dưới các bài viết tin tức, hoặc tham gia tạo chủ đề (topic)/bình luận trong
+                            khu vực diễn đàn, bạn cam kết tuân thủ các nguyên tắc sau:</p>
 
                         <ul class="list-disc pl-6 space-y-3">
                             <li class="pl-2">
@@ -72,6 +73,14 @@
                                 Không đăng quảng cáo rác, không chèn các đường link độc hại, virus hoặc mã độc nhằm phá
                                 hoại hệ thống trang web và trải nghiệm của người dùng khác.
                             </li>
+                            <li class="pl-2">
+                                <span class="font-semibold text-gray-900">Quy định khu vực Diễn đàn và Tin tức:</span>
+                                Các chủ đề (topic) bạn tạo trong diễn đàn phải được đặt đúng chuyên mục và không trùng
+                                lặp với các chủ đề đã có. Bình luận dưới các bài viết tin tức phải liên quan đến nội
+                                dung bài viết. Tuyệt đối không sử dụng diễn đàn hoặc phần bình luận tin tức để công kích
+                                cá nhân (flame/war), lôi kéo phe phái hoặc thảo luận các vấn đề chính trị, tôn giáo
+                                không liên quan đến điện ảnh.
+                            </li>
                         </ul>
                     </section>
 
@@ -80,9 +89,10 @@
                         <ul class="list-disc pl-6 space-y-3">
                             <li class="pl-2">
                                 <span class="font-semibold text-gray-900">Nội dung của bạn:</span>
-                                Bạn giữ bản quyền đối với các bài review và bình luận do chính mình viết. Tuy nhiên, khi
-                                đăng tải lên RecoDB, bạn cấp cho chúng tôi quyền hiển thị, sao chép và phân phối nội
-                                dung đó trên nền tảng của chúng tôi một cách hoàn toàn miễn phí.
+                                Bạn giữ bản quyền đối với các bài review, bình luận, và các bài đăng trên diễn đàn do
+                                chính mình viết. Tuy nhiên, khi đăng tải lên RecoDB, bạn cấp cho chúng tôi quyền hiển
+                                thị, sao chép và phân phối nội dung đó trên nền tảng của chúng tôi một cách hoàn toàn
+                                miễn phí.
                             </li>
                             <li class="pl-2">
                                 <span class="font-semibold text-gray-900">Tài sản của RecoDB:</span>

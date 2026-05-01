@@ -3,14 +3,19 @@
 namespace App\Models;
 
 use App\Enums\UserRole;
+use App\Traits\HasSlug;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, SoftDeletes;
+    use HasFactory, Notifiable, SoftDeletes, HasSlug, HasRoles;
+
+    // Slug được tạo tự động từ 'name'
+    protected $slugSource = 'name';
 
     protected $fillable = [
         'name',
@@ -20,7 +25,7 @@ class User extends Authenticatable
         'cover_photo',
         'bio',
         'date_of_birth',
-        'gender',
+        'pronouns',
         'location',
         'website',
         'role',
@@ -28,6 +33,16 @@ class User extends Authenticatable
         'last_login_at',
         'two_factor_code',
         'two_factor_expires_at',
+        'two_factor_enabled',
+        'two_factor_remember_enabled',
+        'two_factor_trusted_token_hash',
+        'two_factor_trusted_until',
+        'notification_preferences',
+        'movie_quote',
+        'reputation_score',
+        'active_title_id',
+        'active_frame_id',
+        'report_banned_until',
     ];
 
     protected $hidden = [
@@ -38,14 +53,43 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-            'date_of_birth' => 'date',
-            'is_active' => 'boolean',
-            'last_login_at' => 'datetime',
-            'role' => UserRole::class,
-            'two_factor_expires_at' => 'datetime',
+            'email_verified_at'               => 'datetime',
+            'password'                         => 'hashed',
+            'date_of_birth'                    => 'date',
+            'is_active'                        => 'boolean',
+            'last_login_at'                    => 'datetime',
+            'role'                             => UserRole::class,
+            'two_factor_expires_at'            => 'datetime',
+            'two_factor_enabled'               => 'boolean',
+            'two_factor_remember_enabled'      => 'boolean',
+            'two_factor_trusted_until'         => 'datetime',
+            'notification_preferences'         => 'array',
+            'report_banned_until'              => 'datetime',
         ];
+    }
+
+    // ── Report Ban Helpers ──
+
+    /**
+     * Kiểm tra user hiện có đang bị cấm báo cáo không.
+     */
+    public function isReportBanned(): bool
+    {
+        return $this->report_banned_until !== null && $this->report_banned_until->isFuture();
+    }
+
+    // ── Notifications ──
+
+    public function notify($instance)
+    {
+        $type = get_class($instance);
+        $preferences = $this->notification_preferences ?? [];
+        
+        if (in_array($type, $preferences['disabled_types'] ?? [])) {
+            return;
+        }
+
+        app(\Illuminate\Contracts\Notifications\Dispatcher::class)->send($this, $instance);
     }
 
     // ── Relationships ──
@@ -77,24 +121,63 @@ class User extends Authenticatable
 
     public function favorites()
     {
-        return $this->belongsToMany(Movie::class, 'favorites')->withTimestamps();
+        return $this->belongsToMany(Movie::class, 'favorites')->whereNotNull('movie_id')->withTimestamps();
+    }
+
+    public function tvShowFavorites()
+    {
+        return $this->belongsToMany(\App\Models\TvShow::class, 'favorites', 'user_id', 'tv_show_id')->whereNotNull('tv_show_id')->withTimestamps();
     }
 
     public function watchlists()
     {
-        return $this->belongsToMany(Movie::class, 'watchlists')->withPivot('status')->withTimestamps();
+        return $this->belongsToMany(Movie::class, 'watchlists')->whereNotNull('movie_id')->withPivot('status')->withTimestamps();
     }
 
+    public function tvShowWatchlists()
+    {
+        return $this->belongsToMany(\App\Models\TvShow::class, 'watchlists', 'user_id', 'tv_show_id')->whereNotNull('tv_show_id')->withPivot('status')->withTimestamps();
+    }
 
+    public function vibes()
+    {
+        return $this->hasMany(MovieVibe::class);
+    }
+
+    public function tvShowVibes()
+    {
+        return $this->hasMany(\App\Models\TvShowVibe::class);
+    }
+
+    public function activeTitle()
+    {
+        return $this->belongsTo(UserTitle::class, 'active_title_id');
+    }
+
+    public function activeFrame()
+    {
+        return $this->belongsTo(AvatarFrame::class, 'active_frame_id');
+    }
+
+    public function titles()
+    {
+        return $this->belongsToMany(UserTitle::class, 'user_title_inventory', 'user_id', 'title_id')->withTimestamps();
+    }
+
+    public function frames()
+    {
+        return $this->belongsToMany(AvatarFrame::class, 'user_frame_inventory', 'user_id', 'frame_id')->withTimestamps();
+    }
+
+    public function topMovies()
+    {
+        return $this->belongsToMany(Movie::class, 'user_top_movies')->withPivot('order')->orderBy('user_top_movies.order')->withTimestamps();
+    }
     public function articles()
     {
         return $this->hasMany(Article::class);
     }
 
-    public function chatMessages()
-    {
-        return $this->hasMany(ChatMessage::class);
-    }
 
     /**
      * Tùy chỉnh hệ thống gửi Email khôi phục mật khẩu.
@@ -225,7 +308,7 @@ class User extends Authenticatable
      */
     public function requiresTwoFactor(): bool
     {
-        return $this->isAdmin();
+        return (bool) $this->two_factor_enabled;
     }
 }
 

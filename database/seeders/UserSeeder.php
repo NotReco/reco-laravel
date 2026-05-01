@@ -39,7 +39,7 @@ class UserSeeder extends Seeder
                         'Thích anime và phim Nhật 🇯🇵',
                         'Phim tài liệu là tình yêu đích thực 📹',
                     ]),
-                    'gender' => $gender,
+                    'pronouns' => $gender === 'male' ? 'Anh ấy' : 'Cô ấy',
                     'location' => $faker->optional(0.5)->randomElement([
                         'TP. Hồ Chí Minh',
                         'Hà Nội',

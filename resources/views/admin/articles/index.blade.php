@@ -4,7 +4,7 @@
 <div class="flex items-center justify-between mb-6">
     <p class="text-dark-400 text-sm">Tổng: {{ $articles->total() }} bài viết</p>
     <a href="{{ route('admin.articles.create') }}"
-       class="flex items-center gap-2 px-4 py-2 bg-rose-600 text-white text-sm font-medium rounded-xl hover:bg-rose-700 transition-colors">
+       class="flex items-center gap-2 px-4 py-2 bg-sky-600 text-white text-sm font-medium rounded-xl hover:bg-sky-700 transition-colors">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
         Viết bài mới
     </a>
@@ -16,13 +16,13 @@
         <table class="w-full text-sm">
             <thead>
                 <tr class="border-b border-dark-800 text-left">
-                    <th class="px-5 py-3 text-dark-400 font-medium">Tiêu đề</th>
-                    <th class="px-5 py-3 text-dark-400 font-medium">Tác giả</th>
-                    <th class="px-5 py-3 text-dark-400 font-medium">Tags</th>
-                    <th class="px-5 py-3 text-dark-400 font-medium text-center">Trạng thái</th>
-                    <th class="px-5 py-3 text-dark-400 font-medium text-center">Bình luận</th>
-                    <th class="px-5 py-3 text-dark-400 font-medium">Ngày tạo</th>
-                    <th class="px-5 py-3 text-dark-400 font-medium text-right">Thao tác</th>
+                    <th class="px-5 py-3 text-dark-400 font-medium whitespace-nowrap">Tiêu đề</th>
+                    <th class="px-5 py-3 text-dark-400 font-medium whitespace-nowrap">Tác giả</th>
+                    <th class="px-5 py-3 text-dark-400 font-medium whitespace-nowrap">Tags</th>
+                    <th class="px-5 py-3 text-dark-400 font-medium text-center whitespace-nowrap">Trạng thái</th>
+                    <th class="px-5 py-3 text-dark-400 font-medium text-center whitespace-nowrap">Bình luận</th>
+                    <th class="px-5 py-3 text-dark-400 font-medium whitespace-nowrap">Ngày tạo</th>
+                    <th class="px-5 py-3 text-dark-400 font-medium text-right whitespace-nowrap">Thao tác</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-dark-800">
@@ -36,7 +36,7 @@
                                 @endif
                             </div>
                         </td>
-                        <td class="px-5 py-3">
+                        <td class="px-5 py-3 whitespace-nowrap">
                             <span class="text-dark-300">{{ $article->user->name ?? 'Ẩn danh' }}</span>
                         </td>
                         <td class="px-5 py-3">
@@ -46,15 +46,15 @@
                                 @endforeach
                             </div>
                         </td>
-                        <td class="px-5 py-3 text-center">
+                        <td class="px-5 py-3 text-center whitespace-nowrap">
                             @if($article->is_published)
-                                <span class="px-2 py-1 bg-emerald-500/20 text-emerald-400 text-xs font-bold rounded-lg">Đã đăng</span>
+                                <span class="px-2 py-1 bg-emerald-500/20 text-emerald-400 text-xs font-bold rounded-lg whitespace-nowrap">Công khai</span>
                             @else
-                                <span class="px-2 py-1 bg-dark-700 text-dark-400 text-xs font-bold rounded-lg">Nháp</span>
+                                <span class="px-2 py-1 bg-dark-700 text-dark-400 text-xs font-bold rounded-lg whitespace-nowrap">Nháp</span>
                             @endif
                         </td>
                         <td class="px-5 py-3 text-center text-dark-400">{{ $article->comments_count }}</td>
-                        <td class="px-5 py-3 text-dark-500 text-xs">{{ $article->created_at->format('d/m/Y H:i') }}</td>
+                        <td class="px-5 py-3 text-dark-500 text-xs whitespace-nowrap">{{ $article->created_at->format('d/m/Y H:i') }}</td>
                         <td class="px-5 py-3">
                             <div class="flex items-center justify-end gap-2">
                                 <a href="{{ route('news.show', $article) }}" target="_blank"
@@ -65,12 +65,13 @@
                                    class="p-1.5 text-dark-500 hover:text-amber-400 transition-colors" title="Sửa">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                 </a>
-                                <form action="{{ route('admin.articles.destroy', $article) }}" method="POST"
-                                      onsubmit="return confirm('Xóa bài viết này?')">
+                                <button type="button" 
+                                        @click="$dispatch('admin-confirm', { title: 'Xóa bài viết', message: 'Xóa bài viết \u00ab{{ addslashes($article->title) }}\u00bb? Hành động này không thể hoàn tác.', formId: 'del-article-{{ $article->id }}' })"
+                                        class="p-1.5 text-dark-500 hover:text-red-400 transition-colors" title="Xóa">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                </button>
+                                <form id="del-article-{{ $article->id }}" action="{{ route('admin.articles.destroy', $article) }}" method="POST" class="hidden">
                                     @csrf @method('DELETE')
-                                    <button type="submit" class="p-1.5 text-dark-500 hover:text-red-400 transition-colors" title="Xóa">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                    </button>
                                 </form>
                             </div>
                         </td>

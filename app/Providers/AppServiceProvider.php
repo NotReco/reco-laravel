@@ -3,9 +3,14 @@
 namespace App\Providers;
 
 use App\Enums\UserRole;
+use App\Listeners\BroadcastNotification;
 use App\Models\User;
+use Illuminate\Notifications\Events\NotificationSent;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Pagination\Paginator;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -22,7 +27,31 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Gate::before(function ($user, $ability) {
+            return $user->hasRole('Super Admin') ? true : null;
+        });
+
+        Paginator::defaultView('vendor.pagination.reco');
+
         $this->defineGates();
+
+        // Broadcast mọi database notification qua Reverb WebSocket
+        Event::listen(NotificationSent::class, BroadcastNotification::class);
+
+        Relation::morphMap([
+            'ArticleComment' => 'App\Models\ArticleComment',
+            'Comment'        => 'App\Models\Comment',
+            'ForumReply'     => 'App\Models\ForumReply',
+            'Review'         => 'App\Models\Review',
+        ]);
+
+        // ── Quest Observers ──
+        \App\Models\Review::observe(\App\Observers\ReviewObserver::class);
+        \App\Models\Comment::observe(\App\Observers\CommentObserver::class);
+        \App\Models\Like::observe(\App\Observers\LikeObserver::class);
+        \App\Models\Follow::observe(\App\Observers\FollowObserver::class);
+        \App\Models\ForumThread::observe(\App\Observers\ForumThreadObserver::class);
+        \App\Models\ForumReply::observe(\App\Observers\ForumReplyObserver::class);
     }
 
     /**

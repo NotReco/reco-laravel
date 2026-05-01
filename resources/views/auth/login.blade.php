@@ -8,31 +8,8 @@
             <p class="mt-2 text-[15px] text-gray-500">Xem, chấm điểm và chia sẻ gu phim của bạn</p>
         </div>
 
-        {{-- Bubble Notification (Toast) --}}
-        @if (session('status'))
-            <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 6000)"
-                class="fixed top-5 right-5 z-50 bg-[#01b4e4] text-white px-6 py-4 rounded-xl shadow-2xl flex items-start gap-4 mx-4 sm:mx-0 max-w-sm"
-                x-transition:enter="transition ease-out duration-300"
-                x-transition:enter-start="opacity-0 translate-x-10"
-                x-transition:enter-end="opacity-100 translate-x-0"
-                x-transition:leave="transition ease-in duration-300"
-                x-transition:leave-start="opacity-100 translate-x-0"
-                x-transition:leave-end="opacity-0 translate-x-10"
-                style="display: none;">
-                <svg class="w-6 h-6 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                <div>
-                    <h4 class="font-bold text-[15px]">Kiểm tra hộp thư</h4>
-                    <p class="text-[13px] opacity-90 mt-1 leading-relaxed">{{ session('status') }}</p>
-                </div>
-                <button @click="show = false" class="ml-auto opacity-70 hover:opacity-100 transition-opacity mt-0.5">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
-            </div>
-        @endif
 
-        <form method="POST" action="{{ route('login') }}" class="space-y-5">
+        <form method="POST" action="{{ route('login') }}" class="space-y-5" novalidate>
             @csrf
 
             {{-- Username or Email --}}

@@ -11,24 +11,14 @@ class HomeController extends Controller
 {
     public function index()
     {
-        // Hero carousel — 5 phim có backdrop + trailer, view cao nhất
-        $heroMovies = Movie::with('genres')
-            ->whereNotNull('backdrop')
-            ->whereNotNull('poster')
-            ->whereNotNull('trailer_url')
-            ->orderByDesc('view_count')
-            ->take(5)
-            ->get();
+        // Hero carousel — Lấy danh sách phim/TV show đã được ghim trong Admin Carousel (tối đa 20)
+        $featuredMovies = Movie::with('genres')->where('is_featured', true)->get();
+        $featuredTvShows = \App\Models\TvShow::with('genres')->where('is_featured', true)->get();
 
-        // Fallback: nếu không đủ phim có trailer, bổ sung phim có backdrop
-        if ($heroMovies->count() < 3) {
-            $heroMovies = Movie::with('genres')
-                ->whereNotNull('backdrop')
-                ->whereNotNull('poster')
-                ->orderByDesc('view_count')
-                ->take(5)
-                ->get();
-        }
+        $heroItems = $featuredMovies->concat($featuredTvShows)
+            ->sortBy('featured_order')
+            ->take(20)
+            ->values();
 
         // 🔥 Trending — 10 phim xem nhiều nhất
         $trendingMovies = Movie::with('genres')
@@ -76,7 +66,7 @@ class HomeController extends Controller
             ->get();
 
         return view('home', compact(
-            'heroMovies',
+            'heroItems',
             'trendingMovies',
             'nowPlayingMovies',
             'topRatedMovies',

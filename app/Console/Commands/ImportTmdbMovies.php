@@ -129,6 +129,29 @@ class ImportTmdbMovies extends Command
 
         // Sync cast & crew
         $this->syncCredits($movie, $detail['credits'] ?? []);
+
+        // Sync keywords
+        $this->syncKeywords($movie, $detail['keywords'] ?? []);
+    }
+
+    /**
+     * Đồng bộ từ khóa (keywords).
+     */
+    protected function syncKeywords(Movie $movie, array $keywordsData): void
+    {
+        $rawKeywords = $keywordsData['results'] ?? $keywordsData['keywords'] ?? [];
+        $tagIds = [];
+
+        foreach ($rawKeywords as $kw) {
+            if (isset($kw['name'])) {
+                $tag = \App\Models\Tag::firstOrCreate(
+                    ['slug' => \Illuminate\Support\Str::slug($kw['name'])],
+                    ['name' => strtolower($kw['name'])]
+                );
+                $tagIds[] = $tag->id;
+            }
+        }
+        $movie->tags()->sync($tagIds);
     }
 
     /**
@@ -202,6 +225,7 @@ class ImportTmdbMovies extends Command
 
     /**
      * Tìm hoặc tạo mới nghệ sĩ từ TMDb data.
+     * Khi tạo mới, tự động fetch thêm thông tin chi tiết (bio, giới tính, nơi sinh, external IDs).
      */
     protected function findOrCreatePerson(array $data): ?Person
     {
@@ -212,13 +236,38 @@ class ImportTmdbMovies extends Command
         $person = Person::withTrashed()->where('tmdb_id', $tmdbId)->first();
 
         if (!$person) {
+            // Lấy chi tiết đầy đủ từ TMDb (có external_ids)
+            $detail = $this->tmdb->getPersonDetail($tmdbId);
+            $ext = $detail['external_ids'] ?? [];
+
+            $aliases = collect($detail['also_known_as'] ?? [])
+                ->filter(fn($a) => $a !== ($detail['name'] ?? ''))
+                ->values()->all();
+
             $person = Person::create([
-                'tmdb_id' => $tmdbId,
-                'name' => $data['name'] ?? 'Unknown',
-                'photo' => $this->tmdb->profileUrl($data['profile_path'] ?? null, 'medium'),
-                'known_for' => $data['known_for_department'] ?? null,
+                'tmdb_id'        => $tmdbId,
+                'name'           => $detail['name'] ?? $data['name'] ?? 'Unknown',
+                'photo'          => $this->tmdb->profileUrl($detail['profile_path'] ?? $data['profile_path'] ?? null, 'large'),
+                'biography'      => $detail['biography'] ?? null,
+                'bio'            => $detail['biography'] ?? null,
+                'known_for'      => $detail['known_for_department'] ?? $data['known_for_department'] ?? null,
+                'gender'         => $detail['gender'] ?? 0,
+                'place_of_birth' => $detail['place_of_birth'] ?? null,
+                'also_known_as'  => !empty($aliases) ? $aliases : null,
+                'homepage'       => !empty($detail['homepage']) ? $detail['homepage'] : null,
+                'imdb_id'        => $ext['imdb_id'] ?? null,
+                'instagram_id'   => $ext['instagram_id'] ?? null,
+                'twitter_id'     => $ext['twitter_id'] ?? null,
+                'date_of_birth'  => !empty($detail['birthday']) ? $detail['birthday'] : null,
+                'date_of_death'  => !empty($detail['deathday']) ? $detail['deathday'] : null,
+                'nationality'    => isset($detail['place_of_birth']) && str_contains($detail['place_of_birth'], ',')
+                    ? trim(substr($detail['place_of_birth'], strrpos($detail['place_of_birth'], ',') + 1))
+                    : null,
             ]);
             $this->peopleCreated++;
+
+            // Rate limit nhẹ để tránh vượt quota
+            usleep(100000); // 100ms
         }
 
         return $person;

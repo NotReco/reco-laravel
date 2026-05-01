@@ -96,13 +96,13 @@ try {
 
                         <button @click="toggleWatchlist('want_to_watch')"
                             class="w-full flex items-center gap-2.5 px-3 py-1.5 text-xs hover:bg-gray-50 transition-colors text-left"
-                            :class="watchlistStatus === 'want_to_watch' ? 'text-rose-600 bg-rose-50' : 'text-gray-700'">
+                            :class="watchlistStatus === 'want_to_watch' ? 'text-sky-600 bg-sky-50' : 'text-gray-700'">
                             <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                             </svg>
                             <span>Muốn xem</span>
-                            <svg x-show="watchlistStatus === 'want_to_watch'" class="w-3 h-3 ml-auto text-rose-500 shrink-0"
+                            <svg x-show="watchlistStatus === 'want_to_watch'" class="w-3 h-3 ml-auto text-sky-500 shrink-0"
                                 fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd"
                                     d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -164,7 +164,7 @@ try {
                     <div class="border-t border-gray-100 py-1.5">
                         <button @click="toggleFavorite()"
                             class="w-full flex items-center gap-2.5 px-3 py-1.5 text-xs hover:bg-gray-50 transition-colors text-left"
-                            :class="isFavorited ? 'text-rose-600' : 'text-gray-700'">
+                            :class="isFavorited ? 'text-rose-500' : 'text-gray-700'">
                             <svg class="w-3.5 h-3.5 shrink-0" :fill="isFavorited ? 'currentColor' : 'none'"
                                 stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -187,14 +187,14 @@ try {
                     <div class="py-3 px-4 text-left">
                         <p class="text-xs text-gray-600 leading-snug">Muốn đánh giá hoặc thêm vào danh sách?</p>
                         <a href="{{ route('login') }}"
-                            class="mt-1.5 inline-block text-xs font-semibold text-rose-600 hover:text-rose-700 hover:underline">Đăng
+                            class="mt-1.5 inline-block text-xs font-semibold text-sky-600 hover:text-sky-700 hover:underline">Đăng
                             nhập</a>
                     </div>
                     <div class="border-t-2 border-gray-200"></div>
                     <div class="py-3 px-4 text-left">
                         <p class="text-xs text-gray-600 leading-snug">Chưa là thành viên?</p>
                         <a href="{{ route('register') }}"
-                            class="mt-1.5 inline-block text-xs font-semibold text-rose-600 hover:text-rose-700 hover:underline">Đăng
+                            class="mt-1.5 inline-block text-xs font-semibold text-sky-600 hover:text-sky-700 hover:underline">Đăng
                             ký</a>
                     </div>
                 @endauth
@@ -205,7 +205,7 @@ try {
     {{-- 3-dot button (top-right, OUTSIDE poster overflow, hidden when dropdown open) --}}
     <div class="absolute top-2 right-2 z-30" x-show="!open">
         <button @click.stop.prevent="toggle()"
-            class="w-7 h-7 rounded-full bg-gray-500/70 backdrop-blur-sm text-white flex items-center justify-center hover:bg-rose-500/80 transition-colors shadow">
+            class="w-7 h-7 rounded-full bg-gray-500/70 backdrop-blur-sm text-white flex items-center justify-center hover:bg-sky-500/80 transition-colors shadow">
             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                 <path
                     d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z" />
@@ -215,7 +215,7 @@ try {
 
     {{-- Title & Meta --}}
     <a href="{{ route('movies.show', $movie) }}" class="block mt-2">
-        <h3 class="text-sm font-bold text-gray-900 group-hover:text-rose-600 transition-colors font-heading">
+        <h3 class="text-sm font-bold text-gray-900 group-hover:text-sky-600 transition-colors font-heading">
             {{ $movie->title }}
             @if (!isset($hideOriginalTitle) || !$hideOriginalTitle)
                 @if ($movie->original_title && $movie->original_title !== $movie->title)

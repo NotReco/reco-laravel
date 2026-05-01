@@ -28,10 +28,12 @@ class MovieController extends Controller
             }
         }
 
-        // Lọc theo nhiều thể loại (logic OR: phim chứa ít nhất 1 thể loại được chọn)
+        // Lọc theo nhiều thể loại (logic AND: phim chứa tất cả thể loại được chọn)
         if ($request->has('genres') && is_array($request->input('genres')) && count($request->input('genres')) > 0) {
             $genreIds = $request->input('genres');
-            $query->whereHas('genres', fn($qb) => $qb->whereIn('genres.id', $genreIds));
+            foreach ($genreIds as $id) {
+                $query->whereHas('genres', fn($qb) => $qb->where('genres.id', $id));
+            }
         } elseif ($genreId = $request->input('genre')) { // Keep for backward compatibility
             $query->whereHas('genres', fn($qb) => $qb->where('genres.id', $genreId));
         }
@@ -79,9 +81,30 @@ class MovieController extends Controller
         if ($request->filled('q')) {
             $qStr = trim(str_replace(['%', '_'], '', $request->input('q')));
             if ($qStr !== '') {
+                $bindings = [
+                    $qStr,
+                    "{$qStr} %",
+                    "% {$qStr} %", "% {$qStr}",
+                    "{$qStr}%",
+                    $qStr,
+                    "{$qStr} %",
+                    "% {$qStr} %", "% {$qStr}",
+                    "{$qStr}%"
+                ];
+
                 $query->orderByRaw(
-                    "CASE WHEN title LIKE ? THEN 1 WHEN original_title LIKE ? THEN 2 ELSE 3 END",
-                    ["{$qStr}%", "{$qStr}%"]
+                    "CASE 
+                        WHEN title = ? THEN 1
+                        WHEN title LIKE ? THEN 2
+                        WHEN title LIKE ? OR title LIKE ? THEN 3
+                        WHEN title LIKE ? THEN 4
+                        WHEN original_title = ? THEN 5
+                        WHEN original_title LIKE ? THEN 6
+                        WHEN original_title LIKE ? OR original_title LIKE ? THEN 7
+                        WHEN original_title LIKE ? THEN 8
+                        ELSE 9 
+                    END",
+                    $bindings
                 );
             }
         }
@@ -103,24 +126,7 @@ class MovieController extends Controller
             ->get();
 
         // Lấy danh sách quốc gia cho bộ lọc
-        $countryNames = [
-            'AR' => 'Argentina',
-            'AU' => 'Úc',
-            'BR' => 'Brazil',
-            'CA' => 'Canada',
-            'CN' => 'Trung Quốc',
-            'ES' => 'Tây Ban Nha',
-            'FR' => 'Pháp',
-            'GB' => 'Anh',
-            'IE' => 'Ireland',
-            'IN' => 'Ấn Độ',
-            'JP' => 'Nhật Bản',
-            'KR' => 'Hàn Quốc',
-            'NO' => 'Na Uy',
-            'PH' => 'Philippines',
-            'RU' => 'Nga',
-            'US' => 'Mỹ',
-        ];
+        $countryNames = config('countries');
 
         $countries = Movie::whereNotNull('country')
             ->where('country', '!=', '')
@@ -144,10 +150,19 @@ class MovieController extends Controller
     {
         $movie->load([
             'genres',
+            'tags',
             'people' => fn($q) => $q->orderBy('display_order'),
             'reviews' => fn($q) => $q->published()
                 ->fullReview()
-                ->with(['user', 'likes', 'comments.user'])
+                ->with([
+                    'user.activeFrame',
+                    'likes',
+                    'comments.user.activeFrame',
+                    'reports' => fn($r) => $r->where('is_public', true)
+                                            ->where('status', 'resolved')
+                                            ->with('user')
+                                            ->latest(),
+                ])
                 ->latest('published_at')
                 ->take(10),
         ]);
@@ -155,6 +170,10 @@ class MovieController extends Controller
         // Tính rating trung bình
         $avgRating = $movie->reviews()->whereNotNull('rating')->avg('rating');
         $ratingCount = $movie->reviews()->whereNotNull('rating')->count();
+
+        // Lấy media (Videos, Backdrops, Posters)
+        $tmdbService = app(\App\Services\TmdbService::class);
+        $media = $tmdbService->getMedia($movie->tmdb_id, 'movie');
 
         // Phim liên quan (cùng thể loại)
         $relatedMovies = Movie::with('genres')
@@ -170,6 +189,39 @@ class MovieController extends Controller
         $directors = $movie->people->where('pivot.role', 'director');
         $writers = $movie->people->where('pivot.role', 'writer');
 
+        // Tên quốc gia tiếng Việt
+        $countryName = config('countries')[$movie->country] ?? $movie->country;
+
+        // Tên ngôn ngữ gốc tiếng Việt
+        $languageName = config('languages')[$movie->language] ?? $movie->language;
+
+        // Phân phối điểm (số lượng đánh giá theo từng điểm 1-10)
+        $ratingDistribution = $movie->reviews()
+            ->where('status', 'published')
+            ->whereNotNull('rating')
+            ->selectRaw('ROUND(rating) as score, COUNT(*) as count')
+            ->groupBy('score')
+            ->orderBy('score')
+            ->pluck('count', 'score')
+            ->toArray();
+        // Đảm bảo đủ 10 mức
+        $distribution = [];
+        for ($i = 1; $i <= 10; $i++) {
+            $distribution[$i] = $ratingDistribution[$i] ?? 0;
+        }
+
+        // Lịch sử đánh giá theo tháng (12 tháng gần nhất)
+        $ratingHistory = $movie->reviews()
+            ->where('status', 'published')
+            ->whereNotNull('rating')
+            ->where('created_at', '>=', now()->subMonths(12))
+            ->selectRaw('DATE_FORMAT(created_at, "%Y-%m") as month, AVG(rating) as avg_score, COUNT(*) as count')
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get()
+            ->keyBy('month')
+            ->toArray();
+
         return view('movies.show', compact(
             'movie',
             'avgRating',
@@ -178,6 +230,11 @@ class MovieController extends Controller
             'cast',
             'directors',
             'writers',
+            'countryName',
+            'languageName',
+            'distribution',
+            'ratingHistory',
+            'media',
         ));
     }
 }

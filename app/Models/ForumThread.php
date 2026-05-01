@@ -24,10 +24,7 @@ class ForumThread extends Model
 
     // ── Sluggable ──
 
-    protected function slugSource(): string
-    {
-        return 'title';
-    }
+    protected $slugSource = 'title';
 
     // ── Relationships ──
 
