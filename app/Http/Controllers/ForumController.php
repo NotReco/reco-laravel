@@ -27,7 +27,7 @@ class ForumController extends Controller
             ->get();
 
         $query = ForumThread::with(['category', 'user.activeTitle', 'user.activeFrame', 'latestReply.user.activeFrame'])
-            ->withCount('replies')
+            ->withCount(['replies', 'likes'])
             ->recent();
 
         // Lọc theo category
@@ -57,6 +57,7 @@ class ForumController extends Controller
                         'is_locked' => $thread->is_locked,
                         'views_count' => $thread->views_count,
                         'replies_count' => $thread->replies_count,
+                        'likes_count' => $thread->likes_count,
                         'created_at' => $thread->created_at->diffForHumans(),
                         'user' => [
                             'id' => $thread->user->id,
@@ -94,9 +95,9 @@ class ForumController extends Controller
     {
         $thread->incrementViews();
 
-        $thread->load(['category', 'user.activeTitle', 'user.activeFrame']);
+        $thread->load(['category', 'user.activeTitle', 'user.activeFrame', 'likes']);
         $replies = $thread->replies()
-            ->with(['user.activeTitle', 'user.activeFrame', 'parent.user'])
+            ->with(['user.activeTitle', 'user.activeFrame', 'parent.user', 'likes'])
             ->orderBy('created_at')
             ->paginate(20);
 
@@ -237,6 +238,48 @@ class ForumController extends Controller
         ]);
 
         return redirect()->route('forum.show', $thread)->with('success', 'Bài viết đã được cập nhật.');
+    }
+
+    /**
+     * Thích / Hủy thích bài viết.
+     */
+    public function toggleThreadLike(ForumThread $thread)
+    {
+        $like = $thread->likes()->where('user_id', Auth::id())->first();
+
+        if ($like) {
+            $like->delete();
+            $isLiked = false;
+        } else {
+            $thread->likes()->create(['user_id' => Auth::id()]);
+            $isLiked = true;
+        }
+
+        return response()->json([
+            'isLiked' => $isLiked,
+            'likesCount' => $thread->likes()->count(),
+        ]);
+    }
+
+    /**
+     * Thích / Hủy thích phản hồi.
+     */
+    public function toggleReplyLike(ForumReply $reply)
+    {
+        $like = $reply->likes()->where('user_id', Auth::id())->first();
+
+        if ($like) {
+            $like->delete();
+            $isLiked = false;
+        } else {
+            $reply->likes()->create(['user_id' => Auth::id()]);
+            $isLiked = true;
+        }
+
+        return response()->json([
+            'isLiked' => $isLiked,
+            'likesCount' => $reply->likes()->count(),
+        ]);
     }
 
     /**

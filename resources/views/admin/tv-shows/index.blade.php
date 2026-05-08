@@ -1,4 +1,4 @@
-<x-admin-layout :title="'TV Series'" pageTitle="Quản lý TV Series">
+<x-admin-layout :title="'Phim bộ'" pageTitle="Quản lý phim bộ">
 
     {{-- ── Toolbar ───────────────────────────────────────────────── --}}
     <div class="flex items-center gap-3 mb-6">
@@ -9,7 +9,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0" />
                 </svg>
-                <input type="text" name="q" value="{{ request('q') }}" placeholder="Tìm theo tên series..."
+                <input type="text" name="q" value="{{ request('q') }}" placeholder="Tìm theo tên phim bộ..."
                     class="input-dark text-sm pl-9 py-2.5 w-full" autocomplete="off">
             </div>
             <button type="submit" class="btn-secondary py-2.5 px-4 text-sm shrink-0">Tìm</button>
@@ -21,7 +21,7 @@
         <div class="ml-auto flex items-center gap-2 shrink-0 px-3 py-1.5 rounded-xl bg-sky-600/15 border border-sky-500/30">
             <svg class="w-3.5 h-3.5 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
             <span class="text-sm font-semibold text-sky-300">{{ $tvShows->total() }}</span>
-            <span class="text-xs text-sky-400/70">series</span>
+            <span class="text-xs text-sky-400/70">phim bộ</span>
         </div>
     </div>
 
@@ -31,7 +31,7 @@
             <table class="w-full text-sm">
                 <thead>
                     <tr class="border-b border-dark-700 text-dark-400 text-left text-xs uppercase tracking-wide">
-                        <th class="px-5 py-3 font-medium">TV Series</th>
+                        <th class="px-5 py-3 font-medium">Phim bộ</th>
                         <th class="px-5 py-3 font-medium">Thể loại</th>
                         <th class="px-5 py-3 font-medium">Năm</th>
                         <th class="px-5 py-3 font-medium">Trạng thái</th>
@@ -156,7 +156,7 @@
                                         </svg>
                                     </a>
                                     <button type="button"
-                                        @click="$dispatch('admin-confirm', { title: 'Xóa TV Series', message: 'Xóa \u00ab{{ addslashes($tvShow->title) }}\u00bb? Hành động này không thể hoàn tác.', formId: 'del-tvshow-{{ $tvShow->id }}' })"
+                                        @click="$dispatch('admin-confirm', { title: 'Xóa Phim bộ', message: 'Xóa \u00ab{{ addslashes($tvShow->title) }}\u00bb? Hành động này không thể hoàn tác.', formId: 'del-tvshow-{{ $tvShow->id }}' })"
                                         class="p-1.5 rounded-lg text-dark-500 hover:text-red-400 hover:bg-dark-800 transition-colors"
                                         title="Xóa">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -180,7 +180,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
                                             d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                     </svg>
-                                    <p>Không tìm thấy TV Series
+                                    <p>Không tìm thấy Phim bộ
                                         nào{{ request('q') ? ' cho "' . request('q') . '"' : '' }}.</p>
                                 </div>
                             </td>

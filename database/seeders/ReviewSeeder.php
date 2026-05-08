@@ -19,6 +19,7 @@ class ReviewSeeder extends Seeder
         $tmdb = app(TmdbService::class);
         $users = User::where('role', 'user')->pluck('id')->toArray();
         $movies = Movie::whereNotNull('tmdb_id')->get();
+        $tvShows = \App\Models\TvShow::whereNotNull('tmdb_id')->get();
 
         if (empty($users)) {
             $this->command->warn('⚠️  Chưa có user nào. Chạy UserSeeder trước!');
@@ -68,6 +69,7 @@ class ReviewSeeder extends Seeder
             ],
         ];
 
+        $this->command->info("Bắt đầu tạo reviews cho Phim lẻ...");
         $bar = $this->command->getOutput()->createProgressBar($movies->count());
         $bar->start();
 
@@ -75,55 +77,67 @@ class ReviewSeeder extends Seeder
         $totalQuickRatings = 0;
 
         foreach ($movies as $movie) {
-            // Mỗi phim có 2-6 reviews đầy đủ
-            $reviewCount = rand(2, 6);
-            $reviewerIds = (array) array_rand(array_flip($users), min($reviewCount, count($users)));
-
-            foreach ($reviewerIds as $userId) {
-                // 70% review đầy đủ, 30% quick rating
-                if (rand(1, 10) <= 7) {
-                    // Full review
-                    $sentiment = $this->randomSentiment();
-                    $rating = $this->ratingForSentiment($sentiment);
-                    $title = $titleTemplates[$sentiment][array_rand($titleTemplates[$sentiment])];
-                    $content = $reviewTemplates[$sentiment][array_rand($reviewTemplates[$sentiment])];
-
-                    Review::create([
-                        'user_id' => $userId,
-                        'movie_id' => $movie->id,
-                        'title' => $title,
-                        'excerpt' => Str::limit($content, 100),
-                        'content' => $content,
-                        'rating' => $rating,
-                        'is_spoiler' => rand(1, 10) <= 2, // 20% spoiler
-                        'status' => 'published',
-                        'published_at' => now()->subDays(rand(1, 90)),
-                        'view_count' => rand(10, 500),
-                    ]);
-                    $totalReviews++;
-                } else {
-                    // Quick rating
-                    $rating = rand(40, 100) / 10; // 4.0 - 10.0
-
-                    Review::create([
-                        'user_id' => $userId,
-                        'movie_id' => $movie->id,
-                        'title' => null,
-                        'content' => null,
-                        'rating' => $rating,
-                        'status' => 'published',
-                        'published_at' => now()->subDays(rand(1, 60)),
-                    ]);
-                    $totalQuickRatings++;
-                }
-            }
-
+            $this->seedReviewsForMedia($movie, 'movie_id', $users, $reviewTemplates, $titleTemplates, $totalReviews, $totalQuickRatings);
             $bar->advance();
         }
 
         $bar->finish();
+        $this->command->newLine();
+
+        $this->command->info("Bắt đầu tạo reviews cho Phim bộ...");
+        $bar2 = $this->command->getOutput()->createProgressBar($tvShows->count());
+        $bar2->start();
+
+        foreach ($tvShows as $tvShow) {
+            $this->seedReviewsForMedia($tvShow, 'tv_show_id', $users, $reviewTemplates, $titleTemplates, $totalReviews, $totalQuickRatings);
+            $bar2->advance();
+        }
+
+        $bar2->finish();
         $this->command->newLine(2);
         $this->command->info("✅ Tạo {$totalReviews} reviews + {$totalQuickRatings} quick ratings!");
+    }
+
+    protected function seedReviewsForMedia($media, $foreignKey, $users, $reviewTemplates, $titleTemplates, &$totalReviews, &$totalQuickRatings)
+    {
+        $reviewCount = rand(2, 6);
+        $reviewerIds = (array) array_rand(array_flip($users), min($reviewCount, count($users)));
+
+        foreach ($reviewerIds as $userId) {
+            if (rand(1, 10) <= 7) {
+                $sentiment = $this->randomSentiment();
+                $rating = $this->ratingForSentiment($sentiment);
+                $title = $titleTemplates[$sentiment][array_rand($titleTemplates[$sentiment])];
+                $content = $reviewTemplates[$sentiment][array_rand($reviewTemplates[$sentiment])];
+
+                Review::create([
+                    'user_id' => $userId,
+                    $foreignKey => $media->id,
+                    'title' => $title,
+                    'excerpt' => Str::limit($content, 100),
+                    'content' => $content,
+                    'rating' => $rating,
+                    'is_spoiler' => rand(1, 10) <= 2,
+                    'status' => 'published',
+                    'published_at' => now()->subDays(rand(1, 90)),
+                    'view_count' => rand(10, 500),
+                ]);
+                $totalReviews++;
+            } else {
+                $rating = rand(40, 100) / 10;
+
+                Review::create([
+                    'user_id' => $userId,
+                    $foreignKey => $media->id,
+                    'title' => null,
+                    'content' => null,
+                    'rating' => $rating,
+                    'status' => 'published',
+                    'published_at' => now()->subDays(rand(1, 60)),
+                ]);
+                $totalQuickRatings++;
+            }
+        }
     }
 
     protected function randomSentiment(): string

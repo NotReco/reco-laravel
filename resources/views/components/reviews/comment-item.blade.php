@@ -33,7 +33,7 @@
         
         <div class="mt-1.5 flex items-center justify-between" x-data="{ 
             liked: {{ auth()->check() && $comment->likes->contains('user_id', auth()->id()) ? 'true' : 'false' }}, 
-            likesCount: {{ $comment->likes_count ?? 0 }}, 
+            likesCount: {{ $comment->likes->count() }}, 
             isLiking: false 
         }">
             <div class="flex items-center gap-3">
@@ -52,8 +52,8 @@
                 @endif
             </div>
 
-            <div x-show="likesCount > 0" x-cloak style="{{ ($comment->likes_count ?? 0) > 0 ? '' : 'display: none;' }}" class="flex items-center gap-1 cursor-pointer">
-                <span x-text="likesCount" class="text-[11px] text-gray-500 hover:underline">{{ $comment->likes_count ?: '' }}</span>
+            <div x-show="likesCount > 0" x-cloak style="{{ $comment->likes->count() > 0 ? '' : 'display: none;' }}" class="flex items-center gap-1 cursor-pointer">
+                <span x-text="likesCount" class="text-[11px] text-gray-500 hover:underline">{{ $comment->likes->count() ?: '' }}</span>
                 <div class="w-[14px] h-[14px] rounded-full bg-rose-500 flex items-center justify-center shadow-sm">
                     <svg class="w-2 h-2 text-white fill-current" viewBox="0 0 24 24">
                         <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>

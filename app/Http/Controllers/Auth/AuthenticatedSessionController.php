@@ -59,13 +59,14 @@ class AuthenticatedSessionController extends Controller
         }
 
         // ── Đăng nhập thường ──
+        $user->resetFailedLogin(); // Xóa đếm sai và mở khóa nếu có
         $user->update(['last_login_at' => now()]);
         $request->session()->regenerate();
 
         return redirect()->intended(route('home', absolute: false));
     }
 
-    private function hasTrustedDevice(Request $request, $user): bool
+    private function hasTrustedDevice(Request $request, \App\Models\User $user): bool
     {
         if (!$user->two_factor_remember_enabled) {
             return false;

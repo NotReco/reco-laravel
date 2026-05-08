@@ -24,11 +24,11 @@
     {{-- ── Filters ───────────────────────────────────────────────────── --}}
     <form action="{{ route('admin.reviews.index') }}" method="GET" class="mb-6 flex flex-col sm:flex-row gap-3">
         <input type="text" name="q" value="{{ request('q') }}"
-            placeholder="Tìm người dùng, phim hoặc TV series..." class="input-dark text-sm flex-1 py-2.5">
+            placeholder="Tìm người dùng, phim lẻ hoặc phim bộ..." class="input-dark text-sm flex-1 py-2.5">
         <select name="type" class="input-dark text-sm w-44 py-2.5">
             <option value="">Tất cả loại</option>
-            <option value="movie" {{ request('type') === 'movie' ? 'selected' : '' }}>Phim</option>
-            <option value="series" {{ request('type') === 'series' ? 'selected' : '' }}>TV Series</option>
+            <option value="movie" {{ request('type') === 'movie' ? 'selected' : '' }}>Phim lẻ</option>
+            <option value="series" {{ request('type') === 'series' ? 'selected' : '' }}>Phim bộ</option>
         </select>
         <button type="submit" class="btn-secondary py-2.5 px-5 text-sm">Lọc</button>
         @if (request()->hasAny(['q', 'type']))
@@ -43,7 +43,7 @@
                 <thead>
                     <tr class="border-b border-dark-700 text-dark-400 text-left">
                         <th class="px-5 py-3 font-medium">Người dùng</th>
-                        <th class="px-5 py-3 font-medium">Phim / TV Series</th>
+                        <th class="px-5 py-3 font-medium">Phim lẻ / Phim bộ</th>
                         <th class="px-5 py-3 font-medium">Điểm</th>
                         <th class="px-5 py-3 font-medium">Nội dung đánh giá</th>
                         <th class="px-5 py-3 font-medium">Báo cáo</th>
@@ -55,7 +55,7 @@
                     @forelse($reviews as $review)
                         @php
                             $subject = $review->movie ?? $review->tvShow;
-                            $subjectType = $review->movie ? 'Phim' : 'Series';
+                            $subjectType = $review->movie ? 'Phim lẻ' : 'Phim bộ';
                             $topReport = $review->reports->first();
 
                             // Lý do báo cáo phổ biến nhất

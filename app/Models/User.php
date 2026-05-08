@@ -4,13 +4,14 @@ namespace App\Models;
 
 use App\Enums\UserRole;
 use App\Traits\HasSlug;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, Notifiable, SoftDeletes, HasSlug, HasRoles;
 
@@ -31,6 +32,8 @@ class User extends Authenticatable
         'role',
         'is_active',
         'last_login_at',
+        'failed_login_count',
+        'locked_until',
         'two_factor_code',
         'two_factor_expires_at',
         'two_factor_enabled',
@@ -58,6 +61,7 @@ class User extends Authenticatable
             'date_of_birth'                    => 'date',
             'is_active'                        => 'boolean',
             'last_login_at'                    => 'datetime',
+            'locked_until'                     => 'datetime',
             'role'                             => UserRole::class,
             'two_factor_expires_at'            => 'datetime',
             'two_factor_enabled'               => 'boolean',
@@ -76,6 +80,61 @@ class User extends Authenticatable
     public function isReportBanned(): bool
     {
         return $this->report_banned_until !== null && $this->report_banned_until->isFuture();
+    }
+
+    // ── Login Security Helpers ──
+
+    /**
+     * Kiểm tra tài khoản đang bị khóa tạm thời do nhập sai mật khẩu.
+     */
+    public function isLoginLocked(): bool
+    {
+        return $this->locked_until !== null && $this->locked_until->isFuture();
+    }
+
+    /**
+     * Số phút/giây còn lại của lệnh khóa.
+     */
+    public function loginLockedSecondsRemaining(): int
+    {
+        if (! $this->isLoginLocked()) {
+            return 0;
+        }
+
+        return (int) now()->diffInSeconds($this->locked_until, absolute: true);
+    }
+
+    /**
+     * Tăng đếm sai, kích hoạt cảnh báo/khóa nếu đạt ngưỡng.
+     * Gọi sau mỗi lần Auth::attempt() thất bại.
+     *
+     * @return int Số lần sai hiện tại
+     */
+    public function incrementFailedLogin(): int
+    {
+        $count = ($this->failed_login_count ?? 0) + 1;
+
+        $updates = ['failed_login_count' => $count];
+
+        // Ngưỡng khóa: 5 lần sai
+        if ($count >= 5) {
+            $updates['locked_until'] = now()->addMinutes(30);
+        }
+
+        $this->update($updates);
+
+        return $count;
+    }
+
+    /**
+     * Reset đếm sai sau khi đăng nhập thành công.
+     */
+    public function resetFailedLogin(): void
+    {
+        $this->update([
+            'failed_login_count' => 0,
+            'locked_until'       => null,
+        ]);
     }
 
     // ── Notifications ──

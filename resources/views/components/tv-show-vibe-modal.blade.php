@@ -25,7 +25,7 @@
             <div class="flex items-center justify-between px-8 pt-8 pb-4 shrink-0">
                 <div>
                     <h3 class="text-3xl font-black text-[#022541] mb-1">Cảm xúc</h3>
-                    <p class="text-base text-slate-500 italic font-medium">Bạn cảm thấy series này như thế nào?</p>
+                    <p class="text-base text-slate-500 italic font-medium">Bạn cảm thấy phim bộ này như thế nào?</p>
                 </div>
                 <button @click="open = false" class="text-gray-400 hover:text-black transition-colors rounded-full hover:bg-gray-200 p-2 shrink-0">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg>

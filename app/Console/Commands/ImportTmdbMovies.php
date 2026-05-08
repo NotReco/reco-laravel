@@ -162,7 +162,7 @@ class ImportTmdbMovies extends Command
         $genreIds = [];
 
         foreach ($genres as $genreData) {
-            $genre = Genre::where('tmdb_id', $genreData['id'])->first();
+            $genre = Genre::withTrashed()->where('tmdb_id', $genreData['id'])->first();
 
             if (!$genre) {
                 $genre = Genre::create([

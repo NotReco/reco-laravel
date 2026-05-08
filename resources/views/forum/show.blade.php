@@ -16,7 +16,36 @@
 
     {{-- ── Thread Content ─────────────────────────────────────────── --}}
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <article class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 sm:p-8">
+        <article class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 sm:p-8"
+                 x-data="{
+                     liked: {{ auth()->check() ? ($thread->likes->contains('user_id', auth()->id()) ? 'true' : 'false') : 'false' }},
+                     likesCount: {{ $thread->likes->count() }},
+                     isLiking: false,
+                     toggleLike() {
+                         if (!{{ auth()->check() ? 'true' : 'false' }}) {
+                             window.location.href = '{{ route('login') }}';
+                             return;
+                         }
+                         if (this.isLiking) return;
+                         this.isLiking = true;
+                         fetch('{{ route('forum.thread.like', $thread) }}', {
+                             method: 'POST',
+                             headers: {
+                                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                 'Accept': 'application/json',
+                                 'Content-Type': 'application/json'
+                             }
+                         })
+                         .then(response => response.json())
+                         .then(data => {
+                             this.liked = data.isLiked;
+                             this.likesCount = data.likesCount;
+                         })
+                         .finally(() => {
+                             this.isLiking = false;
+                         });
+                     }
+                 }">
             {{-- Header --}}
             <div class="flex items-start gap-4">
                 {{-- Author avatar --}}
@@ -101,6 +130,23 @@
             <div class="mt-6 prose prose-sm prose-gray max-w-none text-gray-700 leading-relaxed">
                 {!! Purify::clean(Str::markdown($thread->content, ['html_input' => 'allow'])) !!}
             </div>
+
+            {{-- Footer: Actions (Like) --}}
+            <div class="mt-6 flex items-center gap-4 pt-6 border-t border-gray-100">
+                <button type="button" 
+                        @click="toggleLike"
+                        class="flex items-center gap-2 group transition-colors"
+                        :class="liked ? 'text-rose-500' : 'text-gray-500 hover:text-rose-500'">
+                    <div class="relative flex items-center justify-center">
+                        <svg class="w-6 h-6 transition-transform duration-300"
+                             :class="[liked ? 'fill-current scale-110' : 'fill-none group-hover:scale-110', isLiking ? 'animate-pulse' : '']"
+                             stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        </svg>
+                    </div>
+                    <span class="font-medium" x-text="likesCount"></span>
+                </button>
+            </div>
         </article>
 
         {{-- ── Replies ───────────────────────────────────────────── --}}
@@ -114,7 +160,36 @@
 
             <div class="space-y-4">
                 @forelse($replies as $reply)
-                    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5" id="reply-{{ $reply->id }}">
+                    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5" id="reply-{{ $reply->id }}"
+                         x-data="{
+                             liked: {{ auth()->check() ? ($reply->likes->contains('user_id', auth()->id()) ? 'true' : 'false') : 'false' }},
+                             likesCount: {{ $reply->likes->count() }},
+                             isLiking: false,
+                             toggleLike() {
+                                 if (!{{ auth()->check() ? 'true' : 'false' }}) {
+                                     window.location.href = '{{ route('login') }}';
+                                     return;
+                                 }
+                                 if (this.isLiking) return;
+                                 this.isLiking = true;
+                                 fetch('{{ route('forum.reply.like', $reply) }}', {
+                                     method: 'POST',
+                                     headers: {
+                                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                         'Accept': 'application/json',
+                                         'Content-Type': 'application/json'
+                                     }
+                                 })
+                                 .then(response => response.json())
+                                 .then(data => {
+                                     this.liked = data.isLiked;
+                                     this.likesCount = data.likesCount;
+                                 })
+                                 .finally(() => {
+                                     this.isLiking = false;
+                                 });
+                             }
+                         }">
                         <div class="flex items-start gap-3">
                             <a href="{{ route('profile.show', $reply->user) }}" class="w-9 h-9 shrink-0 relative group">
                                 <div class="w-full h-full rounded-full bg-gradient-to-br from-gray-300 to-gray-500 flex items-center justify-center overflow-hidden transition-all duration-300 {{ $reply->user->activeFrame ? 'scale-[1.0475]' : 'ring-2 ring-white shadow-sm' }}">
@@ -143,6 +218,18 @@
                                         <span class="text-gray-400">{{ $reply->created_at->diffForHumans() }}</span>
                                     </div>
                                     <div class="flex items-center gap-1">
+                                        <button type="button" 
+                                                @click="toggleLike"
+                                                class="flex items-center gap-1.5 transition-colors p-1.5 rounded-lg hover:bg-rose-50"
+                                                :class="liked ? 'text-rose-500' : 'text-gray-400 hover:text-rose-500'"
+                                                title="Thích phản hồi">
+                                            <svg class="w-4 h-4 transition-transform duration-300"
+                                                 :class="[liked ? 'fill-current scale-110' : 'fill-none group-hover:scale-110', isLiking ? 'animate-pulse' : '']"
+                                                 stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                            </svg>
+                                            <span class="text-xs font-medium" x-text="likesCount || ''"></span>
+                                        </button>
                                         @auth
                                             @if(!$thread->is_locked)
                                                 <button type="button" onclick="setReplyParent({{ $reply->id }}, '{{ addslashes($reply->user->name) }}')"

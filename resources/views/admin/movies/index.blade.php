@@ -1,4 +1,4 @@
-<x-admin-layout :title="'Phim'" pageTitle="Quản lý phim">
+<x-admin-layout :title="'Phim lẻ'" pageTitle="Quản lý phim lẻ">
 
     {{-- ── Toolbar ───────────────────────────────────────────────── --}}
     <div class="flex items-center gap-3 mb-6">
@@ -9,7 +9,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0" />
                 </svg>
-                <input type="text" name="q" value="{{ request('q') }}" placeholder="Tìm theo tên phim..."
+                <input type="text" name="q" value="{{ request('q') }}" placeholder="Tìm theo tên phim lẻ..."
                     class="input-dark text-sm pl-9 py-2.5 w-full" autocomplete="off">
             </div>
             <button type="submit" class="btn-secondary py-2.5 px-4 text-sm shrink-0">Tìm</button>
@@ -21,7 +21,7 @@
         <div class="ml-auto flex items-center gap-2 shrink-0 px-3 py-1.5 rounded-xl bg-sky-600/15 border border-sky-500/30">
             <svg class="w-3.5 h-3.5 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"/></svg>
             <span class="text-sm font-semibold text-sky-300">{{ $movies->total() }}</span>
-            <span class="text-xs text-sky-400/70">phim</span>
+            <span class="text-xs text-sky-400/70">phim lẻ</span>
         </div>
     </div>
 
@@ -31,7 +31,7 @@
             <table class="w-full text-sm">
                 <thead>
                     <tr class="border-b border-dark-700 text-dark-400 text-left text-xs uppercase tracking-wide">
-                        <th class="px-5 py-3 font-medium">Phim</th>
+                        <th class="px-5 py-3 font-medium">Phim lẻ</th>
                         <th class="px-5 py-3 font-medium">Thể loại</th>
                         <th class="px-5 py-3 font-medium">Năm</th>
                         <th class="px-5 py-3 font-medium">Trạng thái</th>
@@ -42,7 +42,7 @@
                 <tbody class="divide-y divide-dark-800/60">
                     @forelse($movies as $movie)
                         <tr class="hover:bg-dark-800/40 transition-colors group">
-                            {{-- Tên phim --}}
+                            {{-- Tên phim lẻ --}}
                             <td class="px-5 py-3">
                                 <div class="flex items-center gap-3">
                                     <div class="w-10 h-14 rounded-lg bg-dark-700 bg-cover bg-center shrink-0 ring-1 ring-dark-700"
@@ -146,7 +146,7 @@
                                         </svg>
                                     </a>
                                     <button type="button"
-                                        @click="$dispatch('admin-confirm', { title: 'Xóa phim', message: 'Xóa phim \u00ab{{ addslashes($movie->title) }}\u00bb? Hành động này không thể hoàn tác.', formId: 'del-movie-{{ $movie->id }}' })"
+                                        @click="$dispatch('admin-confirm', { title: 'Xóa phim lẻ', message: 'Xóa phim lẻ \u00ab{{ addslashes($movie->title) }}\u00bb? Hành động này không thể hoàn tác.', formId: 'del-movie-{{ $movie->id }}' })"
                                         class="p-1.5 rounded-lg text-dark-500 hover:text-red-400 hover:bg-dark-800 transition-colors"
                                         title="Xóa">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -170,7 +170,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
                                             d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
                                     </svg>
-                                    <p>Không tìm thấy phim nào{{ request('q') ? ' cho "' . request('q') . '"' : '' }}.
+                                    <p>Không tìm thấy phim lẻ nào{{ request('q') ? ' cho "' . request('q') . '"' : '' }}.
                                     </p>
                                 </div>
                             </td>

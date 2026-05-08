@@ -1,7 +1,7 @@
 <x-guest-layout>
     <x-slot:title>Xác minh Email</x-slot:title>
 
-    <div class="space-y-8">
+    <div class="space-y-6">
         {{-- Header --}}
         <div class="text-center">
             <div class="w-14 h-14 bg-[#01b4e4]/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -12,11 +12,33 @@
             </div>
             <h2 class="text-[22px] font-bold text-gray-900">Xác minh email của bạn</h2>
             <p class="mt-2 text-[15px] text-gray-500 leading-relaxed">
-                Chúng tôi đã gửi một liên kết xác minh đến email của bạn.<br>
-                Vui lòng kiểm tra hộp thư và nhấp vào liên kết để kích hoạt tài khoản.
+                Chúng tôi đã gửi một liên kết xác minh đến địa chỉ email mới của bạn.<br>
+                Vui lòng kiểm tra hộp thư và nhấp vào liên kết để hoàn tất.
             </p>
         </div>
 
+        {{-- Flash: đến từ profile update --}}
+        @if (session('success'))
+            <div class="flex items-start gap-3 p-4 rounded-xl bg-green-50 border border-green-200">
+                <svg class="w-5 h-5 text-green-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p class="text-sm text-green-700 font-medium">{{ session('success') }}</p>
+            </div>
+        @endif
+
+        {{-- Security notice: email cảnh báo đã gửi đến email cũ --}}
+        <div class="flex items-start gap-3 p-4 rounded-xl bg-amber-50 border border-amber-200">
+            <svg class="w-5 h-5 text-amber-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <p class="text-sm text-amber-700 leading-relaxed">
+                Một <strong>email cảnh báo bảo mật</strong> cũng đã được gửi đến địa chỉ email cũ của bạn.
+                Nếu bạn không thực hiện thay đổi này, hãy
+                <a href="{{ route('password.request') }}" class="font-bold underline hover:text-amber-900">đặt lại mật khẩu ngay</a>.
+            </p>
+        </div>
 
         {{-- Info Box --}}
         <div class="flex items-start gap-3 p-4 rounded-xl bg-blue-50 border border-blue-100">
@@ -38,8 +60,12 @@
             </button>
         </form>
 
-        {{-- Logout --}}
-        <div class="text-center">
+        {{-- Actions row --}}
+        <div class="flex items-center justify-between">
+            <a href="{{ route('profile.edit') }}"
+                class="text-[14px] text-gray-500 hover:text-gray-800 font-medium transition-colors">
+                ← Quay lại hồ sơ
+            </a>
             <form method="POST" action="{{ route('logout') }}" class="inline">
                 @csrf
                 <button type="submit" class="text-[14px] text-gray-500 hover:text-gray-800 font-medium transition-colors">

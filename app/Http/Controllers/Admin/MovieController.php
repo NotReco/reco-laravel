@@ -64,7 +64,7 @@ class MovieController extends Controller
 
         return redirect()
             ->route('admin.movies.index')
-            ->with('success', "Đã cập nhật phim «{$movie->title}».");
+            ->with('success', "Đã cập nhật phim lẻ «{$movie->title}».");
     }
 
     public function destroy(Movie $movie)
@@ -74,6 +74,6 @@ class MovieController extends Controller
 
         return redirect()
             ->route('admin.movies.index')
-            ->with('success', "Đã xóa phim «{$title}».");
+            ->with('success', "Đã xóa phim lẻ «{$title}».");
     }
 }

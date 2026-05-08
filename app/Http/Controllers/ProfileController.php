@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Models\User;
+use App\Notifications\EmailChangedNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
@@ -105,13 +107,19 @@ class ProfileController extends Controller
             $data['cover_photo'] = null;
         }
 
-        $request->user()->fill($data);
+        $user = $request->user();
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        // Capture email cũ trước khi thay đổi
+        $oldEmail        = $user->email;
+        $emailWasChanged = isset($data['email']) && $data['email'] !== $oldEmail;
+
+        $user->fill($data);
+
+        if ($emailWasChanged) {
+            $user->email_verified_at = null;
         }
 
-        $request->user()->save();
+        $user->save();
 
         // Sync Top 4 Movies
         if ($request->has('top_movies')) {
@@ -121,13 +129,25 @@ class ProfileController extends Controller
                     $syncData[$movieId] = ['order' => $index + 1];
                 }
             }
-            $request->user()->topMovies()->sync($syncData);
+            $user->topMovies()->sync($syncData);
         } else {
-            // Nếu không gửi top_movies, có thể người dùng đã clear (trống array)
-            // Hoặc form không chứa, cần check
             if ($request->exists('top_movies_submitted')) {
-                $request->user()->topMovies()->sync([]);
+                $user->topMovies()->sync([]);
             }
+        }
+
+        if ($emailWasChanged) {
+            // 1. Gửi email CẢNH BÁO đến địa chỉ email CŨ
+            //    Dùng Notification::route để bypass User notify() override và gửi thẳng đến địa chỉ email
+            Notification::route('mail', [$oldEmail => $user->name])
+                ->notify(new EmailChangedNotification($user->email, $oldEmail, $user->name));
+
+            // 2. Gửi email XÁC THỰC đến địa chỉ email MỚI
+            $user->sendEmailVerificationNotification();
+
+            // 3. Redirect về trang xác thực email
+            return Redirect::route('verification.notice')
+                ->with('success', 'Hồ sơ đã được cập nhật. Vui lòng xác thực địa chỉ email mới của bạn.');
         }
 
         return Redirect::route('profile.edit')->with('success', 'Hồ sơ đã được cập nhật.');

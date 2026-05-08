@@ -25,14 +25,16 @@ class DashboardController extends Controller
             'pending_reports' => Report::where('status', 'pending')->count(),
         ];
 
-        $todayReviews = Review::with(['user', 'movie'])
+        $todayReviews = Review::with(['user', 'movie', 'tvShow'])
             ->whereDate('created_at', today())
             ->orderByDesc('created_at')
-            ->paginate(5, ['*'], 'reviews_page');
+            ->paginate(5, ['*'], 'reviews_page')
+            ->onEachSide(1);
 
         $todayUsers = User::whereDate('created_at', today())
             ->orderByDesc('created_at')
-            ->paginate(5, ['*'], 'users_page');
+            ->paginate(5, ['*'], 'users_page')
+            ->onEachSide(1);
 
         // Dữ liệu biểu đồ 7 ngày qua
         $chartDates = collect(range(6, 0))->map(fn($days) => today()->subDays($days)->format('Y-m-d'));

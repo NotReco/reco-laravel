@@ -8,7 +8,7 @@
                     @if(request('q'))
                         Kết quả tìm kiếm: "{{ request('q') }}"
                     @else
-                        Danh sách TV Series
+                        Danh sách Phim bộ
                     @endif
                 </h2>
             </div>
@@ -38,7 +38,7 @@
     @else
         <div class="text-center py-20 bg-white rounded-2xl border border-gray-200 shadow-sm" id="explore-movie-grid">
             <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            <h3 class="text-xl font-bold text-gray-900 mb-2">Không tìm thấy series nào</h3>
+            <h3 class="text-xl font-bold text-gray-900 mb-2">Không tìm thấy phim bộ nào</h3>
             <p class="text-gray-500">Thử thay đổi bộ lọc hoặc tìm với từ khóa khác xem sao nhé.</p>
             <button type="button" @click="resetFilters()" class="inline-flex items-center gap-2 mt-6 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg transition-colors text-sm font-medium">
                 <span>Xóa tất cả bộ lọc</span>

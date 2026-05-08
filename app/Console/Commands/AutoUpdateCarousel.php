@@ -36,7 +36,7 @@ class AutoUpdateCarousel extends Command
             'featured_order' => 0
         ]);
 
-        $this->info("Lấy danh sách 10 phim lẻ và 10 TV series Trending có đủ HÌNH/ẢNH...");
+        $this->info("Lấy danh sách 10 phim lẻ và 10 phim bộ đang thịnh hành...");
         
         $trendingMovies = Movie::whereNotNull('backdrop')
             ->whereNotNull('poster')

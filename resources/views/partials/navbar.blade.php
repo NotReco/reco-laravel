@@ -67,7 +67,7 @@
                         $links = [
                             ['label' => 'Trang chủ', 'route' => 'home', 'match' => 'home'],
                             ['label' => 'Phim lẻ', 'route' => 'explore', 'match' => 'explore'],
-                            ['label' => 'TV Series', 'route' => 'tv-shows.index', 'match' => 'tv-shows.*'],
+                            ['label' => 'Phim bộ', 'route' => 'tv-shows.index', 'match' => 'tv-shows.*'],
                             ['label' => 'Diễn viên', 'route' => 'person.index', 'match' => 'person.*'],
                             ['label' => 'Tin tức', 'route' => 'news.index', 'match' => 'news.*'],
                             ['label' => 'Diễn đàn', 'route' => 'forum.index', 'match' => 'forum.*'],
@@ -835,7 +835,7 @@
             <a href="{{ route('tv-shows.index') }}"
                 class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
                       {{ request()->routeIs('tv-shows.*') ? 'bg-sky-50 text-sky-600' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50' }}">
-                TV Series
+                Phim bộ
             </a>
             <a href="{{ route('news.index') }}"
                 class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors

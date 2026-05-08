@@ -1,9 +1,9 @@
-<x-admin-layout :title="'Sửa phim — ' . $movie->title" pageTitle="Sửa phim">
+<x-admin-layout :title="'Sửa phim lẻ — ' . $movie->title" pageTitle="Sửa phim lẻ">
 
     <div class="max-w-4xl">
         {{-- Breadcrumb --}}
         <nav class="flex items-center gap-2 text-sm text-dark-500 mb-6">
-            <a href="{{ route('admin.movies.index') }}" class="hover:text-white transition-colors">Quản lý phim</a>
+            <a href="{{ route('admin.movies.index') }}" class="hover:text-white transition-colors">Quản lý phim lẻ</a>
             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
             </svg>
@@ -63,13 +63,13 @@
                 {{-- ── Cột chính ─────────────────────────────────────────── --}}
                 <div class="lg:col-span-2 space-y-5">
 
-                    {{-- Tên phim --}}
+                    {{-- Tên phim lẻ --}}
                     <div class="card p-5">
                         <h3 class="text-sm font-semibold text-dark-300 uppercase tracking-wide mb-4">Thông tin cơ bản
                         </h3>
                         <div class="space-y-4">
                             <div>
-                                <label for="title" class="block text-sm font-medium text-dark-200 mb-1.5">Tên phim
+                                <label for="title" class="block text-sm font-medium text-dark-200 mb-1.5">Tên phim lẻ
                                     <span class="text-red-400">*</span></label>
                                 <input id="title" type="text" name="title"
                                     value="{{ old('title', $movie->title) }}" class="input-dark text-sm" required>
@@ -92,7 +92,7 @@
                                     class="block text-sm font-medium text-dark-200 mb-1.5">Tagline</label>
                                 <input id="tagline" type="text" name="tagline"
                                     value="{{ old('tagline', $movie->tagline) }}" class="input-dark text-sm"
-                                    placeholder="Câu khẩu hiệu của phim">
+                                    placeholder="Câu khẩu hiệu của phim lẻ">
                                 @error('tagline')
                                     <p class="text-red-400 text-xs mt-1">{{ $message }}</p>
                                 @enderror
@@ -101,7 +101,7 @@
                                 <label for="synopsis" class="block text-sm font-medium text-dark-200 mb-1.5">Mô tả / Nội
                                     dung</label>
                                 <textarea id="synopsis" name="synopsis" rows="6" class="input-dark text-sm"
-                                    placeholder="Tóm tắt nội dung phim...">{{ old('synopsis', $movie->synopsis) }}</textarea>
+                                    placeholder="Tóm tắt nội dung phim lẻ...">{{ old('synopsis', $movie->synopsis) }}</textarea>
                                 @error('synopsis')
                                     <p class="text-red-400 text-xs mt-1">{{ $message }}</p>
                                 @enderror
@@ -237,14 +237,14 @@
                         </div>
                     </div>
 
-                    {{-- Xóa phim --}}
+                    {{-- Xóa phim lẻ --}}
                     <div class="card p-5 border border-red-500/20">
                         <h3 class="text-sm font-semibold text-red-400 uppercase tracking-wide mb-3">Vùng nguy hiểm</h3>
-                        <p class="text-xs text-dark-400 mb-3">Xóa phim sẽ ẩn nó khỏi hệ thống!</p>
+                        <p class="text-xs text-dark-400 mb-3">Xóa phim lẻ sẽ ẩn nó khỏi hệ thống!</p>
                         <button type="button"
-                            @click="$dispatch('admin-confirm', { title: 'Xóa phim', message: 'Xóa phim \u00ab{{ addslashes($movie->title) }}\u00bb? Hành động này không thể hoàn tác.', formId: 'delete-movie-form' })"
+                            @click="$dispatch('admin-confirm', { title: 'Xóa phim lẻ', message: 'Xóa phim lẻ \u00ab{{ addslashes($movie->title) }}\u00bb? Hành động này không thể hoàn tác.', formId: 'delete-movie-form' })"
                             class="w-full text-sm py-2 px-4 rounded-xl border border-red-500/40 text-red-400 hover:bg-red-500/10 transition-colors">
-                            🗑 Xóa phim này
+                            🗑 Xóa phim lẻ này
                         </button>
                     </div>
 

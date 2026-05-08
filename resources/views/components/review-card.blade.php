@@ -110,7 +110,7 @@
     {{-- Interactions (Likes & Comments) --}}
     <div x-data="{
         liked: {{ auth()->check() && $review->likes->contains('user_id', auth()->id()) ? 'true' : 'false' }},
-        likesCount: {{ $review->likes_count }},
+        likesCount: {{ $review->likes->count() }},
         commentsCount: {{ $review->comments->count() }},
         showComments: false,
         replyContent: '',

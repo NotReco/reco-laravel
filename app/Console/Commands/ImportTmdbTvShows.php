@@ -165,10 +165,13 @@ class ImportTmdbTvShows extends Command
         $genreIds = [];
 
         foreach ($genres as $genreData) {
-            $genre = Genre::firstOrCreate(
-                ['tmdb_id' => $genreData['id']],
-                ['name'    => $genreData['name']]
-            );
+            $genre = Genre::withTrashed()->where('tmdb_id', $genreData['id'])->first();
+            if (!$genre) {
+                $genre = Genre::create([
+                    'tmdb_id' => $genreData['id'],
+                    'name'    => $genreData['name']
+                ]);
+            }
             $genreIds[] = $genre->id;
         }
 

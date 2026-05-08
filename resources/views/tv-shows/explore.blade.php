@@ -1,5 +1,5 @@
 <x-app-layout>
-    <x-slot:title>Khám phá TV Series</x-slot:title>
+    <x-slot:title>Khám phá Phim bộ</x-slot:title>
 
     <div class="bg-gray-50 min-h-screen pb-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" x-data="exploreFilter()" @popstate.window="handlePopstate">
@@ -64,9 +64,9 @@
                                             <option value="release_date_asc"
                                                 {{ $sort === 'release_date_asc' ? 'selected' : '' }}>Cũ nhất</option>
                                             <option value="title_asc" {{ $sort === 'title_asc' ? 'selected' : '' }}>Tên
-                                                series (A-Z)</option>
+                                                phim bộ (A-Z)</option>
                                             <option value="title_desc" {{ $sort === 'title_desc' ? 'selected' : '' }}>
-                                                Tên series (Z-A)</option>
+                                                Tên phim bộ (Z-A)</option>
                                         </select>
                                     </div>
                                 </div>

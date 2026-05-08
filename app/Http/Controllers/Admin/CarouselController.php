@@ -65,7 +65,7 @@ class CarouselController extends Controller
         $media = $request->media_type === 'movie' ? Movie::findOrFail($request->media_id) : \App\Models\TvShow::findOrFail($request->media_id);
 
         if (!$media->backdrop || !$media->poster || !$media->trailer_url) {
-            return back()->withErrors(['carousel' => 'Phim không đủ điều kiện (phải có hình nền ngang, poster, trailer).']);
+            return back()->withErrors(['carousel' => 'Nội dung không đủ điều kiện (phải có hình nền ngang, poster, trailer).']);
         }
 
         $maxMovieOrder = Movie::max('featured_order') ?? 0;
@@ -156,7 +156,7 @@ class CarouselController extends Controller
             ]);
         }
 
-        return back()->with('success', 'Đã tự động làm mới top 10 nội dung thịnh hành nhất lên Carousel (5 Phim + 5 TV Series).');
+        return back()->with('success', 'Đã tự động làm mới top 10 nội dung thịnh hành nhất lên Carousel (5 phim lẻ + 5 phim bộ).');
     }
 
     public function destroy($type, $id)

@@ -1,9 +1,9 @@
-<x-admin-layout :title="'Sửa TV Series — ' . $tvShow->title" pageTitle="Sửa TV Series">
+<x-admin-layout :title="'Sửa phim bộ — ' . $tvShow->title" pageTitle="Sửa phim bộ">
 
     <div class="max-w-4xl">
         {{-- Breadcrumb --}}
         <nav class="flex items-center gap-2 text-sm text-dark-500 mb-6">
-            <a href="{{ route('admin.tv-shows.index') }}" class="hover:text-white transition-colors">Quản lý TV Series</a>
+            <a href="{{ route('admin.tv-shows.index') }}" class="hover:text-white transition-colors">Quản lý phim bộ</a>
             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
             </svg>
@@ -69,8 +69,8 @@
                         </h3>
                         <div class="space-y-4">
                             <div>
-                                <label for="title" class="block text-sm font-medium text-dark-200 mb-1.5">Tên TV
-                                    Series <span class="text-red-400">*</span></label>
+                                <label for="title" class="block text-sm font-medium text-dark-200 mb-1.5">Tên phim bộ
+                                    <span class="text-red-400">*</span></label>
                                 <input id="title" type="text" name="title"
                                     value="{{ old('title', $tvShow->title) }}" class="input-dark text-sm" required>
                                 @error('title')
@@ -167,7 +167,7 @@
 
                     {{-- Thông số series --}}
                     <div class="card p-5">
-                        <h3 class="text-sm font-semibold text-dark-300 uppercase tracking-wide mb-4">Thông số series
+                        <h3 class="text-sm font-semibold text-dark-300 uppercase tracking-wide mb-4">Thông số phim bộ
                         </h3>
                         <div class="grid grid-cols-3 gap-4">
                             <div>
@@ -245,11 +245,11 @@
                     {{-- Xóa --}}
                     <div class="card p-5 border border-red-500/20">
                         <h3 class="text-sm font-semibold text-red-400 uppercase tracking-wide mb-3">Vùng nguy hiểm</h3>
-                        <p class="text-xs text-dark-400 mb-3">Xóa series sẽ ẩn nó khỏi hệ thống!</p>
+                        <p class="text-xs text-dark-400 mb-3">Xóa phim bộ sẽ ẩn nó khỏi hệ thống!</p>
                         <button type="button"
-                            @click="$dispatch('admin-confirm', { title: 'Xóa TV Series', message: 'Xóa \u00ab{{ addslashes($tvShow->title) }}\u00bb? Hành động này không thể hoàn tác.', formId: 'delete-tvshow-form' })"
+                            @click="$dispatch('admin-confirm', { title: 'Xóa Phim bộ', message: 'Xóa \u00ab{{ addslashes($tvShow->title) }}\u00bb? Hành động này không thể hoàn tác.', formId: 'delete-tvshow-form' })"
                             class="w-full text-sm py-2 px-4 rounded-xl border border-red-500/40 text-red-400 hover:bg-red-500/10 transition-colors">
-                            🗑 Xóa series này
+                            🗑 Xóa phim bộ này
                         </button>
                     </div>
 

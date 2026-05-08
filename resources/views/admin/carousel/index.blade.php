@@ -14,7 +14,7 @@
                 <form id="auto-update-form" action="{{ route('admin.carousel.autoUpdate') }}" method="POST">
                     @csrf
                     <button type="button"
-                        @click="$dispatch('admin-confirm', { title: 'Tự động lấy nội dung hot', message: 'Hành động này sẽ gỡ toàn bộ nội dung đang được ghim và tự động lấy top 10 (5 Phim + 5 TV Series) hot nhất lên thế chỗ. Bạn chắc chứ?', formId: 'auto-update-form', confirmText: 'Cập nhật', type: 'info' })"
+                        @click="$dispatch('admin-confirm', { title: 'Tự động lấy nội dung hot', message: 'Hành động này sẽ gỡ toàn bộ nội dung đang được ghim và tự động lấy top 10 (5 phim lẻ + 5 phim bộ) hot nhất lên thế chỗ. Bạn chắc chứ?', formId: 'auto-update-form', confirmText: 'Cập nhật', type: 'info' })"
                         class="btn-secondary text-sm px-4 py-2">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -28,7 +28,7 @@
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                     </svg>
-                    Thêm Phim
+                    Thêm nội dung
                 </button>
             </div>
         </div>
@@ -40,7 +40,7 @@
                     <thead>
                         <tr class="bg-dark-800/50 border-b border-dark-700/50">
                             <th class="px-5 py-3 font-medium text-dark-300 w-16">Thứ tự</th>
-                            <th class="px-5 py-3 font-medium text-dark-300">Bộ phim</th>
+                            <th class="px-5 py-3 font-medium text-dark-300">Nội dung</th>
                             <th class="px-5 py-3 font-medium text-dark-300">Thể loại</th>
                             <th class="px-5 py-3 font-medium text-dark-300 text-right w-32">Thao tác</th>
                         </tr>
@@ -55,7 +55,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                     </svg>
-                                    Carousel đang trống. Hãy nhấn "Tự động Lấp Đầy" hoặc thêm phim thủ công.
+                                    Carousel đang trống. Hãy nhấn "Tự động Cập nhật" hoặc thêm thủ công.
                                 </td>
                             </tr>
                         </template>
@@ -81,12 +81,11 @@
                                                     x-text="item.title"></p>
                                                 <template x-if="item.media_type === 'tv'">
                                                     <span
-                                                        class="px-1.5 py-0.5 rounded bg-dark-700 text-[10px] font-bold text-dark-300 border border-dark-600 shrink-0">TV
-                                                        Series</span>
+                                                        class="px-1.5 py-0.5 rounded bg-dark-700 text-[10px] font-bold text-dark-300 border border-dark-600 shrink-0">Phim bộ</span>
                                                 </template>
                                                 <template x-if="item.media_type === 'movie'">
                                                     <span
-                                                        class="px-1.5 py-0.5 rounded bg-sky-600/20 text-[10px] font-bold text-sky-400 border border-sky-600/30 shrink-0">Movie</span>
+                                                        class="px-1.5 py-0.5 rounded bg-sky-600/20 text-[10px] font-bold text-sky-400 border border-sky-600/30 shrink-0">Phim lẻ</span>
                                                 </template>
                                             </div>
                                         </div>
@@ -168,9 +167,9 @@
                     {{-- Modal Header --}}
                     <div class="px-6 py-5 border-b border-dark-800 flex items-center justify-between shrink-0">
                         <div>
-                            <h3 class="text-xl font-bold text-white" id="modal-title">Chọn phim/series ghim lên
+                            <h3 class="text-xl font-bold text-white" id="modal-title">Chọn phim lẻ / phim bộ ghim lên
                                 Carousel</h3>
-                            <p class="text-sm text-dark-400 mt-1">Danh sách dưới đây là các phim và series thỏa mãn
+                            <p class="text-sm text-dark-400 mt-1">Danh sách dưới đây là các phim lẻ và phim bộ thỏa mãn
                                 điều kiện có đầy đủ Ảnh, Nền và Trailer.</p>
                         </div>
                         <button type="button" class="text-dark-400 hover:text-white" @click="addModalOpen = false">
@@ -183,7 +182,7 @@
 
                     {{-- Modal Body - Search & List --}}
                     <div class="p-6 flex-1 overflow-hidden flex flex-col">
-                        <input type="text" x-model="search" placeholder="Tìm tên phim hoặc series..."
+                        <input type="text" x-model="search" placeholder="Tìm tên phim lẻ hoặc phim bộ..."
                             class="input-dark w-full mb-4 shrink-0 focus:!border-sky-500 focus:!ring-sky-500">
 
                         <div class="flex-1 overflow-y-auto pr-2 space-y-2 relative" style="min-h: 300px;">
@@ -243,7 +242,7 @@
 
                             @if ($eligibleMovies->isEmpty())
                                 <div class="text-center py-12 text-dark-400">
-                                    <p>Không có phim hoặc series nào đủ điều kiện hoặc chưa ghim.</p>
+                                    <p>Không có phim lẻ hoặc phim bộ nào đủ điều kiện hoặc chưa ghim.</p>
                                 </div>
                             @endif
                         </div>
@@ -256,7 +255,7 @@
     {{-- Criteria note --}}
     <p class="text-xs text-dark-400 mt-5 leading-relaxed max-w-5xl">
         Tự động cập nhật lấy
-        <span class="font-semibold text-dark-300">Top 5 Phim và Top 5 TV Series</span>
+        <span class="font-semibold text-dark-300">Top 5 phim lẻ và Top 5 phim bộ</span>
         có lượt xem
         <span class="font-semibold text-dark-300">cao nhất</span>,
         yêu cầu phải có đủ

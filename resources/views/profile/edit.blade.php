@@ -768,6 +768,18 @@
                                 window.scrollTo({ top: parseInt(savedScroll), behavior: 'instant' });
                                 sessionStorage.removeItem('profileEditScroll');
                             });
+                        } else if (window.location.hash) {
+                            // If coming from profile view with a specific field hash, focus and scroll to it smoothly
+                            setTimeout(() => {
+                                const targetId = window.location.hash.substring(1);
+                                const targetEl = document.getElementById(targetId);
+                                if (targetEl) {
+                                    targetEl.focus({ preventScroll: true });
+                                    // 120px offset to account for the fixed navbar
+                                    const y = targetEl.getBoundingClientRect().top + window.scrollY - 120;
+                                    window.scrollTo({ top: y, behavior: 'smooth' });
+                                }
+                            }, 100);
                         }
 
                         for (const form of this.forms) {

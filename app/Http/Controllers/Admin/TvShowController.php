@@ -66,7 +66,7 @@ class TvShowController extends Controller
 
         return redirect()
             ->route('admin.tv-shows.index')
-            ->with('success', "Đã cập nhật TV Series «{$tvShow->title}».");
+            ->with('success', "Đã cập nhật phim bộ «{$tvShow->title}».");
     }
 
     public function destroy(TvShow $tvShow)
@@ -76,6 +76,6 @@ class TvShowController extends Controller
 
         return redirect()
             ->route('admin.tv-shows.index')
-            ->with('success', "Đã xóa TV Series «{$title}».");
+            ->with('success', "Đã xóa phim bộ «{$title}».");
     }
 }

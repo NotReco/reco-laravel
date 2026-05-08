@@ -40,7 +40,7 @@ Route::get('/api/search', function (\Illuminate\Http\Request $request) {
         return response()->json([]);
     }
 
-    $movies = \App\Models\Movie::where(function ($qb) use ($q) {
+    $movies = \App\Models\Movie::query()->where(function ($qb) use ($q) {
             $qb->where('title', 'like', "%{$q}%")
                ->orWhere('original_title', 'like', "%{$q}%")
                ->orWhereHas('tags', function($qTag) use ($q) {
@@ -56,7 +56,7 @@ Route::get('/api/search', function (\Illuminate\Http\Request $request) {
             return $m;
         });
 
-    $tvShows = \App\Models\TvShow::where(function ($qb) use ($q) {
+    $tvShows = \App\Models\TvShow::query()->where(function ($qb) use ($q) {
             $qb->where('title', 'like', "%{$q}%")
                ->orWhere('original_title', 'like', "%{$q}%")
                ->orWhereHas('tags', function($qTag) use ($q) {
@@ -120,6 +120,33 @@ Route::get('/api/search', function (\Illuminate\Http\Request $request) {
 
     return response()->json($cleanResults);
 })->name('api.search');
+
+// Random suggestions for Top 4 Movies picker
+Route::get('/api/suggestions', function () {
+    $movies = \App\Models\Movie::query()->inRandomOrder('')->limit(4)
+        ->select('id', 'title', 'poster', 'release_date')
+        ->get()->map(fn($m) => [
+            'id'           => $m->id,
+            'title'        => $m->title,
+            'poster'       => $m->poster && !str_starts_with($m->poster, 'http') ? '/storage/' . $m->poster : $m->poster,
+            'release_date' => $m->release_date,
+            'type'         => 'movie',
+        ]);
+
+    $tvShows = \App\Models\TvShow::query()->inRandomOrder('')->limit(4)
+        ->select('id', 'title', 'poster', 'first_air_date as release_date')
+        ->get()->map(fn($t) => [
+            'id'           => $t->id,
+            'title'        => $t->title,
+            'poster'       => $t->poster && !str_starts_with($t->poster, 'http') ? '/storage/' . $t->poster : $t->poster,
+            'release_date' => $t->release_date,
+            'type'         => 'tv',
+        ]);
+
+    return response()->json(
+        $movies->concat($tvShows)->shuffle()->take(6)->values()
+    );
+})->name('api.suggestions');
 
 // Person
 Route::get('/person', [PersonController::class, 'index'])->name('person.index');
@@ -210,11 +237,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // ── Forum (auth actions) ──
     Route::get('/forum/create', [ForumController::class, 'create'])->name('forum.create');
     Route::post('/forum/threads', [ForumController::class, 'storeThread'])->name('forum.storeThread');
+    Route::post('/forum/threads/{thread:slug}/like', [ForumController::class, 'toggleThreadLike'])->name('forum.thread.like');
     Route::get('/forum/threads/{thread:slug}/edit', [ForumController::class, 'editThread'])->name('forum.editThread');
     Route::put('/forum/threads/{thread:slug}', [ForumController::class, 'updateThread'])->name('forum.updateThread');
     Route::post('/forum/threads/{thread:slug}/reply', [ForumController::class, 'storeReply'])->name('forum.reply');
     Route::delete('/forum/threads/{thread:slug}', [ForumController::class, 'destroy'])->name('forum.destroy');
     
+    Route::post('/forum/replies/{reply}/like', [ForumController::class, 'toggleReplyLike'])->name('forum.reply.like');
     Route::get('/forum/replies/{reply}/edit', [ForumController::class, 'editReply'])->name('forum.editReply');
     Route::put('/forum/replies/{reply}', [ForumController::class, 'updateReply'])->name('forum.updateReply');
     Route::delete('/forum/replies/{reply}', [ForumController::class, 'destroyReply'])->name('forum.destroyReply');
@@ -249,6 +278,14 @@ Route::middleware(['auth', 'can:access_admin_panel'])->prefix('staff')->name('ad
         Route::get('/tv-shows/{tvShow}/edit', [\App\Http\Controllers\Admin\TvShowController::class, 'edit'])->name('tv-shows.edit');
         Route::put('/tv-shows/{tvShow}', [\App\Http\Controllers\Admin\TvShowController::class, 'update'])->name('tv-shows.update');
         Route::delete('/tv-shows/{tvShow}', [\App\Http\Controllers\Admin\TvShowController::class, 'destroy'])->name('tv-shows.destroy');
+    });
+
+    // People (Diễn viên / Đạo diễn / ...)
+    Route::middleware('can:manage_movies')->group(function () {
+        Route::get('/people', [\App\Http\Controllers\Admin\PersonController::class, 'index'])->name('people.index');
+        Route::get('/people/{person}/edit', [\App\Http\Controllers\Admin\PersonController::class, 'edit'])->name('people.edit');
+        Route::put('/people/{person}', [\App\Http\Controllers\Admin\PersonController::class, 'update'])->name('people.update');
+        Route::delete('/people/{person}', [\App\Http\Controllers\Admin\PersonController::class, 'destroy'])->name('people.destroy');
     });
 
     // Reviews (post-moderation: chỉ xử lý vi phạm, không duyệt trước)

@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ForumReply extends Model
 {
+    use SoftDeletes;
+
     protected $fillable = ['forum_thread_id', 'user_id', 'content', 'parent_id'];
 
     // ── Relationships ──
@@ -44,6 +47,11 @@ class ForumReply extends Model
     public function children()
     {
         return $this->hasMany(ForumReply::class, 'parent_id');
+    }
+
+    public function likes()
+    {
+        return $this->hasMany(ForumReplyLike::class);
     }
 
 

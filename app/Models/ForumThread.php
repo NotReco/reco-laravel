@@ -4,10 +4,11 @@ namespace App\Models;
 
 use App\Traits\HasSlug;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ForumThread extends Model
 {
-    use HasSlug;
+    use HasSlug, SoftDeletes;
 
     protected $fillable = [
         'forum_category_id', 'user_id', 'title', 'slug',
@@ -41,6 +42,11 @@ class ForumThread extends Model
     public function replies()
     {
         return $this->hasMany(ForumReply::class);
+    }
+
+    public function likes()
+    {
+        return $this->hasMany(ForumThreadLike::class);
     }
 
     public function latestReply()

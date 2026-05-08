@@ -84,7 +84,7 @@
                             @else
                                 <span class="badge-sky mb-3 bg-indigo-50 text-indigo-700 border-indigo-200">
                                     <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M2.695 14.763l-1.262 3.155a.5.5 0 00.65.65l3.155-1.262a4 4 0 001.343-3.084V14a.5.5 0 011 0v.222a5 5 0 01-1.678 3.854l-3.95 2.112a1.5 1.5 0 01-2.091-2.09l2.112-3.951A5 5 0 015.778 13H6a.5.5 0 010 1h-.222a4 4 0 00-3.083 1.343v-.58zm7.305 1.487v-.55a4.004 4.004 0 00-3.083-1.343H6a.5.5 0 010-1h.917A5.002 5.002 0 0110 12.012v.238a.5.5 0 01-1 0v-.238a4 4 0 00-1.343-3.084V6a.5.5 0 011 0v.222a5 5 0 011.678-3.854l3.95-2.112a1.5 1.5 0 012.09 2.09l-2.112 3.951A5 5 0 0114.222 13H14a.5.5 0 010-1h.222a4 4 0 003.083-1.343v.58zm-7.305-1.487"/></svg>
-                                    TV SERIES
+                                    PHIM BỘ
                                 </span>
                             @endif
 
@@ -122,18 +122,6 @@
                                 @endif
                             </div>
 
-                            {{-- Rating Score Box --}}
-                            @if($item->avg_rating > 0)
-                                <div class="flex items-center gap-3 mt-3">
-                                    <div class="bg-white/80 backdrop-blur border border-gray-200 shadow-sm rounded-xl px-4 py-2 flex items-center gap-3">
-                                        <span class="text-2xl font-bold text-gray-900">{{ number_format($item->avg_rating, 1) }}</span>
-                                        <div>
-                                            <x-star-rating :rating="$item->avg_rating" :max="10" size="sm" />
-                                            <p class="text-xs text-gray-500 font-medium mt-0.5">RecoDB Score</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endif
 
                             {{-- Synopsis --}}
                             @if($item->synopsis)
