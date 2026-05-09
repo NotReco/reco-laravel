@@ -74,7 +74,7 @@
                                             <img src="{{ $review->user->avatar }}" class="w-full h-full object-cover"
                                                 alt="">
                                         @else
-                                            {{ strtoupper(substr($review->user?->name ?? '?', 0, 1)) }}
+                                            {{ mb_strtoupper(mb_substr($review->user?->name ?? '?', 0, 1, 'UTF-8'), 'UTF-8') }}
                                         @endif
                                     </div>
                                     <div>

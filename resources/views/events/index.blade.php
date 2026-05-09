@@ -137,19 +137,32 @@
                             {{-- Reward Preview Panel --}}
                             <div class="bg-slate-900/50 rounded-2xl p-4 border border-white/5 mb-6">
                                 <p class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-3">Phần thưởng</p>
-                                <div class="flex justify-center items-center h-16">
-                                    @if($quest->reward_type === 'title' && $quest->rewardTitle)
+                                <div class="flex justify-center items-center gap-6 h-16">
+                                    @php $hasReward = false; @endphp
+
+                                    @if(in_array($quest->reward_type, ['title', 'both']) && $quest->rewardTitle)
+                                        @php $hasReward = true; @endphp
                                         <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-extrabold tracking-wide border shadow-lg"
                                               style="color: {{ $quest->rewardTitle->color_hex }}; border-color: {{ $quest->rewardTitle->color_hex }}60; background-color: {{ $quest->rewardTitle->color_hex }}15; text-shadow: 0 0 10px {{ $quest->rewardTitle->color_hex }}40;">
                                             {{ $quest->rewardTitle->name }}
                                         </span>
-                                    @elseif($quest->reward_type === 'frame' && $quest->rewardFrame)
+                                    @endif
+
+                                    @if(in_array($quest->reward_type, ['frame', 'both']) && $quest->rewardFrame)
+                                        @php $hasReward = true; @endphp
                                         <div class="relative w-16 h-16 shrink-0 group-hover:scale-110 transition-transform duration-500">
                                             <div class="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-full blur-md"></div>
                                             <img src="{{ Storage::url($quest->rewardFrame->image_path) }}" class="absolute inset-0 w-full h-full object-contain filter drop-shadow-xl" alt="{{ $quest->rewardFrame->name }}">
                                         </div>
-                                    @else
-                                        <span class="text-sm text-slate-600 font-medium">Bí ẩn</span>
+                                    @endif
+
+                                    @if(!$hasReward)
+                                        <div class="flex flex-col items-center gap-1 text-slate-500 animate-pulse">
+                                            <svg class="w-6 h-6 drop-shadow-[0_0_10px_rgba(100,116,139,0.5)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </svg>
+                                            <span class="text-[10px] font-bold uppercase tracking-widest">Bí ẩn</span>
+                                        </div>
                                     @endif
                                 </div>
                             </div>

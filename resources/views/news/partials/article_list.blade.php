@@ -68,7 +68,7 @@
                                         @if($article->user->avatar)
                                             <img src="{{ $article->user->avatar }}" alt="{{ $article->user->name }}" class="w-full h-full object-cover shadow-sm">
                                         @else
-                                            {{ strtoupper(substr($article->user->name, 0, 1)) }}
+                                            {{ mb_strtoupper(mb_substr($article->user->name, 0, 1, 'UTF-8'), 'UTF-8') }}
                                         @endif
                                     </div>
                                     @if($article->user->activeFrame)

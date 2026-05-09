@@ -40,7 +40,7 @@
                                                 class="w-full h-full object-cover" loading="lazy">
                                         @else
                                             <span
-                                                class="text-xs font-bold text-white">{{ strtoupper(substr($user->name, 0, 1)) }}</span>
+                                                class="text-xs font-bold text-white">{{ mb_strtoupper(mb_substr($user->name, 0, 1, 'UTF-8'), 'UTF-8') }}</span>
                                         @endif
                                     </div>
                                     <div class="min-w-0">

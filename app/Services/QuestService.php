@@ -91,8 +91,8 @@ class QuestService
 
     private function getLikesReceived(User $user): int
     {
-        return \App\Models\Like::whereHasMorph(
-            'likeable', [\App\Models\Review::class],
+        return \App\Models\Like::whereHas(
+            'review',
             fn($q) => $q->where('user_id', $user->id)
         )->count();
     }
@@ -154,9 +154,10 @@ class QuestService
             ]);
 
             // Phát phần thưởng vào inventory
-            if ($quest->reward_type === 'title' && $quest->reward_title_id) {
+            if (in_array($quest->reward_type, ['title', 'both']) && $quest->reward_title_id) {
                 $user->titles()->syncWithoutDetaching([$quest->reward_title_id]);
-            } elseif ($quest->reward_type === 'frame' && $quest->reward_frame_id) {
+            }
+            if (in_array($quest->reward_type, ['frame', 'both']) && $quest->reward_frame_id) {
                 $user->frames()->syncWithoutDetaching([$quest->reward_frame_id]);
             }
         });

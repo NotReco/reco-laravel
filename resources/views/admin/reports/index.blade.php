@@ -110,7 +110,7 @@
                                     @if($report->user?->avatar)
                                         <img src="{{ $report->user->avatar }}" class="w-full h-full object-cover" alt="">
                                     @else
-                                        {{ strtoupper(substr($report->user?->name ?? '?', 0, 1)) }}
+                                        {{ mb_strtoupper(mb_substr($report->user?->name ?? '?', 0, 1, 'UTF-8'), 'UTF-8') }}
                                     @endif
                                 </div>
                                 <span class="font-medium text-white whitespace-nowrap">{{ $report->user?->name ?? 'Ẩn danh' }}</span>

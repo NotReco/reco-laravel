@@ -176,15 +176,23 @@
                 @if($bioText)
                     @php
                         $isLongBio = mb_strlen($bioText) > 350;
+                        $isEnglishOnly = !$person->biography_vi && ($person->biography || $person->bio);
                     @endphp
-                    <div class="mt-5 max-w-2xl text-sm text-gray-300 leading-relaxed" 
+                    <div class="mt-5 max-w-2xl text-sm text-gray-300 leading-relaxed"
                          x-data="{ expanded: false }">
-                         
+
+                        @if($isEnglishOnly)
+                            <span class="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-400/10 text-amber-400 border border-amber-400/20 mb-2">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/></svg>
+                                Tiểu sử tiếng Anh (chưa có bản Việt)
+                            </span>
+                        @endif
+
                         <div class="transition-all duration-300 relative {{ $isLongBio ? 'line-clamp-4 mask-bottom' : '' }}"
                              :class="expanded ? '!line-clamp-none mask-none' : ''">
                              {!! nl2br(e($bioText)) !!}
                         </div>
-                        
+
                         @if($isLongBio)
                             <button @click="expanded = !expanded"
                                     class="mt-2 text-xs font-semibold text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-1 group">
@@ -403,7 +411,7 @@
                                     <div class="flex-1 min-w-0">
                                         <div class="credit-title truncate">{{ $movie->title }}</div>
                                         @if($movie->pivot->character_name)
-                                            <div class="credit-char">vai {{ $movie->pivot->character_name }}</div>
+                                            <div class="credit-char">vai {{ str_ireplace(['(voice)', '/ voice'], ['(lồng tiếng)', '/ lồng tiếng'], $movie->pivot->character_name) }}</div>
                                         @endif
                                     </div>
 

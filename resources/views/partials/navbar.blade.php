@@ -675,7 +675,7 @@
                                         <img src="{{ Auth::user()->avatar }}" alt="{{ Auth::user()->name }}"
                                             class="w-full h-full object-cover">
                                     @else
-                                        <span class="text-xs font-bold text-white">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</span>
+                                        <span class="text-xs font-bold text-white">{{ mb_strtoupper(mb_substr(Auth::user()->name, 0, 1, 'UTF-8'), 'UTF-8') }}</span>
                                     @endif
                                 </div>
                                 @if (Auth::user()->activeFrame)
@@ -704,7 +704,7 @@
                                                 class="w-full h-full object-cover">
                                         @else
                                             <span class="text-[15px] font-bold text-white">
-                                                {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                                                {{ mb_strtoupper(mb_substr(Auth::user()->name, 0, 1, 'UTF-8'), 'UTF-8') }}
                                             </span>
                                         @endif
                                     </div>

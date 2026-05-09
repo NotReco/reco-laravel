@@ -716,7 +716,7 @@
                                                 </p>
                                                 @if ($person->pivot->character_name)
                                                     <p class="text-[13px] text-gray-600 mt-0.5 leading-snug">
-                                                        {{ $person->pivot->character_name }}
+                                                        {{ str_ireplace(['(voice)', '/ voice'], ['(lồng tiếng)', '/ lồng tiếng'], $person->pivot->character_name) }}
                                                     </p>
                                                 @endif
                                             </div>

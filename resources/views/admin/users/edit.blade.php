@@ -24,7 +24,7 @@
                             @if($user->avatar)
                                 <img src="{{ $user->avatar }}" alt="" class="w-full h-full object-cover">
                             @else
-                                <span class="text-xl font-bold text-white">{{ strtoupper(substr($user->name, 0, 1)) }}</span>
+                                <span class="text-xl font-bold text-white">{{ mb_strtoupper(mb_substr($user->name, 0, 1, 'UTF-8'), 'UTF-8') }}</span>
                             @endif
                         </div>
                         <div>

@@ -23,7 +23,7 @@ class ProfileController extends Controller
         $user->loadCount(['followers', 'following', 'reviews'])
             ->load([
                 'favorites' => fn($q) => $q->latest()->take(6),
-                'reviews' => fn($q) => $q->with('movie')->latest()->take(5),
+                'reviews' => fn($q) => $q->with(['movie', 'tvShow'])->latest()->take(5),
                 'activeTitle',
                 'activeFrame',
                 'topMovies' => fn($q) => $q->orderBy('user_top_movies.order'),

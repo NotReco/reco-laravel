@@ -33,7 +33,7 @@
                     @if($review->user?->avatar)
                         <img src="{{ $review->user->avatar }}" class="w-full h-full object-cover" alt="" loading="lazy">
                     @else
-                        <span class="text-sm font-bold text-gray-500">{{ strtoupper(substr($review->user?->name ?? '?', 0, 1)) }}</span>
+                        <span class="text-sm font-bold text-gray-500">{{ mb_strtoupper(mb_substr($review->user?->name ?? '?', 0, 1, 'UTF-8'), 'UTF-8') }}</span>
                     @endif
                 </div>
                 @if($review->user?->activeFrame)
@@ -280,7 +280,7 @@
                             @if(Auth::user()->avatar)
                                 <img src="{{ Auth::user()->avatar }}" class="w-full h-full object-cover" loading="lazy">
                             @else
-                                {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                                {{ mb_strtoupper(mb_substr(Auth::user()->name, 0, 1, 'UTF-8'), 'UTF-8') }}
                             @endif
                         </div>
                         @if(Auth::user()->activeFrame)
@@ -378,7 +378,7 @@
                             @if($report->user?->avatar)
                                 <img src="{{ $report->user->avatar }}" class="w-full h-full object-cover" alt="">
                             @else
-                                {{ strtoupper(substr($report->user?->name ?? '?', 0, 1)) }}
+                                {{ mb_strtoupper(mb_substr($report->user?->name ?? '?', 0, 1, 'UTF-8'), 'UTF-8') }}
                             @endif
                         </div>
                         <div class="min-w-0 flex-1">

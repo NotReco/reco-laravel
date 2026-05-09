@@ -29,7 +29,7 @@
                     <label for="name" class="block text-sm font-medium text-dark-300">
                         Tên khung <span class="text-red-500">*</span>
                     </label>
-                    <input type="text" id="name" name="name"
+                    <input type="text" id="name" name="name" maxlength="50"
                         class="w-full bg-dark-950 border border-dark-800 rounded-xl text-white placeholder-dark-600 focus:ring-sky-500 focus:border-sky-500 px-4 py-2.5 transition-colors"
                         value="{{ old('name', $frame->name ?? '') }}" oninput="updateNamePreview(this.value)" required>
                 </div>
@@ -43,7 +43,8 @@
                         @endif
                     </label>
 
-                    <div class="border-2 border-dashed border-dark-700 hover:border-sky-500/50 rounded-xl p-6 transition-colors text-center cursor-pointer"
+                    <div id="dropzone"
+                        class="border-2 border-dashed border-dark-700 hover:border-sky-500/50 rounded-xl p-6 transition-colors text-center cursor-pointer"
                         onclick="document.getElementById('image').click()">
                         <svg class="w-10 h-10 text-dark-600 mx-auto mb-3" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">
@@ -101,34 +102,45 @@
                 <div class="flex flex-col items-center gap-4">
                     <div class="relative w-28 h-28 shrink-0">
                         <div
-                            class="w-full h-full rounded-full bg-gradient-to-br from-sky-500 to-blue-700 flex items-center justify-center text-4xl font-bold text-white scale-[1.0475]">
-                            A
+                            class="w-full h-full rounded-full bg-gradient-to-br from-sky-500 to-blue-700 flex items-center justify-center overflow-hidden text-4xl font-bold text-white scale-[1.0475]">
+                            @if (Auth::user()->avatar)
+                                <img src="{{ Auth::user()->avatar }}" alt="" class="w-full h-full object-cover">
+                            @else
+                                {{ mb_strtoupper(mb_substr(Auth::user()->name, 0, 1, 'UTF-8'), 'UTF-8') }}
+                            @endif
                         </div>
                         <img id="framePreviewLg" src="{{ isset($frame) ? Storage::url($frame->image_path) : '' }}"
                             alt="Frame preview"
                             class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[126%] h-[126%] max-w-none object-contain pointer-events-none z-10 transition-opacity {{ !isset($frame) ? 'opacity-0' : '' }}">
                     </div>
 
-                    <p id="namePreviewLg" class="text-sm font-semibold text-white mt-2">
+                    <p id="namePreviewLg"
+                        class="text-sm font-semibold text-white mt-2 break-words w-full text-center px-4">
                         {{ isset($frame) ? $frame->name : 'Tên khung' }}
                     </p>
                 </div>
 
                 {{-- Small preview --}}
                 <div class="mt-5 pt-4 border-t border-dark-800">
-                    <p class="text-xs text-dark-500 mb-4 text-center">Preview kích thước nhỏ (nav)</p>
+                    <p class="text-xs text-dark-500 mb-4 text-center">Xem trước</p>
                     <div class="flex items-center justify-center gap-3">
                         <div class="relative w-10 h-10 shrink-0">
                             <div
-                                class="w-full h-full rounded-full bg-gradient-to-br from-sky-500 to-blue-700 flex items-center justify-center text-sm font-bold text-white scale-[1.0475]">
-                                A</div>
+                                class="w-full h-full rounded-full bg-gradient-to-br from-sky-500 to-blue-700 flex items-center justify-center overflow-hidden text-sm font-bold text-white scale-[1.0475]">
+                                @if (Auth::user()->avatar)
+                                    <img src="{{ Auth::user()->avatar }}" alt=""
+                                        class="w-full h-full object-cover">
+                                @else
+                                    {{ mb_strtoupper(mb_substr(Auth::user()->name, 0, 1, 'UTF-8'), 'UTF-8') }}
+                                @endif
+                            </div>
                             <img id="framePreviewSm" src="{{ isset($frame) ? Storage::url($frame->image_path) : '' }}"
                                 alt=""
                                 class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[126%] h-[126%] max-w-none object-contain pointer-events-none z-10 transition-opacity {{ !isset($frame) ? 'opacity-0' : '' }}">
                         </div>
                         <div>
-                            <p class="text-xs font-medium text-white">Người dùng mẫu</p>
-                            <p class="text-[10px] text-dark-500">user@example.com</p>
+                            <p class="text-xs font-medium text-white">{{ Auth::user()->name }}</p>
+                            <p class="text-[10px] text-dark-500">{{ Auth::user()->email }}</p>
                         </div>
                     </div>
                 </div>
@@ -147,9 +159,7 @@
                     </div>
                 @endif
 
-                <p class="text-[10px] text-dark-600 text-center mt-4">
-                    * Ảnh khung nên có nền trong suốt (PNG/WEBP/SVG) để hiển thị đúng.
-                </p>
+
             </div>
         </div>
     </div>
@@ -181,18 +191,29 @@
                 document.getElementById('namePreviewLg').textContent = val || 'Tên khung';
             }
 
+            // Prevent default drag behaviors for the whole window
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                window.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
             // Drag-over styling
-            const dropzone = document.querySelector('[onclick]');
+            const dropzone = document.getElementById('dropzone');
             if (dropzone) {
-                dropzone.addEventListener('dragover', (e) => {
-                    e.preventDefault();
+                dropzone.addEventListener('dragenter', () => {
+                    dropzone.classList.add('border-sky-500/80', 'bg-sky-500/5');
+                });
+                dropzone.addEventListener('dragover', () => {
                     dropzone.classList.add('border-sky-500/80', 'bg-sky-500/5');
                 });
                 dropzone.addEventListener('dragleave', () => {
                     dropzone.classList.remove('border-sky-500/80', 'bg-sky-500/5');
                 });
                 dropzone.addEventListener('drop', (e) => {
-                    e.preventDefault();
                     dropzone.classList.remove('border-sky-500/80', 'bg-sky-500/5');
                     const dt = e.dataTransfer;
                     if (dt.files.length) {

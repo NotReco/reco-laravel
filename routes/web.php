@@ -238,6 +238,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/forum/create', [ForumController::class, 'create'])->name('forum.create');
     Route::post('/forum/threads', [ForumController::class, 'storeThread'])->name('forum.storeThread');
     Route::post('/forum/threads/{thread:slug}/like', [ForumController::class, 'toggleThreadLike'])->name('forum.thread.like');
+    Route::post('/forum/threads/{thread:slug}/toggle-pin', [ForumController::class, 'togglePin'])->name('forum.thread.togglePin');
+    Route::post('/forum/threads/{thread:slug}/toggle-lock', [ForumController::class, 'toggleLock'])->name('forum.thread.toggleLock');
     Route::get('/forum/threads/{thread:slug}/edit', [ForumController::class, 'editThread'])->name('forum.editThread');
     Route::put('/forum/threads/{thread:slug}', [ForumController::class, 'updateThread'])->name('forum.updateThread');
     Route::post('/forum/threads/{thread:slug}/reply', [ForumController::class, 'storeReply'])->name('forum.reply');

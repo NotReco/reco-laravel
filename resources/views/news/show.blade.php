@@ -116,7 +116,7 @@
                                 class="w-7 h-7 rounded-full object-cover">
                         @else
                             <div class="w-7 h-7 flex items-center justify-center rounded-full bg-sky-100 text-sky-600 font-bold text-xs">
-                                {{ strtoupper(substr($article->user->name, 0, 1)) }}
+                                {{ mb_strtoupper(mb_substr($article->user->name, 0, 1, 'UTF-8'), 'UTF-8') }}
                             </div>
                         @endif
                         <span class="text-sm font-semibold text-gray-800">{{ $article->user->name }}</span>
@@ -803,7 +803,7 @@
                                         class="w-full h-full object-cover" loading="lazy">
                                 @else
                                     <span
-                                        class="text-sm font-bold text-white">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
+                                        class="text-sm font-bold text-white">{{ mb_strtoupper(mb_substr(auth()->user()->name, 0, 1, 'UTF-8'), 'UTF-8') }}</span>
                                 @endif
                             </div>
                             @if (auth()->user()->activeFrame)
@@ -849,7 +849,7 @@
                                             class="w-full h-full object-cover" loading="lazy">
                                     @else
                                         <span
-                                            class="text-xs font-bold text-white">{{ strtoupper(substr($comment->user->name ?? '?', 0, 1)) }}</span>
+                                            class="text-xs font-bold text-white">{{ mb_strtoupper(mb_substr($comment->user->name ?? '?', 0, 1, 'UTF-8'), 'UTF-8') }}</span>
                                     @endif
                                 </div>
                                 @if ($comment->user->activeFrame ?? false)
@@ -980,7 +980,7 @@
                                         class="w-full h-full rounded-full object-cover">
                                 @else
                                     <span
-                                        class="text-[11px] font-bold text-gray-500">{{ strtoupper(substr($firstReplyUser->name ?? '?', 0, 1)) }}</span>
+                                        class="text-[11px] font-bold text-gray-500">{{ mb_strtoupper(mb_substr($firstReplyUser->name ?? '?', 0, 1, 'UTF-8'), 'UTF-8') }}</span>
                                 @endif
                             </div>
                             <span class="group-hover:underline">
@@ -1004,7 +1004,7 @@
                                                     class="w-full h-full object-cover" loading="lazy">
                                             @else
                                                 <span
-                                                    class="text-[10px] font-bold text-white">{{ strtoupper(substr($reply->user->name ?? '?', 0, 1)) }}</span>
+                                                    class="text-[10px] font-bold text-white">{{ mb_strtoupper(mb_substr($reply->user->name ?? '?', 0, 1, 'UTF-8'), 'UTF-8') }}</span>
                                             @endif
                                         </div>
                                         @if ($reply->user->activeFrame ?? false)
@@ -1124,7 +1124,7 @@
                                                     class="w-full h-full object-cover" loading="lazy">
                                             @else
                                                 <span
-                                                    class="text-[10px] font-bold text-white">{{ strtoupper(substr($nestedReply->user->name ?? '?', 0, 1)) }}</span>
+                                                    class="text-[10px] font-bold text-white">{{ mb_strtoupper(mb_substr($nestedReply->user->name ?? '?', 0, 1, 'UTF-8'), 'UTF-8') }}</span>
                                             @endif
                                         </div>
                                         @if ($nestedReply->user->activeFrame ?? false)

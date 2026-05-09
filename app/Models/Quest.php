@@ -59,12 +59,13 @@ class Quest extends Model
 
     public function rewardLabel(): string
     {
-        if ($this->reward_type === 'title' && $this->rewardTitle) {
-            return '🏷 ' . $this->rewardTitle->name;
+        $labels = [];
+        if (in_array($this->reward_type, ['title', 'both']) && $this->rewardTitle) {
+            $labels[] = '🏷 ' . $this->rewardTitle->name;
         }
-        if ($this->reward_type === 'frame' && $this->rewardFrame) {
-            return '🖼 ' . $this->rewardFrame->name;
+        if (in_array($this->reward_type, ['frame', 'both']) && $this->rewardFrame) {
+            $labels[] = '🖼 ' . $this->rewardFrame->name;
         }
-        return '—';
+        return !empty($labels) ? implode(' + ', $labels) : '—';
     }
 }

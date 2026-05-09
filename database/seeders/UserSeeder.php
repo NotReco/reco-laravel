@@ -7,6 +7,73 @@ use Illuminate\Database\Seeder;
 
 class UserSeeder extends Seeder
 {
+    // -------------------------------------------------------------------------
+    // Họ phổ biến tại Việt Nam
+    // -------------------------------------------------------------------------
+    private static array $ho = [
+        'Nguyễn', 'Trần', 'Lê', 'Phạm', 'Hoàng', 'Huỳnh',
+        'Phan', 'Vũ', 'Võ', 'Đặng', 'Bùi', 'Đỗ',
+        'Hồ', 'Ngô', 'Dương', 'Lý',
+    ];
+
+    // -------------------------------------------------------------------------
+    // Tên đệm – Nam (phổ biến, hiện đại)
+    // -------------------------------------------------------------------------
+    private static array $demNam = [
+        'Minh', 'Hải', 'Quang', 'Đức', 'Tuấn', 'Gia',
+        'Nhật', 'Thái', 'Trọng', 'Phúc', 'Khoa', 'Anh',
+        'Hùng', 'Tiến', 'Hoàng', 'Công',
+    ];
+
+    // -------------------------------------------------------------------------
+    // Tên đệm – Nữ (phổ biến, hiện đại)
+    // -------------------------------------------------------------------------
+    private static array $demNu = [
+        'Thanh', 'Thu', 'Ngọc', 'Mai', 'Thị', 'Bảo',
+        'Diễm', 'Hồng', 'Trúc', 'Phương', 'Khánh', 'Quỳnh',
+        'Tuyết', 'Uyên', 'Nhã', 'Bích',
+    ];
+
+    // -------------------------------------------------------------------------
+    // Tên chính – Nam (hiện đại, tự nhiên)
+    // -------------------------------------------------------------------------
+    private static array $tenNam = [
+        'Đăng', 'Trí', 'Bách', 'Huy', 'Anh', 'Kiệt',
+        'Bảo', 'Nghĩa', 'Khôi', 'Phong', 'Sơn', 'Lâm',
+        'Hải', 'Dũng', 'Quân', 'Khang', 'Long', 'Nam',
+        'Toàn', 'Tâm', 'Hưng', 'Duy', 'Tùng', 'Việt',
+    ];
+
+    // -------------------------------------------------------------------------
+    // Tên chính – Nữ (hiện đại, tự nhiên)
+    // -------------------------------------------------------------------------
+    private static array $tenNu = [
+        'Linh', 'Mai', 'Anh', 'Hà', 'Hương', 'Ngọc',
+        'Nhung', 'Lan', 'My', 'Vy', 'Ngân', 'Nhi',
+        'Phương', 'Trâm', 'Thư', 'Giang', 'Yến', 'Trang',
+        'Châu', 'Dung', 'Hân', 'Ly', 'Tiên', 'Oanh',
+    ];
+
+    /**
+     * Sinh tên Việt tự nhiên theo giới tính.
+     * Xác suất ~60% có tên đệm cho giống thực tế.
+     */
+    private function randomVietnameseName(string $gender): string
+    {
+        $ho  = self::$ho[array_rand(self::$ho)];
+        $hasDem = (rand(1, 10) <= 8); // 80% có tên đệm
+
+        if ($gender === 'male') {
+            $dem = $hasDem ? self::$demNam[array_rand(self::$demNam)] : null;
+            $ten = self::$tenNam[array_rand(self::$tenNam)];
+        } else {
+            $dem = $hasDem ? self::$demNu[array_rand(self::$demNu)] : null;
+            $ten = self::$tenNu[array_rand(self::$tenNu)];
+        }
+
+        return $dem ? "{$ho} {$dem} {$ten}" : "{$ho} {$ten}";
+    }
+
     /**
      * Tạo 30 user giả để có dữ liệu tương tác.
      */
@@ -19,7 +86,7 @@ class UserSeeder extends Seeder
         for ($i = 1; $i <= 30; $i++) {
             $style = $avatarStyles[array_rand($avatarStyles)];
             $gender = $faker->randomElement(['male', 'female']);
-            $name = $faker->name($gender);
+            $name = $this->randomVietnameseName($gender);
 
             User::updateOrCreate(
                 ['email' => "user{$i}@reco.test"],

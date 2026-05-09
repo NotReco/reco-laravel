@@ -88,17 +88,23 @@ class QuestController extends Controller
             'description'    => 'nullable|string',
             'type'           => 'required|in:' . implode(',', array_column(QuestType::cases(), 'value')),
             'target_value'   => 'required|integer|min:1',
-            'reward_type'    => 'required|in:title,frame',
+            'reward_type'    => 'required|array|min:1',
+            'reward_type.*'  => 'in:title,frame',
             'reward_title_id'=> 'nullable|exists:user_titles,id',
             'reward_frame_id'=> 'nullable|exists:avatar_frames,id',
             'is_active'      => 'boolean',
             'sort_order'     => 'nullable|integer|min:0',
         ]);
 
-        // Ensure correct reward FK is set
-        if ($validated['reward_type'] === 'title') {
+        // Process reward_type array into enum string and ensure correct reward FK is set
+        $types = $validated['reward_type'];
+        if (in_array('title', $types) && in_array('frame', $types)) {
+            $validated['reward_type'] = 'both';
+        } elseif (in_array('title', $types)) {
+            $validated['reward_type'] = 'title';
             $validated['reward_frame_id'] = null;
         } else {
+            $validated['reward_type'] = 'frame';
             $validated['reward_title_id'] = null;
         }
 

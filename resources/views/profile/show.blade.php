@@ -246,7 +246,7 @@
                                         class="w-full h-full object-cover">
                                 @else
                                     <span
-                                        class="text-3xl font-bold text-white">{{ strtoupper(substr($user->name, 0, 1)) }}</span>
+                                        class="text-3xl font-bold text-white">{{ mb_strtoupper(mb_substr($user->name, 0, 1, 'UTF-8'), 'UTF-8') }}</span>
                                 @endif
                             </div>
                             {{-- Frame overlay --}}
@@ -680,14 +680,29 @@
                                                 alt="{{ $review->movie->title }}" class="w-full h-full object-cover"
                                                 loading="lazy">
                                         </a>
+                                    @elseif ($review->tvShow)
+                                        <a href="{{ route('tv-shows.show', $review->tvShow) }}"
+                                            class="shrink-0 block rounded-md overflow-hidden bg-slate-100 border border-slate-200"
+                                            style="width: 54px; height: 81px;">
+                                            <img src="{{ $review->tvShow->poster }}"
+                                                alt="{{ $review->tvShow->title }}" class="w-full h-full object-cover"
+                                                loading="lazy">
+                                        </a>
                                     @endif
                                     <div class="flex-1 min-w-0">
                                         <div class="flex items-center justify-between gap-2 mb-1.5">
                                             <h3 class="font-semibold text-slate-800 text-[13px] line-clamp-1">
-                                                <a href="{{ route('movies.show', $review->movie) }}"
-                                                    class="hover:text-sky-600 transition-colors">
-                                                    {{ $review->title ?? 'Đánh giá: ' . $review->movie->title }}
-                                                </a>
+                                                @if ($review->movie)
+                                                    <a href="{{ route('movies.show', $review->movie) }}"
+                                                        class="hover:text-sky-600 transition-colors">
+                                                        {{ $review->title ?? 'Đánh giá: ' . $review->movie->title }}
+                                                    </a>
+                                                @elseif ($review->tvShow)
+                                                    <a href="{{ route('tv-shows.show', $review->tvShow) }}"
+                                                        class="hover:text-sky-600 transition-colors">
+                                                        {{ $review->title ?? 'Đánh giá: ' . $review->tvShow->title }}
+                                                    </a>
+                                                @endif
                                             </h3>
                                             <span class="text-[10px] text-slate-400 font-medium">
                                                 {{ $review->created_at->diffForHumans() }}

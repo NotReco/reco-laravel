@@ -299,7 +299,7 @@
                                                 'image_path' => \Illuminate\Support\Facades\Storage::url($thread->user->activeFrame->image_path),
                                             ]
                                             : null,
-                                        'initial' => strtoupper(substr($thread->user->name, 0, 1)),
+                                        'initial' => mb_strtoupper(mb_substr($thread->user->name, 0, 1, 'UTF-8'), 'UTF-8'),
                                         'active_title' => $thread->user->activeTitle
                                             ? [
                                                 'name' => $thread->user->activeTitle->name,

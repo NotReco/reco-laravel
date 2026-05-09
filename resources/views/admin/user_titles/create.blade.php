@@ -26,7 +26,7 @@
                     <label for="name" class="block text-sm font-medium text-dark-300">
                         Tên danh hiệu <span class="text-red-500">*</span>
                     </label>
-                    <input type="text" id="name" name="name"
+                    <input type="text" id="name" name="name" maxlength="50"
                            class="w-full bg-dark-950 border border-dark-800 rounded-xl text-white placeholder-dark-600 focus:ring-sky-500 focus:border-sky-500 px-4 py-2.5 transition-colors"
                            value="{{ old('name', $userTitle->name ?? '') }}"
                            placeholder="Ví dụ: Nhà phê bình, Cinephile..."
@@ -72,11 +72,11 @@
                                class="h-10 w-10 rounded-lg cursor-pointer border border-dark-700 p-0.5 bg-dark-950"
                                value="{{ old('color_hex', $userTitle->color_hex ?? '#38bdf8') }}"
                                oninput="syncColorFromPicker(this.value)">
-                        <input type="text" id="color_hex" name="color_hex"
-                               class="flex-1 bg-dark-950 border border-dark-800 rounded-xl text-white font-mono placeholder-dark-600 focus:ring-sky-500 focus:border-sky-500 px-4 py-2.5 transition-colors"
+                        <input type="text" id="color_hex" name="color_hex" maxlength="7"
+                               class="flex-1 bg-dark-950 border border-dark-800 rounded-xl text-white font-mono focus:ring-sky-500 focus:border-sky-500 px-4 py-2.5 transition-colors"
                                value="{{ old('color_hex', $userTitle->color_hex ?? '#38bdf8') }}"
-                               placeholder="#38bdf8"
-                               oninput="syncColorFromText(this.value)"
+                               oninput="syncColorFromText(this)"
+                               autocomplete="off"
                                required>
                     </div>
                 </div>
@@ -84,9 +84,8 @@
                 {{-- Description --}}
                 <div class="space-y-2">
                     <label for="description" class="block text-sm font-medium text-dark-300">Mô tả</label>
-                    <textarea id="description" name="description" rows="3"
-                              class="w-full bg-dark-950 border border-dark-800 rounded-xl text-white placeholder-dark-600 focus:ring-sky-500 focus:border-sky-500 px-4 py-2.5 transition-colors resize-none"
-                              placeholder="Mô tả điều kiện để nhận danh hiệu này..."
+                    <textarea id="description" name="description" rows="1"
+                              class="w-full bg-dark-950 border border-dark-800 rounded-xl text-white focus:ring-sky-500 focus:border-sky-500 px-4 py-2.5 transition-colors resize-none overflow-hidden"
                               oninput="updatePreview()">{{ old('description', $userTitle->description ?? '') }}</textarea>
                 </div>
 
@@ -128,20 +127,24 @@
                 {{-- Profile card preview --}}
                 <div class="bg-dark-950 rounded-xl p-4 border border-dark-800">
                     <div class="flex items-center gap-3 mb-3">
-                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-sky-500 to-blue-700 flex items-center justify-center text-lg font-bold text-white shrink-0">
-                            A
+                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-sky-500 to-blue-700 flex items-center justify-center overflow-hidden text-lg font-bold text-white shrink-0">
+                            @if (Auth::user()->avatar)
+                                <img src="{{ Auth::user()->avatar }}" alt="" class="w-full h-full object-cover">
+                            @else
+                                {{ mb_strtoupper(mb_substr(Auth::user()->name, 0, 1, 'UTF-8'), 'UTF-8') }}
+                            @endif
                         </div>
                         <div>
-                            <p class="text-sm font-semibold text-white">Người dùng mẫu</p>
+                            <p class="text-sm font-semibold text-white">{{ Auth::user()->name }}</p>
                             {{-- Badge preview --}}
                             <span id="badgePreview"
-                                  class="text-xs font-bold px-2 py-0.5 rounded-full inline-block mt-1 transition-all">
+                                  class="text-xs font-bold px-2 py-0.5 rounded-full inline-block mt-1 transition-all max-w-full break-words whitespace-normal text-center">
                                 Danh hiệu
                             </span>
                         </div>
                     </div>
                     <div class="h-px bg-dark-800 mb-3"></div>
-                    <p class="text-xs text-dark-500 leading-relaxed" id="descPreview">
+                    <p class="text-xs text-dark-500 leading-relaxed whitespace-pre-wrap break-words" id="descPreview">
                         Mô tả danh hiệu sẽ xuất hiện ở đây...
                     </p>
                 </div>
@@ -180,7 +183,12 @@
     <script>
     function updatePreview() {
         const name  = document.getElementById('name').value || 'Danh hiệu';
-        const desc  = document.getElementById('description').value || 'Mô tả danh hiệu sẽ xuất hiện ở đây...';
+        const descInput = document.getElementById('description');
+        const desc  = descInput.value || 'Mô tả danh hiệu sẽ xuất hiện ở đây...';
+
+        // Auto-resize textarea
+        descInput.style.height = 'auto';
+        descInput.style.height = descInput.scrollHeight + 'px';
         const color = document.getElementById('color_hex').value || '#38bdf8';
 
         const badge = document.getElementById('badgePreview');
@@ -197,7 +205,22 @@
         syncColor(val);
     }
 
-    function syncColorFromText(val) {
+    function syncColorFromText(input) {
+        let val = input.value;
+        
+        // Ensure it always starts with #
+        if (!val.startsWith('#')) {
+            val = '#' + val.replace(/#/g, '');
+        }
+        
+        // Remove invalid hex characters
+        val = '#' + val.substring(1).replace(/[^0-9a-fA-F]/g, '');
+        
+        input.value = val;
+        
+        // Update text preview immediately
+        document.getElementById('colorHexDisplay').textContent = val;
+
         if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
             document.getElementById('color_picker').value = val;
             syncColor(val);

@@ -54,7 +54,7 @@
                         @if($thread->user->avatar)
                             <img src="{{ $thread->user->avatar }}" alt="" class="w-full h-full object-cover" loading="lazy">
                         @else
-                            <span class="text-sm font-bold text-white">{{ strtoupper(substr($thread->user->name, 0, 1)) }}</span>
+                            <span class="text-sm font-bold text-white">{{ mb_strtoupper(mb_substr($thread->user->name, 0, 1, 'UTF-8'), 'UTF-8') }}</span>
                         @endif
                     </div>
                     @if($thread->user->activeFrame)
@@ -90,10 +90,35 @@
                     </div>
                 </div>
 
-                {{-- Actions (Edit / Delete) --}}
+                {{-- Actions (Edit / Delete / Pin / Lock) --}}
                 @auth
                     @if(auth()->id() === $thread->user_id || auth()->user()->isStaff())
                         <div class="flex items-center gap-1 shrink-0">
+                            @if(auth()->user()->isStaff())
+                                {{-- Nút Ghim --}}
+                                <form action="{{ route('forum.thread.togglePin', $thread) }}" method="POST" class="inline">
+                                    @csrf
+                                    <button type="submit" 
+                                            class="p-2 rounded-lg transition-colors {{ $thread->is_pinned ? 'text-amber-600 bg-amber-50 hover:bg-amber-100' : 'text-gray-400 hover:text-amber-600 hover:bg-amber-50' }}"
+                                            title="{{ $thread->is_pinned ? 'Bỏ ghim bài viết' : 'Ghim bài viết' }}">
+                                        <svg class="w-5 h-5" fill="{{ $thread->is_pinned ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                                        </svg>
+                                    </button>
+                                </form>
+                                {{-- Nút Khóa --}}
+                                <form action="{{ route('forum.thread.toggleLock', $thread) }}" method="POST" class="inline">
+                                    @csrf
+                                    <button type="submit" 
+                                            class="p-2 rounded-lg transition-colors {{ $thread->is_locked ? 'text-gray-800 bg-gray-100 hover:bg-gray-200' : 'text-gray-400 hover:text-gray-800 hover:bg-gray-50' }}"
+                                            title="{{ $thread->is_locked ? 'Mở khóa bài viết' : 'Khóa bài viết' }}">
+                                        <svg class="w-5 h-5" fill="{{ $thread->is_locked ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                        </svg>
+                                    </button>
+                                </form>
+                            @endif
+
                             @if(auth()->id() === $thread->user_id)
                                 <a href="{{ route('forum.editThread', $thread) }}"
                                    class="text-gray-400 hover:text-sky-500 transition-colors p-2 rounded-lg hover:bg-sky-50" title="Sửa bài viết">
@@ -196,7 +221,7 @@
                                     @if($reply->user->avatar)
                                         <img src="{{ $reply->user->avatar }}" alt="" class="w-full h-full object-cover" loading="lazy">
                                     @else
-                                        <span class="text-xs font-bold text-white">{{ strtoupper(substr($reply->user->name, 0, 1)) }}</span>
+                                        <span class="text-xs font-bold text-white">{{ mb_strtoupper(mb_substr($reply->user->name, 0, 1, 'UTF-8'), 'UTF-8') }}</span>
                                     @endif
                                 </div>
                                 @if($reply->user->activeFrame)

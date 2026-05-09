@@ -21,6 +21,7 @@ class Person extends Model
         'photo',
         'bio',
         'biography',
+        'biography_vi',
         'date_of_birth',
         'date_of_death',
         'nationality',
@@ -45,11 +46,11 @@ class Person extends Model
     }
 
     /**
-     * Trả về tiểu sử (ưu tiên biography mới, fallback sang bio cũ)
+     * Trả về tiểu sử (ưu tiên biography_vi tiếng Việt, sau đó biography, cuối cùng bio cũ)
      */
     public function getBioTextAttribute(): string
     {
-        return $this->biography ?? $this->bio ?? '';
+        return $this->biography_vi ?? $this->biography ?? $this->bio ?? '';
     }
 
     /**

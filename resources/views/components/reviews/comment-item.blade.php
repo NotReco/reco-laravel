@@ -6,7 +6,7 @@
             @if($comment->user?->avatar)
                 <img src="{{ $comment->user->avatar }}" class="w-full h-full object-cover" loading="lazy">
             @else
-                {{ strtoupper(substr($comment->user?->name ?? '?', 0, 1)) }}
+                {{ mb_strtoupper(mb_substr($comment->user?->name ?? '?', 0, 1, 'UTF-8'), 'UTF-8') }}
             @endif
         </div>
         @if($comment->user?->activeFrame)

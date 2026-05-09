@@ -37,109 +37,255 @@
                 {{-- Description --}}
                 <div class="space-y-1.5">
                     <label for="description" class="block text-sm font-medium text-dark-300">Mô tả</label>
-                    <textarea id="description" name="description" rows="2"
-                              class="w-full bg-dark-950 border border-dark-800 rounded-xl text-white placeholder-dark-600 focus:ring-sky-500 focus:border-sky-500 px-4 py-2.5 transition-colors resize-none"
-                              placeholder="Mô tả yêu cầu để hoàn thành nhiệm vụ...">{{ old('description', $quest->description) }}</textarea>
+                    <textarea id="description" name="description" rows="1"
+                              class="w-full bg-dark-950 border border-dark-800 rounded-xl text-white focus:ring-sky-500 focus:border-sky-500 px-4 py-2.5 transition-colors resize-none overflow-hidden"
+                              oninput="autoResize(this)">{{ old('description', $quest->description) }}</textarea>
                 </div>
+
+                {{-- Divider --}}
+                <div class="border-t border-dark-800"></div>
 
                 {{-- Condition --}}
-                <div class="grid sm:grid-cols-2 gap-4">
-                    <div class="space-y-1.5">
-                        <label for="type" class="block text-sm font-medium text-dark-300">
-                            Loại điều kiện <span class="text-red-500">*</span>
-                        </label>
-                        <select id="type" name="type"
-                                class="w-full bg-dark-950 border border-dark-800 rounded-xl text-white focus:ring-sky-500 focus:border-sky-500 px-4 py-2.5 transition-colors"
-                                onchange="updateTypeHint(this.value)">
-                            @foreach($questTypes as $type)
-                                <option value="{{ $type->value }}"
-                                        data-desc="{{ $type->description() }}"
-                                        {{ old('type', $quest->type?->value) === $type->value ? 'selected' : '' }}>
-                                    {{ $type->label() }}
-                                </option>
-                            @endforeach
-                        </select>
-                        <p id="typeHint" class="text-xs text-dark-500 min-h-[1.25rem]"></p>
-                    </div>
+                <div class="space-y-4">
+                    <p class="text-sm font-semibold text-dark-200">Điều kiện hoàn thành</p>
+                    <div class="grid sm:grid-cols-2 gap-4">
+                        <div class="space-y-1.5">
+                            <label for="type" class="block text-xs font-medium text-dark-400">
+                                Loại điều kiện <span class="text-red-500">*</span>
+                            </label>
+                            @php
+                                $selectedType = old('type', $quest->type?->value ?? collect($questTypes)->first()?->value);
+                            @endphp
+                            <div class="relative" x-data="{
+                                open: false,
+                                selected: @js($selectedType),
+                                options: @js(collect($questTypes)->map(fn($t) => ['value' => $t->value, 'label' => $t->label(), 'desc' => $t->description()])->values()),
+                                get label() { return this.options.find(o => o.value === this.selected)?.label ?? 'Chọn loại'; }
+                            }" @keydown.escape="open=false">
+                                {{-- Trigger button --}}
+                                <button type="button" @click="open=!open"
+                                        class="w-full flex items-center justify-between px-4 py-2.5 bg-dark-800 border border-dark-600 rounded-xl text-dark-100 text-sm focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-colors cursor-pointer"
+                                        :class="open ? 'border-sky-500 ring-1 ring-sky-500' : ''">
+                                    <span x-text="label"></span>
+                                    <svg class="w-4 h-4 text-dark-400 transition-transform duration-200 shrink-0" :class="{'rotate-180': open}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                    </svg>
+                                </button>
+                                {{-- Hidden real select for form --}}
+                                <select id="type" name="type" class="sr-only" x-model="selected" @change="updateTypeHint(selected)">
+                                    @foreach($questTypes as $t)
+                                        <option value="{{ $t->value }}" data-desc="{{ $t->description() }}">{{ $t->label() }}</option>
+                                    @endforeach
+                                </select>
+                                {{-- Dropdown panel --}}
+                                <div x-show="open" x-cloak @click.outside="open=false"
+                                     x-transition:enter="transition ease-out duration-100"
+                                     x-transition:enter-start="opacity-0 -translate-y-1"
+                                     x-transition:enter-end="opacity-100 translate-y-0"
+                                     class="absolute z-50 w-full mt-1 bg-dark-800 border border-dark-600 rounded-xl shadow-2xl overflow-hidden">
+                                    <div class="py-1 max-h-60 overflow-y-auto">
+                                        <template x-for="opt in options" :key="opt.value">
+                                            <button type="button"
+                                                    @click="selected=opt.value; open=false; updateTypeHint(opt.value)"
+                                                    class="w-full text-left px-4 py-2.5 text-sm transition-colors flex items-center justify-between gap-2"
+                                                    :class="selected===opt.value ? 'bg-sky-500/15 text-sky-300' : 'text-dark-200 hover:bg-dark-700 hover:text-white'">
+                                                <span x-text="opt.label"></span>
+                                                <svg x-show="selected===opt.value" class="w-3.5 h-3.5 text-sky-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                                                </svg>
+                                            </button>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+                            <p id="typeHint" class="text-xs text-dark-500 min-h-[1.25rem]"></p>
+                        </div>
 
-                    <div class="space-y-1.5">
-                        <label for="target_value" class="block text-sm font-medium text-dark-300">
-                            Ngưỡng cần đạt <span class="text-red-500">*</span>
-                        </label>
-                        <input type="number" id="target_value" name="target_value" min="1"
-                               class="w-full bg-dark-950 border border-dark-800 rounded-xl text-white placeholder-dark-600 focus:ring-sky-500 focus:border-sky-500 px-4 py-2.5 transition-colors"
-                               value="{{ old('target_value', $quest->target_value ?? 1) }}"
-                               required>
-                        <p class="text-xs text-dark-500">Ví dụ: 10 = cần đủ 10 lần</p>
+                        <div class="space-y-1.5">
+                            <label for="target_value" class="block text-xs font-medium text-dark-400">
+                                Ngưỡng cần đạt <span class="text-red-500">*</span>
+                            </label>
+                            <div class="flex items-stretch bg-dark-950 border border-dark-800 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-sky-500 focus-within:border-sky-500 transition-colors h-[42px]" x-data="{ val: {{ old('target_value', $quest->target_value ?? 1) }} }">
+                                <button type="button" @click="val = Math.max(1, parseInt(val) - 1)" class="w-11 flex items-center justify-center text-dark-400 hover:text-white hover:bg-dark-800 border-r border-dark-800 transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/></svg>
+                                </button>
+                                <input type="number" id="target_value" name="target_value" min="1" x-model="val"
+                                       class="flex-1 bg-transparent text-white px-3 py-2 text-center outline-none w-full border-none focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-inner-spin-button]:m-0"
+                                       required>
+                                <button type="button" @click="val = parseInt(val) + 1" class="w-11 flex items-center justify-center text-dark-400 hover:text-white hover:bg-dark-800 border-l border-dark-800 transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                </button>
+                            </div>
+                            <p class="text-xs text-dark-500">Ví dụ: 10 = cần đủ 10 lần</p>
+                        </div>
                     </div>
                 </div>
+
+                {{-- Divider --}}
+                <div class="border-t border-dark-800"></div>
 
                 {{-- Reward type --}}
                 <div class="space-y-3">
-                    <label class="block text-sm font-medium text-dark-300">
-                        Loại phần thưởng <span class="text-red-500">*</span>
-                    </label>
-                    <div class="flex gap-4">
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" name="reward_type" value="title"
-                                   class="text-sky-500 focus:ring-sky-500/50 bg-dark-900 border-dark-600"
-                                   {{ old('reward_type', $quest->reward_type ?? 'title') === 'title' ? 'checked' : '' }}
-                                   onchange="toggleReward('title')">
-                            <span class="text-sm text-white">🏷 Danh hiệu</span>
+                    <p class="text-sm font-semibold text-dark-200">Phần thưởng <span class="text-red-500">*</span></p>
+
+                    {{-- Card-style radio --}}
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="relative cursor-pointer">
+                            <input type="checkbox" name="reward_type[]" value="title" class="sr-only"
+                                   {{ in_array('title', old('reward_type', $quest->reward_type === 'both' ? ['title', 'frame'] : (array)($quest->reward_type ?? 'title'))) ? 'checked' : '' }}
+                                   onchange="toggleReward('title', this.checked)">
+                            <div id="reward-card-title" class="flex items-center gap-3 p-3.5 rounded-xl border border-dark-700 bg-dark-950 transition-all">
+                                <span class="text-xl">🏷</span>
+                                <div>
+                                    <p class="text-sm font-semibold text-white">Danh hiệu</p>
+                                    <p class="text-xs text-dark-500">Badge tên hiển thị</p>
+                                </div>
+                                <span id="reward-dot-title" class="ml-auto w-4 h-4 rounded border-2 border-dark-600 flex-shrink-0 transition-all flex items-center justify-center">
+                                    <svg id="reward-dot-inner-title" class="w-3 h-3 text-white transition-all scale-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                                </span>
+                            </div>
                         </label>
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" name="reward_type" value="frame"
-                                   class="text-sky-500 focus:ring-sky-500/50 bg-dark-900 border-dark-600"
-                                   {{ old('reward_type', $quest->reward_type) === 'frame' ? 'checked' : '' }}
-                                   onchange="toggleReward('frame')">
-                            <span class="text-sm text-white">🖼 Khung avatar</span>
+                        <label class="relative cursor-pointer">
+                            <input type="checkbox" name="reward_type[]" value="frame" class="sr-only"
+                                   {{ in_array('frame', old('reward_type', $quest->reward_type === 'both' ? ['title', 'frame'] : (array)($quest->reward_type))) ? 'checked' : '' }}
+                                   onchange="toggleReward('frame', this.checked)">
+                            <div id="reward-card-frame" class="flex items-center gap-3 p-3.5 rounded-xl border border-dark-700 bg-dark-950 transition-all">
+                                <span class="text-xl">🖼</span>
+                                <div>
+                                    <p class="text-sm font-semibold text-white">Khung avatar</p>
+                                    <p class="text-xs text-dark-500">Khung ảnh đại diện</p>
+                                </div>
+                                <span id="reward-dot-frame" class="ml-auto w-4 h-4 rounded border-2 border-dark-600 flex-shrink-0 transition-all flex items-center justify-center">
+                                    <svg id="reward-dot-inner-frame" class="w-3 h-3 text-white transition-all scale-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                                </span>
+                            </div>
                         </label>
                     </div>
 
                     {{-- Title picker --}}
                     <div id="rewardTitleSection" class="space-y-1.5">
-                        <label for="reward_title_id" class="block text-xs font-medium text-dark-400">Chọn danh hiệu</label>
-                        <select id="reward_title_id" name="reward_title_id"
-                                class="w-full bg-dark-950 border border-dark-800 rounded-xl text-white focus:ring-sky-500 focus:border-sky-500 px-4 py-2.5 transition-colors">
-                            <option value="">— Chọn danh hiệu —</option>
-                            @foreach($titles as $title)
-                                <option value="{{ $title->id }}"
-                                        data-color="{{ $title->color_hex }}"
-                                        {{ old('reward_title_id', $quest->reward_title_id) == $title->id ? 'selected' : '' }}>
-                                    {{ $title->name }}
-                                </option>
-                            @endforeach
-                        </select>
+                        <label class="block text-xs font-medium text-dark-400">Chọn danh hiệu</label>
+                        @php $selectedTitleId = old('reward_title_id', $quest->reward_title_id); @endphp
+                        <div class="relative" x-data="{
+                            open: false,
+                            selected: @js((string)$selectedTitleId),
+                            options: @js($titles->map(fn($t) => ['value' => (string)$t->id, 'label' => $t->name])),
+                            get label() { return this.options.find(o => o.value === this.selected)?.label ?? '— Chọn danh hiệu —'; }
+                        }" @keydown.escape="open=false">
+                            <button type="button" @click="open=!open"
+                                    class="w-full flex items-center justify-between px-4 py-2.5 bg-dark-800 border border-dark-600 rounded-xl text-dark-100 text-sm focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-colors cursor-pointer"
+                                    :class="open ? 'border-sky-500 ring-1 ring-sky-500' : ''">
+                                <span x-text="label" :class="selected ? 'text-dark-100' : 'text-dark-500'"></span>
+                                <svg class="w-4 h-4 text-dark-400 transition-transform duration-200 shrink-0" :class="{'rotate-180': open}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                </svg>
+                            </button>
+                            <select id="reward_title_id" name="reward_title_id" class="sr-only" x-model="selected">
+                                <option value=""></option>
+                                @foreach($titles as $title)
+                                    <option value="{{ $title->id }}">{{ $title->name }}</option>
+                                @endforeach
+                            </select>
+                            <div x-show="open" x-cloak @click.outside="open=false"
+                                 x-transition:enter="transition ease-out duration-100"
+                                 x-transition:enter-start="opacity-0 -translate-y-1"
+                                 x-transition:enter-end="opacity-100 translate-y-0"
+                                 class="absolute z-50 w-full mt-1 bg-dark-800 border border-dark-600 rounded-xl shadow-2xl overflow-hidden">
+                                <div class="py-1 max-h-60 overflow-y-auto">
+                                    <button type="button" @click="selected=''; open=false"
+                                            class="w-full text-left px-4 py-2.5 text-sm transition-colors text-dark-500 hover:bg-dark-700 hover:text-white italic">
+                                        — Chọn danh hiệu —
+                                    </button>
+                                    <template x-for="opt in options" :key="opt.value">
+                                        <button type="button"
+                                                @click="selected=opt.value; open=false"
+                                                class="w-full text-left px-4 py-2.5 text-sm transition-colors flex items-center justify-between gap-2"
+                                                :class="selected===opt.value ? 'bg-sky-500/15 text-sky-300' : 'text-dark-200 hover:bg-dark-700 hover:text-white'">
+                                            <span x-text="opt.label"></span>
+                                            <svg x-show="selected===opt.value" class="w-3.5 h-3.5 text-sky-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                                            </svg>
+                                        </button>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     {{-- Frame picker --}}
                     <div id="rewardFrameSection" class="space-y-1.5 hidden">
-                        <label for="reward_frame_id" class="block text-xs font-medium text-dark-400">Chọn khung avatar</label>
-                        <select id="reward_frame_id" name="reward_frame_id"
-                                class="w-full bg-dark-950 border border-dark-800 rounded-xl text-white focus:ring-sky-500 focus:border-sky-500 px-4 py-2.5 transition-colors">
-                            <option value="">— Chọn khung —</option>
-                            @foreach($frames as $frame)
-                                <option value="{{ $frame->id }}"
-                                        {{ old('reward_frame_id', $quest->reward_frame_id) == $frame->id ? 'selected' : '' }}>
-                                    {{ $frame->name }}
-                                </option>
-                            @endforeach
-                        </select>
+                        <label class="block text-xs font-medium text-dark-400">Chọn khung avatar</label>
+                        @php $selectedFrameId = old('reward_frame_id', $quest->reward_frame_id); @endphp
+                        <div class="relative" x-data="{
+                            open: false,
+                            selected: @js((string)$selectedFrameId),
+                            options: @js($frames->map(fn($f) => ['value' => (string)$f->id, 'label' => $f->name])),
+                            get label() { return this.options.find(o => o.value === this.selected)?.label ?? '— Chọn khung —'; }
+                        }" @keydown.escape="open=false">
+                            <button type="button" @click="open=!open"
+                                    class="w-full flex items-center justify-between px-4 py-2.5 bg-dark-800 border border-dark-600 rounded-xl text-dark-100 text-sm focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-colors cursor-pointer"
+                                    :class="open ? 'border-sky-500 ring-1 ring-sky-500' : ''">
+                                <span x-text="label" :class="selected ? 'text-dark-100' : 'text-dark-500'"></span>
+                                <svg class="w-4 h-4 text-dark-400 transition-transform duration-200 shrink-0" :class="{'rotate-180': open}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                </svg>
+                            </button>
+                            <select id="reward_frame_id" name="reward_frame_id" class="sr-only" x-model="selected">
+                                <option value=""></option>
+                                @foreach($frames as $frame)
+                                    <option value="{{ $frame->id }}">{{ $frame->name }}</option>
+                                @endforeach
+                            </select>
+                            <div x-show="open" x-cloak @click.outside="open=false"
+                                 x-transition:enter="transition ease-out duration-100"
+                                 x-transition:enter-start="opacity-0 -translate-y-1"
+                                 x-transition:enter-end="opacity-100 translate-y-0"
+                                 class="absolute z-50 w-full mt-1 bg-dark-800 border border-dark-600 rounded-xl shadow-2xl overflow-hidden">
+                                <div class="py-1 max-h-60 overflow-y-auto">
+                                    <button type="button" @click="selected=''; open=false"
+                                            class="w-full text-left px-4 py-2.5 text-sm transition-colors text-dark-500 hover:bg-dark-700 hover:text-white italic">
+                                        — Chọn khung —
+                                    </button>
+                                    <template x-for="opt in options" :key="opt.value">
+                                        <button type="button"
+                                                @click="selected=opt.value; open=false"
+                                                class="w-full text-left px-4 py-2.5 text-sm transition-colors flex items-center justify-between gap-2"
+                                                :class="selected===opt.value ? 'bg-sky-500/15 text-sky-300' : 'text-dark-200 hover:bg-dark-700 hover:text-white'">
+                                            <span x-text="opt.label"></span>
+                                            <svg x-show="selected===opt.value" class="w-3.5 h-3.5 text-sky-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                                            </svg>
+                                        </button>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
+                {{-- Divider --}}
+                <div class="border-t border-dark-800"></div>
+
                 {{-- Sort order + Active --}}
-                <div class="grid sm:grid-cols-2 gap-4 pt-2">
+                <div class="grid sm:grid-cols-2 gap-4">
                     <div class="space-y-1.5">
                         <label for="sort_order" class="block text-sm font-medium text-dark-300">Thứ tự hiển thị</label>
-                        <input type="number" id="sort_order" name="sort_order" min="0"
-                               class="w-full bg-dark-950 border border-dark-800 rounded-xl text-white placeholder-dark-600 focus:ring-sky-500 focus:border-sky-500 px-4 py-2.5 transition-colors"
-                               value="{{ old('sort_order', $quest->sort_order ?? 0) }}">
+                        <div class="flex items-stretch bg-dark-950 border border-dark-800 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-sky-500 focus-within:border-sky-500 transition-colors h-[42px]" x-data="{ val: {{ old('sort_order', $quest->sort_order ?? 0) }} }">
+                            <button type="button" @click="val = Math.max(0, parseInt(val) - 1)" class="w-11 flex items-center justify-center text-dark-400 hover:text-white hover:bg-dark-800 border-r border-dark-800 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/></svg>
+                            </button>
+                            <input type="number" id="sort_order" name="sort_order" min="0" x-model="val"
+                                   class="flex-1 bg-transparent text-white px-3 py-2 text-center outline-none w-full border-none focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-inner-spin-button]:m-0"
+                                   required>
+                            <button type="button" @click="val = parseInt(val) + 1" class="w-11 flex items-center justify-center text-dark-400 hover:text-white hover:bg-dark-800 border-l border-dark-800 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            </button>
+                        </div>
                         <p class="text-xs text-dark-500">Số nhỏ xuất hiện trước.</p>
                     </div>
 
-                    <div class="flex items-center h-full pt-6">
-                        <label class="flex items-center gap-3 cursor-pointer group">
+                    <div class="flex items-center h-full pt-4">
+                        <label class="flex items-center gap-3 cursor-pointer group w-full p-3.5 rounded-xl border border-dark-800 bg-dark-950 hover:border-dark-700 transition-colors">
                             <div class="relative flex items-center justify-center">
                                 <input type="checkbox" name="is_active" value="1" class="peer sr-only"
                                        {{ old('is_active', $quest->is_active ?? true) ? 'checked' : '' }}>
@@ -149,7 +295,10 @@
                                             after:bg-white after:border-gray-300 after:border after:rounded-full
                                             after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-500 transition-colors"></div>
                             </div>
-                            <span class="text-sm font-medium text-dark-200 group-hover:text-white transition-colors">Kích hoạt nhiệm vụ</span>
+                            <div>
+                                <span class="text-sm font-medium text-dark-200 group-hover:text-white transition-colors block">Kích hoạt nhiệm vụ</span>
+                                <span class="text-xs text-dark-600">Hiển thị và theo dõi tiến độ</span>
+                            </div>
                         </label>
                     </div>
                 </div>
@@ -167,29 +316,27 @@
             </form>
         </div>
 
-        {{-- ── Help panel ── --}}
+        {{-- ── Side panel ── --}}
         <div class="space-y-4">
-            <div class="bg-dark-900 border border-dark-800 rounded-2xl p-5 sticky top-20 space-y-5">
-                <div>
-                    <p class="text-xs font-semibold text-dark-400 uppercase tracking-wider mb-3">Hướng dẫn</p>
-                    <ul class="text-xs text-dark-400 space-y-2">
-                        <li class="flex items-start gap-2">
-                            <span class="text-sky-400 shrink-0 mt-0.5">1.</span>
-                            Chọn <strong class="text-white">loại điều kiện</strong> phù hợp với hành động bạn muốn khuyến khích.
-                        </li>
-                        <li class="flex items-start gap-2">
-                            <span class="text-sky-400 shrink-0 mt-0.5">2.</span>
-                            Đặt <strong class="text-white">ngưỡng</strong> — ví dụ 10 nghĩa là user phải làm đủ 10 lần.
-                        </li>
-                        <li class="flex items-start gap-2">
-                            <span class="text-sky-400 shrink-0 mt-0.5">3.</span>
-                            Chọn <strong class="text-white">phần thưởng</strong> từ danh hiệu hoặc khung đã tạo sẵn.
-                        </li>
-                        <li class="flex items-start gap-2">
-                            <span class="text-sky-400 shrink-0 mt-0.5">4.</span>
-                            Hệ thống sẽ <strong class="text-white">tự động phát thưởng</strong> và gửi thông báo khi user đạt điều kiện.
-                        </li>
-                    </ul>
+            <div class="bg-dark-900 border border-dark-800 rounded-2xl p-5 sticky top-20 space-y-4">
+
+                {{-- Steps --}}
+                <p class="text-xs font-semibold text-dark-400 uppercase tracking-wider">Hướng dẫn</p>
+                <div class="space-y-3">
+                    @foreach([
+                        ['icon' => '🎯', 'color' => 'sky', 'title' => 'Loại điều kiện', 'desc' => 'Chọn hành động bạn muốn khuyến khích người dùng thực hiện.'],
+                        ['icon' => '🔢', 'color' => 'violet', 'title' => 'Ngưỡng cần đạt', 'desc' => 'Số lần cần đạt để hoàn thành, ví dụ 10 = làm đủ 10 lần.'],
+                        ['icon' => '🎁', 'color' => 'emerald', 'title' => 'Phần thưởng', 'desc' => 'Chọn danh hiệu hoặc khung avatar đã tạo sẵn.'],
+                        ['icon' => '⚡', 'color' => 'amber', 'title' => 'Tự động phát thưởng', 'desc' => 'Hệ thống tự cấp thưởng và thông báo khi user đạt điều kiện.'],
+                    ] as $step)
+                        <div class="flex gap-3 items-start">
+                            <span class="text-base shrink-0 mt-0.5">{{ $step['icon'] }}</span>
+                            <div>
+                                <p class="text-xs font-semibold text-white">{{ $step['title'] }}</p>
+                                <p class="text-xs text-dark-500 leading-relaxed mt-0.5">{{ $step['desc'] }}</p>
+                            </div>
+                        </div>
+                    @endforeach
                 </div>
 
                 {{-- Stats (edit only) --}}
@@ -218,9 +365,41 @@
 
     @push('scripts')
     <script>
-    function toggleReward(type) {
-        document.getElementById('rewardTitleSection').classList.toggle('hidden', type !== 'title');
-        document.getElementById('rewardFrameSection').classList.toggle('hidden', type !== 'frame');
+
+    function autoResize(el) {
+        el.style.height = 'auto';
+        el.style.height = el.scrollHeight + 'px';
+    }
+
+    function setRewardCardState(type, isChecked) {
+        const card = document.getElementById('reward-card-' + type);
+        const dot  = document.getElementById('reward-dot-' + type);
+        const inner = document.getElementById('reward-dot-inner-' + type);
+        if (!card) return;
+        if (isChecked) {
+            card.classList.add('border-sky-500', 'bg-sky-500/10');
+            card.classList.remove('border-dark-700');
+            dot.classList.add('border-sky-500', 'bg-sky-500');
+            dot.classList.remove('border-dark-600');
+            inner.classList.remove('scale-0');
+            inner.classList.add('scale-100');
+        } else {
+            card.classList.remove('border-sky-500', 'bg-sky-500/10');
+            card.classList.add('border-dark-700');
+            dot.classList.remove('border-sky-500', 'bg-sky-500');
+            dot.classList.add('border-dark-600');
+            inner.classList.add('scale-0');
+            inner.classList.remove('scale-100');
+        }
+    }
+
+    function toggleReward(type, isChecked) {
+        if (type === 'title') {
+            document.getElementById('rewardTitleSection').classList.toggle('hidden', !isChecked);
+        } else if (type === 'frame') {
+            document.getElementById('rewardFrameSection').classList.toggle('hidden', !isChecked);
+        }
+        setRewardCardState(type, isChecked);
     }
 
     function updateTypeHint(value) {
@@ -230,13 +409,20 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-        const checkedRadio = document.querySelector('input[name="reward_type"]:checked');
-        if (checkedRadio) toggleReward(checkedRadio.value);
+        const checkboxes = document.querySelectorAll('input[name="reward_type[]"]');
+        checkboxes.forEach(cb => {
+            toggleReward(cb.value, cb.checked);
+        });
 
         const typeSelect = document.getElementById('type');
         updateTypeHint(typeSelect.value);
+
+        // Auto-resize textarea on load (for edit mode)
+        const desc = document.getElementById('description');
+        if (desc && desc.value) autoResize(desc);
     });
     </script>
     @endpush
 
 </x-admin-layout>
+

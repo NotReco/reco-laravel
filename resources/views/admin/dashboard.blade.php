@@ -77,7 +77,7 @@
                 <div class="px-4 py-3 flex items-center justify-between hover:bg-dark-800/30 transition-colors gap-3">
                     <div class="flex items-center gap-3 min-w-0">
                         <div class="w-8 h-8 rounded-full bg-gradient-to-br from-slate-500 to-slate-700 flex items-center justify-center overflow-hidden shrink-0 text-xs font-bold text-white">
-                            {{ strtoupper(substr($review->user->name ?? '?', 0, 1)) }}
+                            {{ mb_strtoupper(mb_substr($review->user->name ?? '?', 0, 1, 'UTF-8'), 'UTF-8') }}
                         </div>
                         <div class="flex-1 min-w-0">
                             @php $media = $review->movie ?? $review->tvShow; @endphp
@@ -135,7 +135,7 @@
                         @if($user->avatar)
                             <img src="{{ $user->avatar }}" alt="" class="w-full h-full object-cover" loading="lazy">
                         @else
-                            <span class="text-xs font-bold text-white">{{ strtoupper(substr($user->name, 0, 1)) }}</span>
+                            <span class="text-xs font-bold text-white">{{ mb_strtoupper(mb_substr($user->name, 0, 1, 'UTF-8'), 'UTF-8') }}</span>
                         @endif
                     </div>
                     <div class="flex-1 min-w-0">

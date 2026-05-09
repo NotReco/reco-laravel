@@ -22,7 +22,7 @@ class UserTitleController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:50',
             'color_hex' => 'required|string|max:20',
             'description' => 'nullable|string',
             'is_active' => 'boolean',
@@ -46,7 +46,7 @@ class UserTitleController extends Controller
         $userTitle = UserTitle::findOrFail($id);
         
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:50',
             'color_hex' => 'required|string|max:20',
             'description' => 'nullable|string',
             'is_active' => 'boolean',

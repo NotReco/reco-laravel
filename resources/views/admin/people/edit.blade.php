@@ -126,11 +126,27 @@
                             </div>
 
                             <div>
-                                <label for="biography" class="block text-sm font-medium text-dark-200 mb-1.5">Tiểu sử</label>
-                                <textarea id="biography" name="biography" rows="8"
+                                <label for="biography" class="block text-sm font-medium text-dark-200 mb-1.5">
+                                    Tiểu sử gốc
+                                    <span class="ml-1.5 text-[10px] px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-400 font-medium uppercase tracking-wide">Tiếng Anh</span>
+                                </label>
+                                <textarea id="biography" name="biography" rows="6"
                                     class="input-dark text-sm resize-y"
                                     placeholder="Tiểu sử chi tiết...">{{ old('biography', $person->biography ?? $person->bio) }}</textarea>
                                 @error('biography')
+                                    <p class="text-red-400 text-xs mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label for="biography_vi" class="block text-sm font-medium text-dark-200 mb-1.5">
+                                    Tiểu sử
+                                    <span class="ml-1.5 text-[10px] px-1.5 py-0.5 rounded bg-sky-500/15 text-sky-400 font-medium uppercase tracking-wide">Tiếng Việt • Ưu tiên</span>
+                                </label>
+                                <textarea id="biography_vi" name="biography_vi" rows="8"
+                                    class="input-dark text-sm resize-y"
+                                    placeholder="Nhập tiểu sử tiếng Việt ở đây — sẽ được hiển thị thay cho bản tiếng Anh...">{{ old('biography_vi', $person->biography_vi) }}</textarea>
+                                @error('biography_vi')
                                     <p class="text-red-400 text-xs mt-1">{{ $message }}</p>
                                 @enderror
                             </div>

@@ -29,7 +29,7 @@ enum QuestType: string
     public function label(): string
     {
         return match($this) {
-            self::REVIEW_COUNT        => 'Số review đã viết',
+            self::REVIEW_COUNT        => 'Số bài đánh giá đã viết',
             self::COMMENT_COUNT       => 'Số bình luận',
             self::LIKE_RECEIVED_COUNT => 'Lượt thích nhận được',
             self::WATCHLIST_COUNT     => 'Phim trong watchlist',
@@ -45,16 +45,16 @@ enum QuestType: string
     public function description(): string
     {
         return match($this) {
-            self::REVIEW_COUNT        => 'Viết đủ X reviews',
-            self::COMMENT_COUNT       => 'Đăng đủ X bình luận',
-            self::LIKE_RECEIVED_COUNT => 'Reviews của bạn nhận được tổng X lượt thích',
-            self::WATCHLIST_COUNT     => 'Thêm X phim/series vào watchlist',
-            self::FAVORITE_COUNT      => 'Thêm X phim/series vào yêu thích',
-            self::FOLLOWER_COUNT      => 'Có X người theo dõi bạn',
-            self::FOLLOWING_COUNT     => 'Theo dõi X người khác',
-            self::FORUM_THREAD_COUNT  => 'Tạo X bài đăng trong diễn đàn',
-            self::FORUM_REPLY_COUNT   => 'Trả lời X lần trong diễn đàn',
-            self::ACCOUNT_AGE_DAYS    => 'Tài khoản tồn tại X ngày',
+            self::REVIEW_COUNT        => 'Ví dụ: Viết đủ X bài đánh giá',
+            self::COMMENT_COUNT       => 'Ví dụ: Đăng đủ X bình luận',
+            self::LIKE_RECEIVED_COUNT => 'Ví dụ: Bài đánh giá của bạn nhận được tổng X lượt thích',
+            self::WATCHLIST_COUNT     => 'Ví dụ: Thêm X phim/series vào watchlist',
+            self::FAVORITE_COUNT      => 'Ví dụ: Thêm X phim/series vào yêu thích',
+            self::FOLLOWER_COUNT      => 'Ví dụ: Có X người theo dõi bạn',
+            self::FOLLOWING_COUNT     => 'Ví dụ: Theo dõi X người khác',
+            self::FORUM_THREAD_COUNT  => 'Ví dụ: Tạo X bài đăng trong diễn đàn',
+            self::FORUM_REPLY_COUNT   => 'Ví dụ: Trả lời X lần trong diễn đàn',
+            self::ACCOUNT_AGE_DAYS    => 'Ví dụ: Tài khoản tồn tại X ngày',
         };
     }
 }

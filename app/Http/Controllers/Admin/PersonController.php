@@ -40,6 +40,7 @@ class PersonController extends Controller
             'name'           => 'required|string|max:255',
             'photo'          => 'nullable|url|max:2048',
             'biography'      => 'nullable|string',
+            'biography_vi'   => 'nullable|string',
             'date_of_birth'  => 'nullable|date',
             'date_of_death'  => 'nullable|date|after_or_equal:date_of_birth',
             'nationality'    => 'nullable|string|max:100',

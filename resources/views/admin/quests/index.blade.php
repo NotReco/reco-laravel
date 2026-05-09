@@ -34,14 +34,14 @@
 
                             {{-- Sort order --}}
                             <td class="px-5 py-3">
-                                <span class="text-xs text-dark-600 font-mono">{{ $quest->sort_order }}</span>
+                                <span class="inline-flex items-center justify-center min-w-[28px] h-7 px-2 bg-dark-800 text-dark-200 text-xs font-semibold rounded-lg">{{ $quest->sort_order }}</span>
                             </td>
 
                             {{-- Quest name + description --}}
                             <td class="px-5 py-3">
-                                <p class="font-semibold text-white">{{ $quest->name }}</p>
+                                <p class="font-semibold text-white break-words">{{ $quest->name }}</p>
                                 @if($quest->description)
-                                    <p class="text-xs text-dark-500 mt-0.5 max-w-xs truncate">{{ $quest->description }}</p>
+                                    <p class="text-xs text-dark-500 mt-0.5 max-w-xs break-words line-clamp-2">{{ $quest->description }}</p>
                                 @endif
                             </td>
 
@@ -55,29 +55,39 @@
 
                             {{-- Reward --}}
                             <td class="px-5 py-3">
-                                @if($quest->reward_type === 'title' && $quest->rewardTitle)
-                                    <div class="flex items-center gap-2">
-                                        <div class="w-3 h-3 rounded-full shrink-0"
-                                             style="background-color: {{ $quest->rewardTitle->color_hex }}"></div>
-                                        <span class="text-sm font-bold"
-                                              style="color: {{ $quest->rewardTitle->color_hex }}">
-                                            {{ $quest->rewardTitle->name }}
-                                        </span>
-                                    </div>
-                                    <span class="text-[10px] text-dark-600">Danh hiệu</span>
-                                @elseif($quest->reward_type === 'frame' && $quest->rewardFrame)
-                                    <div class="flex items-center gap-2">
-                                        <div class="relative w-8 h-8 shrink-0">
-                                            <div class="absolute inset-0 rounded-full bg-gradient-to-br from-sky-600 to-blue-800"></div>
-                                            <img src="{{ Storage::url($quest->rewardFrame->image_path) }}"
-                                                 class="absolute inset-0 w-full h-full object-contain" alt="">
+                                <div class="flex flex-col gap-3">
+                                    @if(in_array($quest->reward_type, ['title', 'both']) && $quest->rewardTitle)
+                                        <div>
+                                            <div class="flex items-center gap-2">
+                                                <div class="w-3 h-3 rounded-full shrink-0"
+                                                     style="background-color: {{ $quest->rewardTitle->color_hex }}"></div>
+                                                <span class="text-sm font-bold"
+                                                      style="color: {{ $quest->rewardTitle->color_hex }}">
+                                                    {{ $quest->rewardTitle->name }}
+                                                </span>
+                                            </div>
+                                            <span class="text-[10px] text-dark-600 block mt-0.5">Danh hiệu</span>
                                         </div>
-                                        <span class="text-sm text-white">{{ $quest->rewardFrame->name }}</span>
-                                    </div>
-                                    <span class="text-[10px] text-dark-600">Khung avatar</span>
-                                @else
-                                    <span class="text-xs text-dark-600 italic">—</span>
-                                @endif
+                                    @endif
+
+                                    @if(in_array($quest->reward_type, ['frame', 'both']) && $quest->rewardFrame)
+                                        <div>
+                                            <div class="flex items-center gap-2">
+                                                <div class="relative w-8 h-8 shrink-0">
+                                                    <div class="w-full h-full rounded-full bg-gradient-to-br from-sky-500 to-blue-700 overflow-hidden scale-[1.0475]"></div>
+                                                    <img src="{{ Storage::url($quest->rewardFrame->image_path) }}"
+                                                         class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[126%] h-[126%] max-w-none object-contain pointer-events-none" alt="">
+                                                </div>
+                                                <span class="text-sm text-white">{{ $quest->rewardFrame->name }}</span>
+                                            </div>
+                                            <span class="text-[10px] text-dark-600 block mt-0.5">Khung avatar</span>
+                                        </div>
+                                    @endif
+
+                                    @if(!$quest->rewardTitle && !$quest->rewardFrame)
+                                        <span class="text-xs text-dark-600 italic">—</span>
+                                    @endif
+                                </div>
                             </td>
 
                             {{-- Completion count --}}
@@ -90,9 +100,9 @@
                             {{-- Status --}}
                             <td class="px-5 py-3 text-center">
                                 @if($quest->is_active)
-                                    <span class="badge text-[10px] bg-emerald-500/20 text-emerald-400">Đang hoạt động</span>
+                                    <span class="badge whitespace-nowrap text-[10px] bg-emerald-500/20 text-emerald-400">Đang hoạt động</span>
                                 @else
-                                    <span class="badge text-[10px] bg-dark-700 text-dark-400">Tạm ẩn</span>
+                                    <span class="badge whitespace-nowrap text-[10px] bg-dark-700 text-dark-400">Tạm ẩn</span>
                                 @endif
                             </td>
 
@@ -106,10 +116,11 @@
                                         </svg>
                                     </a>
                                     <form action="{{ route('admin.quests.destroy', $quest) }}" method="POST"
-                                          onsubmit="return confirm('Xóa nhiệm vụ «{{ $quest->name }}»?')">
+                                          id="del-quest-{{ $quest->id }}">
                                         @csrf @method('DELETE')
-                                        <button type="submit"
-                                                class="p-2 text-dark-400 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors" title="Xóa">
+                                        <button type="button"
+                                                class="p-2 text-dark-400 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors" title="Xóa"
+                                                @click="$dispatch('admin-confirm', { title: 'Xóa nhiệm vụ', message: 'Xóa nhiệm vụ «{{ addslashes($quest->name) }}»? Hành động này không thể hoàn tác.', formId: 'del-quest-{{ $quest->id }}' })">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                             </svg>
@@ -128,10 +139,7 @@
                                 </div>
                                 <h3 class="text-sm font-semibold text-white mb-1">Chưa có nhiệm vụ nào</h3>
                                 <p class="text-sm text-dark-500 mb-4">Thêm nhiệm vụ để khuyến khích người dùng hoạt động.</p>
-                                <a href="{{ route('admin.quests.create') }}"
-                                   class="inline-flex items-center gap-2 px-4 py-2 bg-sky-500 text-white text-sm font-semibold rounded-xl hover:bg-sky-600 transition-all">
-                                    Thêm nhiệm vụ đầu tiên
-                                </a>
+
                             </td>
                         </tr>
                     @endforelse

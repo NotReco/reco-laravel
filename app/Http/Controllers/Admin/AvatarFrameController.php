@@ -23,7 +23,7 @@ class AvatarFrameController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:50',
             'image' => 'required|image|mimes:png,gif,webp,jpg,jpeg,svg|max:2048',
             'is_active' => 'boolean',
         ]);
@@ -51,7 +51,7 @@ class AvatarFrameController extends Controller
         $frame = AvatarFrame::findOrFail($id);
 
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:50',
             'image' => 'nullable|image|mimes:png,gif,webp,jpg,jpeg,svg|max:2048',
             'is_active' => 'boolean',
         ]);

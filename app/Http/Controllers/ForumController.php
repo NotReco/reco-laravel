@@ -262,6 +262,40 @@ class ForumController extends Controller
     }
 
     /**
+     * Ghim / Bỏ ghim bài viết (chỉ dành cho staff/admin).
+     */
+    public function togglePin(ForumThread $thread)
+    {
+        if (!Auth::user()->isStaff()) {
+            abort(403, 'Bạn không có quyền thực hiện hành động này.');
+        }
+
+        $thread->update([
+            'is_pinned' => !$thread->is_pinned,
+        ]);
+
+        $message = $thread->is_pinned ? 'Đã ghim bài viết.' : 'Đã bỏ ghim bài viết.';
+        return back()->with('success', $message);
+    }
+
+    /**
+     * Khóa / Mở khóa bài viết (chỉ dành cho staff/admin).
+     */
+    public function toggleLock(ForumThread $thread)
+    {
+        if (!Auth::user()->isStaff()) {
+            abort(403, 'Bạn không có quyền thực hiện hành động này.');
+        }
+
+        $thread->update([
+            'is_locked' => !$thread->is_locked,
+        ]);
+
+        $message = $thread->is_locked ? 'Đã khóa bài viết.' : 'Đã mở khóa bài viết.';
+        return back()->with('success', $message);
+    }
+
+    /**
      * Thích / Hủy thích phản hồi.
      */
     public function toggleReplyLike(ForumReply $reply)
