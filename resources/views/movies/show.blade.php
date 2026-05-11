@@ -162,7 +162,7 @@
                                 @endguest
                                 const res = await fetch('{{ route('favorites.toggle') }}', {
                                     method: 'POST',
-                                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
                                     body: JSON.stringify({ movie_id: {{ $movie->id }} })
                                 });
                                 const data = await res.json();
@@ -174,7 +174,7 @@
                                 @endguest
                                 const res = await fetch('{{ route('watchlist.toggle') }}', {
                                     method: 'POST',
-                                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
                                     body: JSON.stringify({ movie_id: {{ $movie->id }}, status: status })
                                 });
                                 const data = await res.json();
@@ -457,7 +457,7 @@
 
                                 {{-- Favorite --}}
                                 <button @click="toggleFavorite()" title="Yêu thích"
-                                    class="p-2.5 rounded-xl border transition-all flex items-center justify-center h-[46px] w-[46px] {{ auth()->check() && $movie->favoritedBy->contains(auth()->id()) ? 'bg-rose-50 border-rose-300 text-rose-500' : 'bg-white border-gray-200 text-gray-400 shadow-sm' }}"
+                                    class="p-2.5 rounded-xl border transition-all flex items-center justify-center h-[46px] w-[46px]"
                                     :class="isFavorited ? 'bg-rose-50 border-rose-300 text-rose-500' :
                                         'bg-white text-gray-400 hover:text-rose-500 hover:border-rose-300 shadow-sm border-gray-200'">
                                     <svg class="w-5 h-5" :fill="isFavorited ? 'currentColor' : 'none'"
@@ -524,7 +524,7 @@
                                 @endphp
                                 <div class="relative" x-data="{ open: false }" @click.outside="open = false">
                                     <button @click="open = !open"
-                                        class="flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-all {{ $wlClass }}"
+                                        class="flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-all"
                                         :class="{
                                             'bg-sky-50 border-sky-400 text-sky-700': watchlistStatus === 'want_to_watch',
                                             'bg-amber-50 border-amber-400 text-amber-700': watchlistStatus === 'watching',

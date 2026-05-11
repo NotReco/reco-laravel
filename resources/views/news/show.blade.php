@@ -173,6 +173,12 @@
                 }
             @endguest
             @auth {
+                alertModal: false,
+                alertMessage: '',
+                showAlert(msg) {
+                    this.alertMessage = msg;
+                    this.alertModal = true;
+                },
                 newComment: '',
                 submitting: false,
                 replyTo: null,
@@ -254,7 +260,16 @@
                         payload = null;
                     }
 
-                    if (payload?.message) return payload.message;
+                    if (payload?.message) {
+                        let msg = payload.message;
+                        if (msg === 'Your email address is not verified.') {
+                            return 'Vui lòng xác minh địa chỉ email của bạn để thực hiện thao tác này.';
+                        }
+                        if (msg === 'Unauthenticated.') {
+                            return 'Vui lòng đăng nhập để thực hiện thao tác này.';
+                        }
+                        return msg;
+                    }
                     if (payload?.errors) {
                         const firstError = Object.values(payload.errors)?.[0]?.[0];
                         if (firstError) return firstError;
@@ -262,7 +277,7 @@
 
                     switch (res.status) {
                         case 401:
-                            return 'Phiên đăng nhập đã hết hạn. V vui lòng đăng nhập lại.';
+                            return 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.';
                         case 403:
                             return 'Bạn chưa xác minh email hoặc không có quyền thực hiện thao tác này.';
                         case 419:
@@ -319,7 +334,7 @@
                             this.editingContent = '';
                         }
                     } catch (err) {
-                        alert(err?.message || 'Không thể cập nhật bình luận.');
+                        this.showAlert(err?.message || 'Không thể cập nhật bình luận.');
                     } finally {
                         this.submittingEdit = false;
                     }
@@ -355,7 +370,7 @@
                         }
                     } catch (err) {
                         console.error('Error posting comment:', err);
-                        alert(err?.message || 'Không thể gửi bình luận. Vui lòng thử lại.');
+                        this.showAlert(err?.message || 'Không thể gửi bình luận. Vui lòng thử lại.');
                     } finally {
                         this.submitting = false;
                     }
@@ -394,7 +409,7 @@
                         }
                     } catch (err) {
                         console.error('Error posting reply:', err);
-                        alert(err?.message || 'Không thể gửi trả lời. Vui lòng thử lại.');
+                        this.showAlert(err?.message || 'Không thể gửi trả lời. Vui lòng thử lại.');
                     } finally {
                         this.submittingReply = false;
                     }
@@ -481,7 +496,7 @@
                         }
                     } catch (err) {
                         console.error('Error deleting:', err);
-                        alert('Không thể xóa bình luận.');
+                        this.showAlert('Không thể xóa bình luận.');
                     } finally {
                         this.isDeleting = false;
                         setTimeout(() => this.deleteStep = 1, 300);
@@ -508,7 +523,7 @@
                         '<img src="' + comment.user.active_frame.image_path +
                         '" alt="" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[126%] h-[126%] max-w-none object-contain pointer-events-none z-10 transition-all duration-300">' :
                         '';
-                    const profileUrl = this.baseUrl + '/profile/' + (comment.user.slug || comment.user.id);
+                    const profileUrl = this.baseUrl + '/users/' + (comment.user.slug || comment.user.id) + '/profile';
 
                     const reportBtn = (this.currentUser.id && this.currentUser.id !== comment.user.id) ?
                         '<button @click="openReport(' + comment.id +
@@ -521,19 +536,19 @@
                         ringClass + '">' +
                         avatarHtml + '</div>' + frameHtml + '</a>' +
                         '<div class="flex-1 min-w-0">' +
-                        '<div class="bg-white rounded-xl px-3.5 py-2 border border-gray-200 transition-colors" :class="replyingToId === ' +
-                        comment.uuid + ' ? \'!bg-blue-50 !border-blue-200\' : \'\'">' +
+                        '<div class="bg-white rounded-xl px-3.5 py-2 border border-gray-200 transition-colors" :class="replyingToId === \'' +
+                        comment.uuid + '\' ? \'!bg-blue-50 !border-blue-200\' : \'\'">' +
                         '<div class="flex items-center gap-2 mb-0.5"><a href="' + profileUrl +
                         '" class="text-[15px] font-bold text-gray-900 hover:text-sky-600 hover:underline transition-colors">' +
                         this.escapeHtml(comment.user.name) + '</a></div>' +
-                        '<div x-show="editingCommentId !== ' + comment.uuid + '"><p id="comment-text-' +
+                        '<div x-show="editingCommentId !== \'' + comment.uuid + '\'"><p id="comment-text-' +
                         comment.uuid +
                         '" class="text-[15px] text-gray-800 leading-relaxed whitespace-pre-line break-words">' +
                         this.formatMentions(comment.content) + '</p></div>' +
-                        '<div x-show="editingCommentId === ' + comment.uuid +
-                        '" x-cloak style="display:none">' +
+                        '<div x-show="editingCommentId === \'' + comment.uuid +
+                        '\'" x-cloak style="display:none">' +
                         '<textarea id="edit-input-' + comment.uuid +
-                        '" x-model="editingContent" @keydown.enter="if(!$event.shiftKey) { $event.preventDefault(); submitEdit(); }" class="w-full px-3 py-2 bg-white border border-blue-300 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all resize-none mt-1" rows="2"></textarea>' +
+                        '" x-model="editingContent" @keydown.enter="if(!$event.shiftKey) { $event.preventDefault(); submitEdit(); }" @input="$el.style.height = \'auto\'; $el.style.height = $el.scrollHeight + \'px\'" class="w-full px-3 py-2 bg-white border border-blue-300 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all resize-none mt-1 overflow-hidden" rows="2"></textarea>' +
                         '<div class="flex gap-2 justify-end mt-1.5"><button @click="cancelEdit()" class="text-xs text-gray-500 hover:underline px-2 py-1">Hủy</button><button @click="submitEdit()" class="text-xs font-semibold bg-blue-500 text-white rounded px-3 py-1.5 mt-1 hover:bg-blue-600 disabled:opacity-50" :disabled="submittingEdit || !editingContent.trim()">Lưu</button></div>' +
                         '</div>' +
                         '</div>' +
@@ -542,10 +557,10 @@
                         '<span class="text-[13px] font-medium text-gray-500 hover:underline cursor-pointer" title="' +
                         this.getFullDateString() + '">' + comment.created_at.replace(" trước", "") +
                         '</span>' +
-                        '<button @click="toggleLike(' + comment.uuid +
-                        ', $event)" class="group flex items-center gap-1.5 text-[13px] font-bold transition-colors whitespace-nowrap" :class="likedComments[' +
+                        '<button @click="toggleLike(\'' + comment.uuid +
+                        '\', $event)" class="group flex items-center gap-1.5 text-[13px] font-bold transition-colors whitespace-nowrap" :class="likedComments[\'' +
                         comment.uuid +
-                        '] ? \'text-rose-500\' : \'text-gray-500 hover:text-gray-700 hover:underline\'" id="like-btn-' +
+                        '\'] ? \'text-rose-500\' : \'text-gray-500 hover:text-gray-700 hover:underline\'" id="like-btn-' +
                         comment.uuid + '"><span>Thích</span></button>' +
                         '<button @click="focusReply(\'' + comment.uuid + '\', \'' + comment.uuid + '\', ' + comment.id + ', \'' + this
                         .escapeHtml(comment.user.name) +
@@ -554,10 +569,10 @@
                         editBtn +
                         deleteBtn +
                         '</div>' +
-                        '<div x-show="likeCounts[' + comment.uuid +
-                        '] > 0" x-cloak style="display: none" class="flex items-center gap-1 cursor-pointer">' +
-                        '<span x-text="likeCounts[' + comment.uuid +
-                        ']" class="text-xs text-gray-500 hover:underline"></span>' +
+                        '<div x-show="likeCounts[\'' + comment.uuid +
+                        '\'] > 0" x-cloak style="display: none" class="flex items-center gap-1 cursor-pointer">' +
+                        '<span x-text="likeCounts[\'' + comment.uuid +
+                        '\']" class="text-xs text-gray-500 hover:underline"></span>' +
                         '<div class="w-4 h-4 rounded-full bg-rose-500 flex items-center justify-center shadow-sm"><svg class="w-2.5 h-2.5 text-white fill-current" viewBox="0 0 24 24"><path d="M4 21h1V8H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2zM20.28 8H14V4.11a2.11 2.11 0 0 0-2.11-2.11c-.48 0-.94.19-1.29.54L5 8.12v12.76l6.83 1.13c.44.07.89.11 1.34.11H19a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2z"></path></svg></div>' +
                         '</div></div></div></div>';
                     list.insertAdjacentHTML('afterbegin', html);
@@ -650,7 +665,7 @@
                         '<img src="' + reply.user.active_frame.image_path +
                         '" alt="" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[126%] h-[126%] max-w-none object-contain pointer-events-none z-10 transition-all duration-300">' :
                         '';
-                    const replyProfileUrl = this.baseUrl + '/profile/' + (reply.user.slug || reply.user.id);
+                    const replyProfileUrl = this.baseUrl + '/users/' + (reply.user.slug || reply.user.id) + '/profile';
                     const reportBtn = (this.currentUser.id && this.currentUser.id !== reply.user.id) ?
                         '<button @click="openReport(' + reply.id +
                         ')" class="text-[13px] font-semibold text-gray-500 hover:text-gray-700 hover:underline transition-colors whitespace-nowrap">Báo cáo</button>' : '';
@@ -664,19 +679,19 @@
                         ringClass + '">' +
                         avatarHtml + '</div>' + frameHtml + '</a>' +
                         '<div class="flex-1 min-w-0">' +
-                        '<div class="bg-gray-50 rounded-lg px-3 py-2 border border-gray-200 transition-colors" :class="replyingToId === ' +
-                        reply.uuid + ' ? \'!bg-blue-50 !border-blue-100\' : \'\'">' +
+                        '<div class="bg-gray-50 rounded-lg px-3 py-2 border border-gray-200 transition-colors" :class="replyingToId === \'' +
+                        reply.uuid + '\' ? \'!bg-blue-50 !border-blue-100\' : \'\'">' +
                         '<div class="flex items-center gap-2 mb-0.5"><a href="' + replyProfileUrl +
                         '" class="text-sm font-bold text-gray-900 hover:text-sky-600 hover:underline transition-colors">' +
                         this.escapeHtml(reply.user.name) + '</a></div>' +
-                        '<div x-show="editingCommentId !== ' + reply.uuid + '"><p id="comment-text-' + reply
+                        '<div x-show="editingCommentId !== \'' + reply.uuid + '\'"><p id="comment-text-' + reply
                         .uuid +
                         '" class="text-[15px] text-gray-800 leading-relaxed whitespace-pre-line break-words">' +
                         this.formatMentions(reply.content) + '</p></div>' +
-                        '<div x-show="editingCommentId === ' + reply.uuid +
-                        '" x-cloak style="display:none">' +
+                        '<div x-show="editingCommentId === \'' + reply.uuid +
+                        '\'" x-cloak style="display:none">' +
                         '<textarea id="edit-input-' + reply.uuid +
-                        '" x-model="editingContent" @keydown.enter="if(!$event.shiftKey) { $event.preventDefault(); submitEdit(); }" class="w-full px-3 py-2 bg-white border border-blue-300 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all resize-none mt-1" rows="2"></textarea>' +
+                        '" x-model="editingContent" @keydown.enter="if(!$event.shiftKey) { $event.preventDefault(); submitEdit(); }" @input="$el.style.height = \'auto\'; $el.style.height = $el.scrollHeight + \'px\'" class="w-full px-3 py-2 bg-white border border-blue-300 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all resize-none mt-1 overflow-hidden" rows="2"></textarea>' +
                         '<div class="flex gap-2 justify-end mt-1.5"><button @click="cancelEdit()" class="text-xs text-gray-500 hover:underline px-2 py-1">Hủy</button><button @click="submitEdit()" class="text-xs font-semibold bg-blue-500 text-white rounded px-3 py-1.5 mt-1 hover:bg-blue-600 disabled:opacity-50" :disabled="submittingEdit || !editingContent.trim()">Lưu</button></div>' +
                         '</div>' +
                         '</div>' +
@@ -685,20 +700,20 @@
                         '<span class="text-[13px] font-medium text-gray-500 hover:underline cursor-pointer" title="' +
                         this.getFullDateString() + '">' + reply.created_at.replace(" trước", "") +
                         '</span>' +
-                        '<button @click="toggleLike(' + reply.uuid +
-                        ', $event)" class="group flex items-center gap-1.5 text-[13px] font-bold transition-colors whitespace-nowrap" :class="likedComments[' +
+                        '<button @click="toggleLike(\'' + reply.uuid +
+                        '\', $event)" class="group flex items-center gap-1.5 text-[13px] font-bold transition-colors whitespace-nowrap" :class="likedComments[\'' +
                         reply.uuid +
-                        '] ? \'text-rose-500\' : \'text-gray-500 hover:text-gray-700 hover:underline\'" id="like-btn-' +
+                        '\'] ? \'text-rose-500\' : \'text-gray-500 hover:text-gray-700 hover:underline\'" id="like-btn-' +
                         reply.uuid + '"><span>Thích</span></button>' +
                         replyBtn +
                         editBtn +
                         reportBtn +
                         deleteBtn +
                         '</div>' +
-                        '<div x-show="likeCounts[' + reply.uuid +
-                        '] > 0" x-cloak style="display: none" class="flex items-center gap-1 cursor-pointer">' +
-                        '<span x-text="likeCounts[' + reply.uuid +
-                        ']" class="text-[11px] text-gray-500 hover:underline"></span>' +
+                        '<div x-show="likeCounts[\'' + reply.uuid +
+                        '\'] > 0" x-cloak style="display: none" class="flex items-center gap-1 cursor-pointer">' +
+                        '<span x-text="likeCounts[\'' + reply.uuid +
+                        '\']" class="text-[11px] text-gray-500 hover:underline"></span>' +
                         '<div class="w-[14px] h-[14px] rounded-full bg-rose-500 flex items-center justify-center shadow-sm"><svg class="w-2 h-2 text-white fill-current" viewBox="0 0 24 24"><path d="M4 21h1V8H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2zM20.28 8H14V4.11a2.11 2.11 0 0 0-2.11-2.11c-.48 0-.94.19-1.29.54L5 8.12v12.76l6.83 1.13c.44.07.89.11 1.34.11H19a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2z"></path></svg></div>' +
                         '</div></div></div></div>';
                     rc.insertAdjacentHTML('beforeend', html);
@@ -813,9 +828,10 @@
                         </div>
                         <div class="flex-1">
                             <textarea x-model="newComment" @keydown.enter="if(!$event.shiftKey) { $event.preventDefault(); submitComment($event); }"
-                                rows="3" required maxlength="1000" placeholder="Viết bình luận của bạn..."
+                                @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'"
+                                rows="2" required maxlength="1000" placeholder="Viết bình luận của bạn..."
                                 class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm text-gray-800 placeholder-gray-400
-                                         focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all resize-none"></textarea>
+                                         focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all resize-none overflow-hidden"></textarea>
                             <div class="mt-2 flex justify-end">
                                 <button type="submit" :disabled="submitting || !newComment.trim()"
                                     class="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-blue-500 text-white rounded-xl shadow-sm shadow-blue-500/20
@@ -873,7 +889,8 @@
                                     <div x-show="editingCommentId === '{{ $comment->uuid }}'" x-cloak style="display: none">
                                         <textarea id="edit-input-{{ $comment->uuid }}" x-model="editingContent"
                                             @keydown.enter="if(!$event.shiftKey) { $event.preventDefault(); submitEdit(); }"
-                                            class="w-full px-3 py-2 bg-white border border-blue-300 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all resize-none mt-1"
+                                            @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'"
+                                            class="w-full px-3 py-2 bg-white border border-blue-300 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all resize-none mt-1 overflow-hidden"
                                             rows="2"></textarea>
                                         <div class="flex gap-2 justify-end mt-1.5">
                                             <button @click="cancelEdit()"
@@ -1030,7 +1047,8 @@
                                                 style="display: none">
                                                 <textarea id="edit-input-{{ $reply->uuid }}" x-model="editingContent"
                                                     @keydown.enter="if(!$event.shiftKey) { $event.preventDefault(); submitEdit(); }"
-                                                    class="w-full px-3 py-2 bg-white border border-blue-300 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all resize-none mt-1"
+                                                    @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'"
+                                                    class="w-full px-3 py-2 bg-white border border-blue-300 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all resize-none mt-1 overflow-hidden"
                                                     rows="2"></textarea>
                                                 <div class="flex gap-2 justify-end mt-1.5">
                                                     <button @click="cancelEdit()"
@@ -1149,7 +1167,8 @@
                                                 style="display: none">
                                                 <textarea id="edit-input-{{ $nestedReply->uuid }}" x-model="editingContent"
                                                     @keydown.enter="if(!$event.shiftKey) { $event.preventDefault(); submitEdit(); }"
-                                                    class="w-full px-3 py-2 bg-white border border-blue-300 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all resize-none mt-1"
+                                                    @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'"
+                                                    class="w-full px-3 py-2 bg-white border border-blue-300 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all resize-none mt-1 overflow-hidden"
                                                     rows="2"></textarea>
                                                 <div class="flex gap-2 justify-end mt-1.5">
                                                     <button @click="cancelEdit()"
@@ -1230,10 +1249,11 @@
                 <form @submit.prevent="submitReply($event)">
                     <textarea x-model="replyContent"
                         @keydown.enter="if(!$event.shiftKey) { $event.preventDefault(); submitReply($event); }"
+                        @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'"
                         id="reply-input-{{ $comment->uuid }}" rows="2" required maxlength="1000"
                         placeholder="Trả lời {{ $comment->user->name ?? '' }}..."
                         class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-800
-                                                     focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all resize-none"></textarea>
+                                                     focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all resize-none overflow-hidden"></textarea>
                     <div class="mt-1.5 flex gap-2 justify-end">
                         <button type="button"
                             @click="replyTo = null; replyParentId = null; replyingToId = null; replyContent = ''"
@@ -1341,6 +1361,32 @@
                         </div>
                     </div>
 
+                </div>
+            </div>
+        @endauth
+
+        @auth
+            {{-- ── Custom Alert Dialog ────────────────────────── --}}
+            <div x-show="alertModal" x-transition.opacity x-cloak
+                class="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm"
+                @click.self="alertModal = false" style="display: none">
+                <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm mx-4 overflow-hidden" @click.stop>
+                    <div class="p-6 text-center">
+                        <div class="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-base font-bold text-gray-900 mb-2">Thông báo</h3>
+                        <p class="text-[13px] text-gray-500 leading-relaxed" x-text="alertMessage"></p>
+                    </div>
+                    <div class="px-5 py-3.5 bg-gray-50 flex justify-center">
+                        <button @click="alertModal = false"
+                            class="px-6 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors focus:outline-none">
+                            Đóng
+                        </button>
+                    </div>
                 </div>
             </div>
         @endauth
