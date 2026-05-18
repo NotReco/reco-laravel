@@ -238,7 +238,7 @@
                                     <template x-for="item in notifications.slice(0, limit)" :key="item.id">
                                         <div class="relative group transition-all" x-data="{ itemMenuOpen: false, openUp: false }"
                                             @mousedown.outside="itemMenuOpen = false"
-                                            :class="itemMenuOpen ? 'z-[60]' : 'z-10'">
+                                            :class="itemMenuOpen ? 'z-50' : 'z-0'">
                                             <a :href="item.data.url ? item.data.url : '#'"
                                                 @click.prevent="if(!item.read_at) markAsRead(item.id); if($event.button === 0 && item.data.url) { window.location.href = item.data.url; }"
                                                 class="block px-2 mx-2 mb-0.5 py-2.5 rounded-lg cursor-pointer flex gap-3 transition"

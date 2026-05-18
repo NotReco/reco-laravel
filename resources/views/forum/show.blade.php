@@ -305,11 +305,16 @@
                                     </div>
                                 </div>
                                 {{-- Nested reply indicator --}}
+                                {{-- Nested reply indicator (Quote block) --}}
                                 @if($reply->parent_id && $reply->parent)
-                                    <div class="mt-1.5 mb-1 flex items-center gap-1.5 text-xs text-gray-400">
-                                        <svg class="w-3.5 h-3.5 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>
-                                        <span>Đã trả lời</span>
-                                        <a href="#reply-{{ $reply->parent_id }}" class="font-semibold text-sky-500 hover:text-sky-600 transition-colors">{{ $reply->parent->user->name ?? 'Ẩn danh' }}</a>
+                                    <div class="mt-3 mb-3 bg-gray-50 border-l-4 border-sky-400 rounded-r-lg p-3.5 relative">
+                                        <div class="flex items-center gap-1.5 mb-1.5 text-[13px] text-gray-500">
+                                            <svg class="w-4 h-4 text-sky-500 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>
+                                            <span>Đã trả lời bình luận của <a href="#reply-{{ $reply->parent_id }}" class="font-bold text-sky-600 hover:underline">{{ $reply->parent->user->name ?? 'Ẩn danh' }}</a></span>
+                                        </div>
+                                        <div class="text-sm text-gray-500 line-clamp-2 italic border-l-2 border-gray-200 pl-3 ml-1">
+                                            {!! Str::limit(strip_tags(Str::markdown($reply->parent->content)), 150) !!}
+                                        </div>
                                     </div>
                                 @endif
                                 <div class="mt-2 text-sm text-gray-700 leading-relaxed prose prose-sm prose-gray max-w-none">
