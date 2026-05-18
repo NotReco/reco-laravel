@@ -94,6 +94,32 @@ class ArticleCommentController extends Controller
                 }
             }
         }
+
+        try {
+            if ($comment->parent_id) {
+                // Notity parent comment owner if not already mentioned
+                $parentUser = $comment->parent->user;
+                if ($parentUser && $parentUser->id !== Auth::id()) {
+                    // Check if already mentioned
+                    $pattern = '/@' . preg_quote($parentUser->name, '/') . '(?![\p{L}\p{N}_])/u';
+                    if (!preg_match($pattern, $content)) {
+                        $parentUser->notify(new \App\Notifications\ArticleCommentReplyNotification($comment, Auth::user()->name));
+                    }
+                }
+            } else {
+                // Notify article owner if not already mentioned
+                $articleOwner = $comment->article->user;
+                if ($articleOwner && $articleOwner->id !== Auth::id()) {
+                    $pattern = '/@' . preg_quote($articleOwner->name, '/') . '(?![\p{L}\p{N}_])/u';
+                    if (!preg_match($pattern, $content)) {
+                        $articleOwner->notify(new \App\Notifications\ArticleCommentReplyNotification($comment, Auth::user()->name));
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            Log::warning('Failed to send article comment reply notification: ' . $e->getMessage());
+        }
+
         if ($request->wantsJson() || $request->ajax()) {
             return response()->json([
                 'success' => true,

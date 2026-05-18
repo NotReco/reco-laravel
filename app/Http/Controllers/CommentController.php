@@ -29,6 +29,24 @@ class CommentController extends Controller
 
         Auth::user()->increment('reputation_score', 1);
 
+        try {
+            if ($comment->parent_id) {
+                // Notity parent comment owner
+                $parentUser = $comment->parent->user;
+                if ($parentUser && $parentUser->id !== Auth::id()) {
+                    $parentUser->notify(new \App\Notifications\ReviewCommentNotification($comment, Auth::user()->name));
+                }
+            } else {
+                // Notify review owner
+                $reviewOwner = $comment->review->user;
+                if ($reviewOwner && $reviewOwner->id !== Auth::id()) {
+                    $reviewOwner->notify(new \App\Notifications\ReviewCommentNotification($comment, Auth::user()->name));
+                }
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Failed to send comment notification: ' . $e->getMessage());
+        }
+
         if ($request->wantsJson()) {
             $comment->load(['user.activeFrame', 'review.comments.user']);
             $html = view('components.reviews.comment-item', ['comment' => $comment, 'review' => $comment->review])->render();
@@ -67,7 +85,8 @@ class CommentController extends Controller
      */
     public function destroy(Comment $comment)
     {
-        if ($comment->user_id !== Auth::id()) {
+        $user = Auth::user();
+        if ($comment->user_id !== $user->id && !$user->hasRole(['admin', 'moderator'])) {
             abort(403, 'Unauthorized action.');
         }
 
