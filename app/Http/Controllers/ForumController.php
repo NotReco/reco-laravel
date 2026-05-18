@@ -152,12 +152,12 @@ class ForumController extends Controller
             'parent_id' => 'nullable|exists:forum_replies,id',
         ]);
 
-        $parentId = $request->input('parent_id');
+        $parentId = !empty($validated['parent_id']) ? (int)$validated['parent_id'] : null;
 
         // Validate parent belongs to same thread
         if ($parentId) {
             $parentReply = ForumReply::find($parentId);
-            if (!$parentReply || $parentReply->forum_thread_id !== $thread->id) {
+            if (!$parentReply || (int)$parentReply->forum_thread_id !== (int)$thread->id) {
                 $parentId = null;
             }
         }
