@@ -131,10 +131,9 @@
                                 {{-- Status --}}
                                 <td class="px-5 py-3">
                                     @if ($account->is_active)
-                                        <span class="badge text-[10px] bg-emerald-500/20 text-emerald-400">Hoạt
-                                            động</span>
+                                        <span class="badge text-[10px] whitespace-nowrap bg-emerald-500/20 text-emerald-400">Hoạt động</span>
                                     @else
-                                        <span class="badge text-[10px] bg-red-500/20 text-red-400">Đã khóa</span>
+                                        <span class="badge text-[10px] whitespace-nowrap bg-red-500/20 text-red-400">Đã khóa</span>
                                     @endif
                                 </td>
 

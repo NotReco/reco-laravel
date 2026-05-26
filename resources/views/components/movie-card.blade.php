@@ -79,6 +79,13 @@ try {
             </div>
         @endif
 
+        {{-- Age Rating Badge (top-left) --}}
+        @if ($movie->age_rating)
+            <div class="absolute top-2 left-2 z-10 text-[10px] font-bold px-1.5 py-0.5 rounded {{ $movie->isAdultRated() ? 'bg-red-600 text-white shadow-md shadow-red-500/20' : 'bg-gray-900/70 backdrop-blur text-gray-200' }} pointer-events-none uppercase tracking-wide" x-show="!open">
+                {{ $movie->age_rating }}
+            </div>
+        @endif
+
         {{-- Dropdown overlay (centered inside poster, TMDB-style) --}}
         <div x-show="open" x-transition:enter="transition ease-out duration-150"
             x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"

@@ -76,10 +76,15 @@ class ImportTmdbMovies extends Command
         return self::SUCCESS;
     }
 
+    public function setTmdbService(TmdbService $tmdb): void
+    {
+        $this->tmdb = $tmdb;
+    }
+
     /**
      * Import một phim từ TMDb (bao gồm chi tiết + cast/crew).
      */
-    protected function importMovie(int $tmdbId): void
+    public function importMovie(int $tmdbId): void
     {
         $detail = $this->tmdb->getMovieDetail($tmdbId);
         if (!$detail)
@@ -87,6 +92,32 @@ class ImportTmdbMovies extends Command
 
         // Tạo hoặc cập nhật phim
         $movie = Movie::withTrashed()->where('tmdb_id', $tmdbId)->first();
+
+        // Xử lý age rating từ release_dates (ưu tiên VN > US > đầu tiên có rating)
+        $ageRating = null;
+        if (isset($detail['release_dates']['results'])) {
+            $ratings = [];
+            foreach ($detail['release_dates']['results'] as $rd) {
+                $cert = null;
+                foreach ($rd['release_dates'] ?? [] as $r) {
+                    if (!empty($r['certification'])) {
+                        $cert = $r['certification'];
+                        break;
+                    }
+                }
+                if ($cert) {
+                    $ratings[$rd['iso_3166_1']] = $cert;
+                }
+            }
+
+            if (isset($ratings['VN'])) {
+                $ageRating = $ratings['VN'];
+            } elseif (isset($ratings['US'])) {
+                $ageRating = $ratings['US'];
+            } elseif (!empty($ratings)) {
+                $ageRating = reset($ratings);
+            }
+        }
 
         $movieAttributes = [
             'tmdb_id' => $tmdbId,
@@ -104,6 +135,7 @@ class ImportTmdbMovies extends Command
             'revenue' => $detail['revenue'] ?? null,
             'is_approved' => true,
             'status' => 'active',
+            'age_rating' => $ageRating,
         ];
 
         // Xử lý trailer YouTube từ videos

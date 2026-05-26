@@ -74,10 +74,15 @@ class ImportTmdbTvShows extends Command
         return self::SUCCESS;
     }
 
+    public function setTmdbService(TmdbService $tmdb): void
+    {
+        $this->tmdb = $tmdb;
+    }
+
     /**
      * Import một TV series từ TMDb.
      */
-    protected function importTvShow(int $tmdbId): void
+    public function importTvShow(int $tmdbId): void
     {
         $detail = $this->tmdb->getTvShowDetail($tmdbId);
         if (!$detail) return;
@@ -91,6 +96,25 @@ class ImportTmdbTvShows extends Command
                 ? $this->tmdb->posterUrl($n['logo_path'], 'small')
                 : null,
         ], $detail['networks'] ?? []);
+
+        // Xử lý age rating từ content_ratings (ưu tiên VN > US > đầu tiên có rating)
+        $ageRating = null;
+        if (isset($detail['content_ratings']['results'])) {
+            $ratings = [];
+            foreach ($detail['content_ratings']['results'] as $rd) {
+                if (!empty($rd['rating'])) {
+                    $ratings[$rd['iso_3166_1']] = $rd['rating'];
+                }
+            }
+
+            if (isset($ratings['VN'])) {
+                $ageRating = $ratings['VN'];
+            } elseif (isset($ratings['US'])) {
+                $ageRating = $ratings['US'];
+            } elseif (!empty($ratings)) {
+                $ageRating = reset($ratings);
+            }
+        }
 
         $attributes = [
             'tmdb_id'            => $tmdbId,
@@ -112,6 +136,7 @@ class ImportTmdbTvShows extends Command
             'language'           => $detail['original_language'] ?? null,
             'is_approved'        => true,
             'status'             => 'active',
+            'age_rating'         => $ageRating,
         ];
 
         // Trailer từ videos

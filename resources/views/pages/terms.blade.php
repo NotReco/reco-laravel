@@ -25,7 +25,8 @@
                             trị</a>
                         <a href="#gioi-han-trach-nhiem" class="text-gray-600 hover:text-black transition-colors">5. Giới
                             hạn trách nhiệm</a>
-                        <a href="#cap-nhat-dieu-khoan" class="text-gray-600 hover:text-black transition-colors">6. Cập
+                        <a href="#noi-dung-gioi-han-do-tuoi" class="text-gray-600 hover:text-black transition-colors">6. Nội dung giới hạn độ tuổi</a>
+                        <a href="#cap-nhat-dieu-khoan" class="text-gray-600 hover:text-black transition-colors">7. Cập
                             nhật</a>
                     </nav>
                 </div>
@@ -129,8 +130,18 @@
                         </ul>
                     </section>
 
+                    <section id="noi-dung-gioi-han-do-tuoi" class="scroll-mt-24 space-y-4">
+                        <h2 class="font-bold text-[16px] text-gray-900">6. Nội dung giới hạn độ tuổi</h2>
+                        <ul class="list-disc pl-6 space-y-3">
+                            <li class="pl-2">RecoDB là nền tảng thông tin và đánh giá phim. Một số bộ phim được giới thiệu trên trang web có thể chứa nội dung dành cho người lớn, yếu tố bạo lực hoặc hình ảnh nhạy cảm.</li>
+                            <li class="pl-2">Người dùng cần tự chịu trách nhiệm về quyết định của mình khi truy cập nội dung được đánh dấu giới hạn độ tuổi (ví dụ: 18+). Người dưới 18 tuổi nên có sự giám sát và hướng dẫn của phụ huynh hoặc người giám hộ hợp pháp.</li>
+                            <li class="pl-2">RecoDB tuyệt đối không lưu trữ, không chia sẻ và không khuyến khích các nội dung trái pháp luật, khiêu dâm trực tiếp, hoặc vi phạm bản quyền.</li>
+                            <li class="pl-2">Nếu bạn cho rằng một bộ phim hoặc một bài đánh giá chứa nội dung không phù hợp hoặc vi phạm nguyên tắc cộng đồng, vui lòng sử dụng chức năng "Báo cáo" để ban quản trị kịp thời xem xét.</li>
+                        </ul>
+                    </section>
+
                     <section id="cap-nhat-dieu-khoan" class="scroll-mt-24 space-y-4">
-                        <h2 class="font-bold text-[16px] text-gray-900">6. Cập nhật điều khoản</h2>
+                        <h2 class="font-bold text-[16px] text-gray-900">7. Cập nhật điều khoản</h2>
                         <p>Chúng tôi có thể thay đổi Điều khoản dịch vụ này vào bất kỳ lúc nào để phù hợp với sự phát
                             triển của hệ thống cũng như quy định của pháp luật. Việc bạn tiếp tục sử dụng RecoDB sau khi
                             có cập nhật đồng nghĩa với việc bạn hiển nhiên chấp nhận các thay đổi đó từ thời điểm công

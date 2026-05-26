@@ -20,6 +20,16 @@
         </div>
     </div>
 
+    {{-- ═══ Section 2b: Phim Bộ Nổi Bật – trắng --}}
+    @if ($trendingTvShows->isNotEmpty())
+        <div class="bg-white py-6 border-b border-gray-100">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <x-tv-show-section title="Phim Bộ Đang Hot"
+                    subtitle="Những series đang được xem nhiều nhất trong cộng đồng." :items="$trendingTvShows" />
+            </div>
+        </div>
+    @endif
+
     {{-- ═══ Section 3: Top Rated – trắng --}}
     <div class="bg-white py-6 border-b border-gray-100">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

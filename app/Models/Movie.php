@@ -34,6 +34,7 @@ class Movie extends Model
         'view_count',
         'is_approved',
         'status',
+        'age_rating',
         'is_featured',
         'featured_order',
         'created_by_user_id',
@@ -42,11 +43,26 @@ class Movie extends Model
     protected function casts(): array
     {
         return [
+        return [
             'release_date' => 'date',
             'is_approved' => 'boolean',
             'is_featured' => 'boolean',
             'avg_rating' => 'decimal:1',
         ];
+    }
+
+    /**
+     * Kiểm tra xem phim có thuộc nhóm giới hạn độ tuổi 18+ hay không.
+     */
+    public function isAdultRated(): bool
+    {
+        if (empty($this->age_rating)) {
+            return false;
+        }
+
+        $adultRatings = ['18+', 'T18', 'R', 'NC-17', 'TV-MA'];
+        
+        return in_array(trim(strtoupper($this->age_rating)), $adultRatings, true);
     }
 
     // ── Relationships ──

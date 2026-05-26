@@ -75,6 +75,15 @@ class MovieController extends Controller
             $query->where('runtime', '<=', $maxRuntime);
         }
 
+        // Lọc nội dung 18+ (Ẩn mặc định nếu không check)
+        if (!$request->input('adult_content')) {
+            $adultRatings = ['18+', 'T18', 'R', 'NC-17', 'TV-MA'];
+            $query->where(function ($q) use ($adultRatings) {
+                $q->whereNotIn('age_rating', $adultRatings)
+                  ->orWhereNull('age_rating');
+            });
+        }
+
         // Sắp xếp
         $sort = $request->input('sort', 'popularity_desc');
         
@@ -118,7 +127,7 @@ class MovieController extends Controller
             default => $query->orderByDesc('release_date'),
         };
 
-        $movies = $query->paginate(24)->withQueryString();
+        $movies = $query->paginate(24)->withQueryString()->fragment('explore-results-wrapper');
 
         $genres = Genre::withCount('movies')
             ->having('movies_count', '>', 0)
@@ -127,14 +136,29 @@ class MovieController extends Controller
 
         // Lấy danh sách quốc gia cho bộ lọc
         $countryNames = config('countries');
+        
+        $defaultCountries = [
+            'US' => 'Mỹ',
+            'KR' => 'Hàn Quốc',
+            'JP' => 'Nhật Bản',
+            'CN' => 'Trung Quốc',
+            'VN' => 'Việt Nam',
+            'TH' => 'Thái Lan',
+            'FR' => 'Pháp',
+            'GB' => 'Anh',
+            'CA' => 'Canada',
+            'IN' => 'Ấn Độ',
+        ];
 
-        $countries = Movie::whereNotNull('country')
+        $dbCountries = Movie::whereNotNull('country')
             ->where('country', '!=', '')
             ->select('country')
             ->distinct()
-            ->orderBy('country')
             ->pluck('country')
-            ->mapWithKeys(fn($code) => [$code => $countryNames[$code] ?? $code]);
+            ->mapWithKeys(fn($code) => [$code => $countryNames[$code] ?? $code])
+            ->toArray();
+            
+        $countries = array_merge($defaultCountries, $dbCountries);
 
         if ($request->ajax()) {
             return view('partials.explore-results', compact('movies'))->render();

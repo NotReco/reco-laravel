@@ -135,7 +135,8 @@ class TmdbService
     public function getMovieDetail(int $tmdbId): ?array
     {
         return $this->getWithFallback("/movie/{$tmdbId}", [
-            'append_to_response' => 'credits,videos,keywords',
+            'append_to_response' => 'credits,videos,keywords,images,release_dates',
+            'include_image_language' => 'vi,en,null',
         ]);
     }
 
@@ -209,7 +210,8 @@ class TmdbService
     public function getTvShowDetail(int $tmdbId): ?array
     {
         return $this->getWithFallback("/tv/{$tmdbId}", [
-            'append_to_response' => 'credits,videos,keywords',
+            'append_to_response' => 'credits,videos,keywords,images,content_ratings',
+            'include_image_language' => 'vi,en,null',
         ]);
     }
 

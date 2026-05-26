@@ -4,6 +4,27 @@
     <div x-data="{
         showTrailer: false,
         trailerUrl: '',
+        isAdult: {{ $tvShow->isAdultRated() ? 'true' : 'false' }},
+
+        init() {
+            if (this.isAdult && localStorage.getItem('reco_age_confirmed') !== 'true') {
+                this.$nextTick(() => {
+                    window.dispatchEvent(new CustomEvent('open-age-modal', {
+                        detail: {
+                            onConfirm: () => {},
+                            onCancel: () => {
+                                if (window.history.length > 1) {
+                                    window.history.back();
+                                } else {
+                                    window.location.href = '{{ route('tv-shows.index') }}';
+                                }
+                            }
+                        }
+                    }));
+                });
+            }
+        },
+
         openTrailer(url) {
             if (!url) return;
             const videoId = url.includes('v=') ? url.split('v=')[1].split('&')[0] : url.split('/').pop();
@@ -110,6 +131,11 @@
                                 <span
                                     class="flex items-center gap-1.5 bg-black/30 backdrop-blur-sm text-white px-3 py-1.5 rounded-full border border-white/20">
                                     🌍 {{ $countryName }}
+                                </span>
+                            @endif
+                            @if ($tvShow->age_rating)
+                                <span class="flex items-center gap-1.5 backdrop-blur-sm px-3 py-1.5 rounded-full border {{ $tvShow->isAdultRated() ? 'bg-red-600/80 text-white border-red-400 font-bold shadow-[0_0_15px_rgba(220,38,38,0.5)]' : 'bg-black/30 text-white border-white/20' }} font-bold uppercase tracking-wider">
+                                    {{ $tvShow->age_rating }}
                                 </span>
                             @endif
                         </div>

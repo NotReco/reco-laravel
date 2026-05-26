@@ -37,6 +37,7 @@ class TvShow extends Model
         'view_count',
         'is_approved',
         'status',
+        'age_rating',
         'is_featured',
         'featured_order',
         'created_by_user_id',
@@ -55,6 +56,20 @@ class TvShow extends Model
     }
 
     // ── Helpers ──
+
+    /**
+     * Kiểm tra xem TV Show có thuộc nhóm giới hạn độ tuổi 18+ hay không.
+     */
+    public function isAdultRated(): bool
+    {
+        if (empty($this->age_rating)) {
+            return false;
+        }
+
+        $adultRatings = ['18+', 'T18', 'R', 'NC-17', 'TV-MA'];
+        
+        return in_array(trim(strtoupper($this->age_rating)), $adultRatings, true);
+    }
 
     /**
      * Lấy tên + logo của network đầu tiên.

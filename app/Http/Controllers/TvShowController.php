@@ -58,6 +58,15 @@ class TvShowController extends Controller
             $query->where('avg_rating', '>=', (int) $minRating);
         }
 
+        // Lọc nội dung 18+ (Ẩn mặc định nếu không check)
+        if (!$request->input('adult_content')) {
+            $adultRatings = ['18+', 'T18', 'R', 'NC-17', 'TV-MA'];
+            $query->where(function ($q) use ($adultRatings) {
+                $q->whereNotIn('age_rating', $adultRatings)
+                  ->orWhereNull('age_rating');
+            });
+        }
+
         // Sắp xếp
         $sort = $request->input('sort', 'popularity_desc');
         
@@ -101,7 +110,7 @@ class TvShowController extends Controller
             default => $query->orderByDesc('view_count'),
         };
 
-        $tvShows = $query->paginate(24)->withQueryString();
+        $tvShows = $query->paginate(24)->withQueryString()->fragment('explore-results-wrapper');
 
         // Get genres that have tv shows
         $genres = Genre::whereHas('tvShows')->withCount('tvShows')->orderBy('name')->get();
@@ -109,13 +118,28 @@ class TvShowController extends Controller
         // Lấy danh sách quốc gia cho bộ lọc
         $countryNames = config('countries');
 
-        $countries = TvShow::whereNotNull('country')
+        $defaultCountries = [
+            'US' => 'Mỹ',
+            'KR' => 'Hàn Quốc',
+            'JP' => 'Nhật Bản',
+            'CN' => 'Trung Quốc',
+            'VN' => 'Việt Nam',
+            'TH' => 'Thái Lan',
+            'FR' => 'Pháp',
+            'GB' => 'Anh',
+            'CA' => 'Canada',
+            'IN' => 'Ấn Độ',
+        ];
+
+        $dbCountries = TvShow::whereNotNull('country')
             ->where('country', '!=', '')
             ->select('country')
             ->distinct()
-            ->orderBy('country')
             ->pluck('country')
-            ->mapWithKeys(fn($code) => [$code => $countryNames[$code] ?? $code]);
+            ->mapWithKeys(fn($code) => [$code => $countryNames[$code] ?? $code])
+            ->toArray();
+            
+        $countries = array_merge($defaultCountries, $dbCountries);
 
         if ($request->ajax()) {
             return view('tv-shows.partials.explore-results', compact('tvShows'))->render();

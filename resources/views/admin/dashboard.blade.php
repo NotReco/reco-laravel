@@ -49,13 +49,30 @@
     @endforeach
 </div>
 
-{{-- ── Biểu đồ 7 ngày ────────────────────────────────────── --}}
+{{-- ── Biểu đồ ────────────────────────────────────────────────── --}}
 <div class="card p-5 mb-8 min-w-0 w-full overflow-hidden">
-    <div class="flex items-center justify-between mb-4">
+    <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
         <h2 class="font-semibold text-white flex items-center gap-2">
             <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/></svg>
-            Biến động 7 ngày qua
+            {{ $chartTitle }}
         </h2>
+        {{-- Period Filter --}}
+        <div class="flex items-center gap-1 bg-dark-800 rounded-xl p-1">
+            @foreach(['week' => '7 ngày', 'month' => 'Tháng', 'quarter' => 'Quý'] as $p => $label)
+                <a href="{{ route('admin.dashboard', array_merge(request()->query(), ['period' => $p])) }}"
+                   class="px-3 py-1.5 text-xs font-semibold rounded-lg transition-all {{ $period === $p ? 'bg-indigo-500 text-white shadow-sm' : 'text-dark-400 hover:text-white hover:bg-dark-700' }}">
+                    {{ $label }}
+                </a>
+            @endforeach
+            <select onchange="window.location.href=this.value" class="pl-3 pr-8 py-1.5 text-xs font-semibold rounded-lg bg-dark-800 border-none text-dark-400 hover:text-white hover:bg-dark-700 focus:outline-none focus:ring-0 transition-all cursor-pointer {{ $period === 'year' || is_numeric($period) ? 'bg-indigo-500 text-white shadow-sm' : '' }}">
+                <option value="{{ route('admin.dashboard', array_merge(request()->query(), ['period' => 'year'])) }}" {{ $period === 'year' || $period == date('Y') ? 'selected' : '' }}>Năm nay</option>
+                @foreach($availableYears as $year)
+                    @if($year != date('Y'))
+                        <option value="{{ route('admin.dashboard', array_merge(request()->query(), ['period' => $year])) }}" {{ $period == $year ? 'selected' : '' }}>Năm {{ $year }}</option>
+                    @endif
+                @endforeach
+            </select>
+        </div>
     </div>
     <div class="relative w-full h-64">
         <canvas id="dashboardChart"></canvas>

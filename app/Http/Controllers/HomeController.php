@@ -27,6 +27,13 @@ class HomeController extends Controller
             ->take(10)
             ->get();
 
+        // 📺 Phim bộ nổi bật — 10 phim bộ xem nhiều nhất
+        $trendingTvShows = \App\Models\TvShow::with('genres')
+            ->whereNotNull('poster')
+            ->orderByDesc('view_count')
+            ->take(10)
+            ->get();
+
         // 🎬 Đang chiếu — 8 phim mới nhất theo release_date
         $nowPlayingMovies = Movie::with('genres')
             ->whereNotNull('poster')
@@ -68,6 +75,7 @@ class HomeController extends Controller
         return view('home', compact(
             'heroItems',
             'trendingMovies',
+            'trendingTvShows',
             'nowPlayingMovies',
             'topRatedMovies',
             'upcomingMovies',

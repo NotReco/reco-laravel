@@ -139,6 +139,9 @@
     {{-- ── Global Report Modal ─────────────────────────── --}}
     <x-report-modal />
 
+    {{-- ── Age Confirmation Modal ──────────────────────── --}}
+    <x-age-confirmation-modal />
+
     {{-- ── 2FA Remember Login Prompt ───────────────────── --}}
     @if(session('2fa_remember_prompt'))
         <div x-data="{ open: true }" x-cloak>

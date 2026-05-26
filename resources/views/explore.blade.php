@@ -185,6 +185,23 @@
                                             </div>
                                         </div>
 
+                                        <hr class="border-gray-100">
+
+                                        {{-- Adult Content --}}
+                                        <div>
+                                            <label class="flex items-center cursor-pointer group">
+                                                <div class="relative flex items-center justify-center w-5 h-5 mr-3">
+                                                    <input type="checkbox" name="adult_content" value="1"
+                                                        class="peer sr-only"
+                                                        x-model="includeAdult"
+                                                        @change="handleAdultFilterChange($event)">
+                                                    <div class="w-5 h-5 bg-white border-2 border-gray-300 rounded peer-checked:bg-red-500 peer-checked:border-red-500 transition-colors"></div>
+                                                    <svg class="absolute w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                                </div>
+                                                <span class="text-sm font-medium text-gray-700 group-hover:text-red-600 transition-colors">Bao gồm nội dung 18+</span>
+                                            </label>
+                                        </div>
+
                                     </div>
                                 </div>
                             </div>
@@ -213,8 +230,32 @@
                 Alpine.data('exploreFilter', () => ({
                     loading: false,
                     searchQuery: '{{ request('q', '') }}',
+                    includeAdult: {{ request('adult_content') ? 'true' : 'false' }},
 
                     init() {
+                        window.addEventListener('age-confirmed', () => {
+                            this.includeAdult = true;
+                            this.fetchResults();
+                        });
+                    },
+
+                    handleAdultFilterChange(e) {
+                        if (this.includeAdult) {
+                            if (localStorage.getItem('reco_age_confirmed') !== 'true') {
+                                this.includeAdult = false;
+                                window.dispatchEvent(new CustomEvent('open-age-modal', {
+                                    detail: {
+                                        onConfirm: () => {
+                                            // The age-confirmed listener will handle fetchResults
+                                        }
+                                    }
+                                }));
+                            } else {
+                                this.fetchResults();
+                            }
+                        } else {
+                            this.fetchResults();
+                        }
                     },
 
                     fetchResults(url = null, pushState = true, scrollToTop = false) {
@@ -265,8 +306,9 @@
                             .finally(() => {
                                 this.loading = false;
                                 if (scrollToTop) {
+                                    const gridTop = document.getElementById('explore-results-wrapper').getBoundingClientRect().top + window.scrollY - 100;
                                     window.scrollTo({
-                                        top: 0,
+                                        top: gridTop,
                                         behavior: 'smooth'
                                     });
                                 }
@@ -317,4 +359,15 @@
             });
         </script>
     @endpush
+
+    {{-- ── Nút Cuộn lên đầu (Back to Top) ────────────────────── --}}
+    <button x-data="{ show: false }" @scroll.window="show = window.pageYOffset > 400" x-show="show"
+        x-transition.opacity.duration.300ms @click="window.scrollTo({ top: 0, behavior: 'smooth' })"
+        class="fixed bottom-8 right-8 z-40 w-12 h-12 bg-white border border-gray-200 rounded-2xl shadow-sm flex items-center justify-center text-black hover:bg-gray-50 hover:shadow-md transition-all group"
+        aria-label="Lên đầu trang" style="display: none;">
+        <svg class="w-6 h-6 group-hover:-translate-y-1 transition-transform duration-300" fill="none"
+            stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+        </svg>
+    </button>
 </x-app-layout>
