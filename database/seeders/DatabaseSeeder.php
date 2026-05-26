@@ -16,10 +16,12 @@ class DatabaseSeeder extends Seeder
         $this->seedDefaultAccounts();
 
         $this->call([
-            UserSeeder::class,        // 30 user giả
-            ReviewSeeder::class,      // Reviews + quick ratings
-            InteractionSeeder::class, // Watchlist, likes, comments, follows
-            ForumSeeder::class,       // Forum categories
+            RolesAndPermissionsSeeder::class,
+            UserSeeder::class,
+            ReviewSeeder::class,
+            InteractionSeeder::class,
+            ForumSeeder::class,
+            UserRewardSeeder::class,
         ]);
     }
 
