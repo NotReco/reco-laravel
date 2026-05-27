@@ -58,7 +58,14 @@ class HomeController extends Controller
             ->get();
 
         // 💬 Review mới nhất từ cộng đồng
-        $latestReviews = Review::with(['user.activeFrame', 'movie', 'likes', 'comments', 'reports' => fn($r) => $r->where('is_public', true)->where('status', 'resolved')->with('user')->latest()])
+        $latestReviews = Review::with([
+                'user.activeFrame',
+                'movie',
+                'tvShow',
+                'likes',
+                'comments',
+                'reports' => fn($r) => $r->where('is_public', true)->where('status', 'resolved')->with('user')->latest(),
+            ])
             ->published()
             ->fullReview()
             ->latest('published_at')

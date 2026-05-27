@@ -79,12 +79,6 @@ try {
             </div>
         @endif
 
-        {{-- Age Rating Badge (top-left) --}}
-        @if ($tvShow->age_rating)
-            <div class="absolute top-2 left-2 z-10 text-[10px] font-bold px-1.5 py-0.5 rounded {{ $tvShow->isAdultRated() ? 'bg-red-600 text-white shadow-md shadow-red-500/20' : 'bg-gray-900/70 backdrop-blur text-gray-200' }} pointer-events-none uppercase tracking-wide" x-show="!open">
-                {{ $tvShow->age_rating }}
-            </div>
-        @endif
 
         {{-- Dropdown overlay (centered inside poster, TMDB-style) --}}
         <div x-show="open" x-transition:enter="transition ease-out duration-150"
@@ -219,6 +213,22 @@ try {
             </svg>
         </button>
     </div>
+
+    {{-- Age Rating Badge (top-left, OUTSIDE poster overflow, hidden when dropdown open) --}}
+    @php
+        $normalizedAge = \App\Helpers\AgeRatingHelper::normalize($tvShow->age_rating, $tvShow->adult ?? false);
+    @endphp
+    @if ($normalizedAge['badge'])
+        <div class="absolute top-2 left-2 z-30 group/tooltip" x-show="!open">
+            <div class="text-[10px] font-bold px-1.5 py-0.5 rounded {{ $normalizedAge['colorClass'] }} uppercase tracking-wide cursor-help transition-transform hover:scale-110">
+                {{ $normalizedAge['badge'] }}
+            </div>
+            {{-- Tooltip (z-50 đảm bảo nằm trên mọi thứ) --}}
+            <div class="absolute left-0 top-full mt-1.5 hidden group-hover/tooltip:block w-max max-w-[200px] p-2 bg-gray-900 text-white text-xs rounded shadow-lg z-[50] whitespace-normal leading-relaxed pointer-events-none">
+                {{ $normalizedAge['description'] }}
+            </div>
+        </div>
+    @endif
 
     {{-- Title & Meta --}}
     <a href="{{ route('tv-shows.show', $tvShow) }}" class="block mt-2">

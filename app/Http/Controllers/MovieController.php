@@ -160,6 +160,15 @@ class MovieController extends Controller
             
         $countries = array_merge($defaultCountries, $dbCountries);
 
+        // Sắp xếp tên quốc gia theo alphabet tiếng Việt, normalize Đ → D để không bị lạc nhóm
+        uasort($countries, function ($a, $b) {
+            $normalize = fn($s) => preg_replace('/^Đ/u', 'D', $s);
+            return strcmp(
+                mb_strtolower($normalize($a), 'UTF-8'),
+                mb_strtolower($normalize($b), 'UTF-8')
+            );
+        });
+
         if ($request->ajax()) {
             return view('partials.explore-results', compact('movies'))->render();
         }

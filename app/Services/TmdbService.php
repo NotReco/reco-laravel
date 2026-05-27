@@ -60,20 +60,44 @@ class TmdbService
     {
         $result = $this->get($endpoint, $params);
 
-        // Nếu title/name rỗng, thử lại với English
+        // Nếu title/name rỗng HOẶC title giống hệt original_title mà tiếng gốc không phải tiếng Anh -> fallback sang tiếng Anh
         if ($result && $this->fallbackLanguage !== $this->language) {
             $needsFallback = false;
 
-            if (isset($result['title']) && empty($result['title'])) {
-                $needsFallback = true;
+            if (isset($result['title'])) {
+                if (empty($result['title'])) {
+                    $needsFallback = true;
+                } elseif (isset($result['original_title'], $result['original_language']) 
+                          && $result['title'] === $result['original_title'] 
+                          && $result['original_language'] !== 'en') {
+                    $needsFallback = true;
+                }
             }
-            if (isset($result['name']) && empty($result['name'])) {
-                $needsFallback = true;
+            if (isset($result['name'])) {
+                if (empty($result['name'])) {
+                    $needsFallback = true;
+                } elseif (isset($result['original_name'], $result['original_language']) 
+                          && $result['name'] === $result['original_name'] 
+                          && $result['original_language'] !== 'en') {
+                    $needsFallback = true;
+                }
             }
 
             if ($needsFallback) {
                 $params['language'] = $this->fallbackLanguage;
-                return $this->get($endpoint, $params);
+                $fallbackResult = $this->get($endpoint, $params);
+                // Gộp lại: dùng title/name tiếng Anh nhưng vẫn giữ các thông tin khác
+                if ($fallbackResult) {
+                    if (isset($fallbackResult['title'])) {
+                        $result['title'] = $fallbackResult['title'];
+                    }
+                    if (isset($fallbackResult['name'])) {
+                        $result['name'] = $fallbackResult['name'];
+                    }
+                    if (empty($result['overview']) && !empty($fallbackResult['overview'])) {
+                        $result['overview'] = $fallbackResult['overview'];
+                    }
+                }
             }
         }
 

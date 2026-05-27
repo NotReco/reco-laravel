@@ -24,7 +24,7 @@
     };
 @endphp
 
-<div {{ $attributes->merge(['class' => 'bg-white border border-gray-100 hover:border-gray-200 hover:shadow-lg transition-all duration-200 rounded-2xl p-5']) }}>
+<div {{ $attributes->merge(['class' => 'bg-white border border-gray-100 hover:border-gray-200 hover:shadow-lg transition-all duration-200 rounded-2xl p-5']) }} id="review-{{ $review->id }}">
     {{-- Header: User + Rating --}}
     <div class="flex items-center justify-between mb-3">
         <div class="flex items-center gap-3 min-w-0">
@@ -57,13 +57,24 @@
         @endif
     </div>
 
-    {{-- Movie link --}}
-    @if($showMovie && $review->movie)
-        <a href="{{ route('movies.show', $review->movie) }}"
-            class="flex items-center gap-2 text-xs font-medium text-sky-500 hover:text-sky-600 transition-colors mb-2 bg-sky-50 w-fit px-2 py-1 rounded-md">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"/></svg>
-            {{ $review->movie->title }}
-        </a>
+    {{-- Movie / TV Show link --}}
+    @if($showMovie)
+        @if($review->movie)
+            @php $contentUrl = route('movies.show', $review->movie) . '#review-' . $review->id; @endphp
+            <a href="{{ $contentUrl }}"
+                class="flex items-center gap-2 text-xs font-medium text-sky-500 hover:text-sky-600 transition-colors mb-2 bg-sky-50 w-fit px-2 py-1 rounded-md">
+                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"/></svg>
+                {{ $review->movie->poster ? '' : '' }}
+                <span class="truncate max-w-[160px]">{{ $review->movie->title }}</span>
+            </a>
+        @elseif($review->tvShow)
+            @php $contentUrl = route('tv-shows.show', $review->tvShow) . '#review-' . $review->id; @endphp
+            <a href="{{ $contentUrl }}"
+                class="flex items-center gap-2 text-xs font-medium text-violet-500 hover:text-violet-600 transition-colors mb-2 bg-violet-50 w-fit px-2 py-1 rounded-md">
+                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                <span class="truncate max-w-[160px]">{{ $review->tvShow->title }}</span>
+            </a>
+        @endif
     @endif
 
     {{-- Review title --}}

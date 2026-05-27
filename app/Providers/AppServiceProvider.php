@@ -61,30 +61,34 @@ class AppServiceProvider extends ServiceProvider
     {
         // ── Admin Panel ──
         // Chỉ staff (moderator + admin) mới được vào admin panel
-        Gate::define('access-admin', fn(User $user) => $user->isStaff());
+        Gate::define('access_admin_panel', fn(User $user) => $user->isStaff());
 
         // ── Quản lý Users ──
         // Chỉ admin mới quản lý được user (ban, đổi role, xóa)
-        Gate::define('manage-users', fn(User $user) => $user->canManageUsers());
+        Gate::define('manage_users', fn(User $user) => $user->canManageUsers());
 
         // ── Quản lý Content ──
         // Staff có quyền CRUD phim, xem/duyệt review, xóa comment
-        Gate::define('manage-movies', fn(User $user) => $user->canManageContent());
-        Gate::define('manage-reviews', fn(User $user) => $user->canModerateReviews());
-        Gate::define('manage-comments', fn(User $user) => $user->canManageContent());
-        Gate::define('manage-genres', fn(User $user) => $user->canManageContent());
-        Gate::define('manage-people', fn(User $user) => $user->canManageContent());
-        Gate::define('manage-tags', fn(User $user) => $user->canManageContent());
-
-        // ── Hệ thống ──
-        // Chỉ admin mới được dùng
-        Gate::define('manage-settings', fn(User $user) => $user->canManageSettings());
-        Gate::define('import-data', fn(User $user) => $user->canImportData());
-        Gate::define('force-delete', fn(User $user) => $user->canForceDelete());
+        Gate::define('manage_movies', fn(User $user) => $user->canManageContent());
+        Gate::define('manage_tv_shows', fn(User $user) => $user->canManageContent());
+        Gate::define('manage_reviews', fn(User $user) => $user->canModerateReviews());
+        Gate::define('manage_comments', fn(User $user) => $user->canManageContent());
+        Gate::define('manage_genres', fn(User $user) => $user->canManageContent());
+        Gate::define('manage_people', fn(User $user) => $user->canManageContent());
+        Gate::define('manage_tags', fn(User $user) => $user->canManageContent());
+        Gate::define('manage_articles', fn(User $user) => $user->canManageContent());
+        Gate::define('manage_carousel', fn(User $user) => $user->canManageContent());
+        Gate::define('manage_forum', fn(User $user) => $user->canManageContent());
+        
+        // ── Quản lý Roles & Settings ──
+        Gate::define('manage_roles', fn(User $user) => $user->isAdmin());
+        Gate::define('manage_settings', fn(User $user) => $user->canManageSettings());
+        Gate::define('import_data', fn(User $user) => $user->canImportData());
+        Gate::define('force_delete', fn(User $user) => $user->canForceDelete());
 
         // ── Giới hạn Moderator ──
         // Mod KHÔNG được: thay đổi role user, xóa vĩnh viễn, thay đổi settings
-        Gate::define('change-user-role', fn(User $user) => $user->isAdmin());
-        Gate::define('delete-user', fn(User $user) => $user->isAdmin());
+        Gate::define('change_user_role', fn(User $user) => $user->isAdmin());
+        Gate::define('delete_user', fn(User $user) => $user->isAdmin());
     }
 }

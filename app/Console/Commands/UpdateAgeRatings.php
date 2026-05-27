@@ -63,7 +63,7 @@ class UpdateAgeRatings extends Command
                 if (isset($ratings['VN'])) {
                     $ageRating = $ratings['VN'];
                 } elseif (isset($ratings['US'])) {
-                    $ageRating = $ratings['US'];
+                    $ageRating = $this->normalizeCertification($ratings['US']);
                 } elseif (!empty($ratings)) {
                     $ageRating = reset($ratings);
                 }
@@ -101,7 +101,7 @@ class UpdateAgeRatings extends Command
                 if (isset($ratings['VN'])) {
                     $ageRating = $ratings['VN'];
                 } elseif (isset($ratings['US'])) {
-                    $ageRating = $ratings['US'];
+                    $ageRating = $this->normalizeCertification($ratings['US']);
                 } elseif (!empty($ratings)) {
                     $ageRating = reset($ratings);
                 }
@@ -118,5 +118,25 @@ class UpdateAgeRatings extends Command
         $this->newLine();
 
         $this->info("Done! Updated $moviesUpdated movies and $tvUpdated TV shows.");
+    }
+
+    /**
+     * Map TMDB US certification sang age rating nội bộ của hệ thống.
+     */
+    protected function normalizeCertification(string $cert): string
+    {
+        return match (strtoupper(trim($cert))) {
+            'NC-17' => '18+',
+            'R'     => '18+',
+            'TV-MA' => '18+',
+            'PG-13' => 'T13',
+            'TV-14' => 'T13',
+            'PG'    => 'P',
+            'TV-PG' => 'P',
+            'G'     => 'P',
+            'TV-G'  => 'P',
+            'TV-Y'  => 'P',
+            default => $cert,
+        };
     }
 }

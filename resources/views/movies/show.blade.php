@@ -134,9 +134,19 @@
                                 </span>
                             @endif
                             @if ($movie->age_rating)
-                                <span class="flex items-center gap-1.5 backdrop-blur-sm px-3 py-1.5 rounded-full border {{ $movie->isAdultRated() ? 'bg-red-600/80 text-white border-red-400 font-bold shadow-[0_0_15px_rgba(220,38,38,0.5)]' : 'bg-black/30 text-white border-white/20' }} font-bold uppercase tracking-wider">
-                                    {{ $movie->age_rating }}
-                                </span>
+                                @php
+                                    $normalizedAge = \App\Helpers\AgeRatingHelper::normalize($movie->age_rating, $movie->adult ?? false);
+                                @endphp
+                                @if ($normalizedAge['badge'])
+                                <div class="relative group/tooltip">
+                                    <span class="flex items-center gap-1.5 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/20 font-bold uppercase tracking-wider cursor-help {{ $normalizedAge['colorClass'] }}">
+                                        {{ $normalizedAge['badge'] }}
+                                    </span>
+                                    <div class="absolute left-0 top-full mt-2 hidden group-hover/tooltip:block w-max max-w-[200px] p-2 bg-gray-900 text-white text-xs rounded shadow-lg z-50 whitespace-normal leading-relaxed pointer-events-none">
+                                        {{ $normalizedAge['description'] }}
+                                    </div>
+                                </div>
+                                @endif
                             @endif
                         </div>
 

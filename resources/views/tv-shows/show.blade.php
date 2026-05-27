@@ -103,28 +103,24 @@
 
                         {{-- Meta Info --}}
                         <div class="flex items-center flex-wrap gap-3 text-sm mb-4">
-                            @if ($tvShow->release_date)
+                            @if ($tvShow->first_air_date)
                                 <span
                                     class="flex items-center gap-1.5 bg-black/30 backdrop-blur-sm text-white px-3 py-1.5 rounded-full border border-white/20">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                     </svg>
-                                    {{ \Carbon\Carbon::parse($tvShow->release_date)->format('d/m/Y') }}
+                                    {{ \Carbon\Carbon::parse($tvShow->first_air_date)->format('d/m/Y') }}
                                 </span>
                             @endif
-                            @if ($tvShow->runtime)
-                                @php
-                                    $h = intdiv($tvShow->runtime, 60);
-                                    $m = $tvShow->runtime % 60;
-                                @endphp
+                            @if ($tvShow->episode_run_time)
                                 <span
                                     class="flex items-center gap-1.5 bg-black/30 backdrop-blur-sm text-white px-3 py-1.5 rounded-full border border-white/20">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
-                                    {{ $h > 0 ? $h . ' tiếng ' : '' }}{{ $m > 0 ? $m . ' phút' : '' }}
+                                    {{ $tvShow->episode_run_time }} phút/tập
                                 </span>
                             @endif
                             @if ($tvShow->country)
@@ -134,9 +130,19 @@
                                 </span>
                             @endif
                             @if ($tvShow->age_rating)
-                                <span class="flex items-center gap-1.5 backdrop-blur-sm px-3 py-1.5 rounded-full border {{ $tvShow->isAdultRated() ? 'bg-red-600/80 text-white border-red-400 font-bold shadow-[0_0_15px_rgba(220,38,38,0.5)]' : 'bg-black/30 text-white border-white/20' }} font-bold uppercase tracking-wider">
-                                    {{ $tvShow->age_rating }}
-                                </span>
+                                @php
+                                    $normalizedAge = \App\Helpers\AgeRatingHelper::normalize($tvShow->age_rating, $tvShow->adult ?? false);
+                                @endphp
+                                @if ($normalizedAge['badge'])
+                                <div class="relative group/tooltip">
+                                    <span class="flex items-center gap-1.5 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/20 font-bold uppercase tracking-wider cursor-help {{ $normalizedAge['colorClass'] }}">
+                                        {{ $normalizedAge['badge'] }}
+                                    </span>
+                                    <div class="absolute left-0 top-full mt-2 hidden group-hover/tooltip:block w-max max-w-[200px] p-2 bg-gray-900 text-white text-xs rounded shadow-lg z-50 whitespace-normal leading-relaxed pointer-events-none">
+                                        {{ $normalizedAge['description'] }}
+                                    </div>
+                                </div>
+                                @endif
                             @endif
                         </div>
 
@@ -922,7 +928,7 @@
                                 <span class="w-1 h-5 bg-sky-500 rounded-full inline-block"></span>
                                 Viết đánh giá
                             </h2>
-                            <x-review-form :movie="$tvShow" />
+                            <x-review-form :tvShow="$tvShow" />
                         </section>
 
                     </div>

@@ -17,9 +17,9 @@ class ReviewSeeder extends Seeder
     public function run(): void
     {
         $tmdb = app(TmdbService::class);
-        $users = User::where('role', 'user')->pluck('id')->toArray();
-        $movies = Movie::whereNotNull('tmdb_id')->get();
-        $tvShows = \App\Models\TvShow::whereNotNull('tmdb_id')->get();
+        $users = User::query()->where('role', 'user')->pluck('id')->toArray();
+        $movies = Movie::query()->whereNotNull('tmdb_id')->get();
+        $tvShows = \App\Models\TvShow::query()->whereNotNull('tmdb_id')->get();
 
         if (empty($users)) {
             $this->command->warn('⚠️  Chưa có user nào. Chạy UserSeeder trước!');
@@ -97,14 +97,14 @@ class ReviewSeeder extends Seeder
         $this->command->info("✅ Tạo {$totalReviews} reviews!");
     }
 
-    protected function seedReviewsForMedia($media, $foreignKey, $users, $reviewTemplates, $titleTemplates, &$totalReviews)
+    protected function seedReviewsForMedia(\App\Models\Movie|\App\Models\TvShow $media, string $foreignKey, array $users, array $reviewTemplates, array $titleTemplates, int &$totalReviews)
     {
         // Each movie must have at least 1 review
         $reviewCount = rand(4, 8);
         $reviewerIds = (array) array_rand(array_flip($users), min($reviewCount, count($users)));
 
         foreach ($reviewerIds as $userId) {
-            $sentiment = $this->randomSentiment();
+            $sentiment = $this->randomSentiment($media);
             $rating = $this->ratingForSentiment($sentiment);
             $title = $titleTemplates[$sentiment][array_rand($titleTemplates[$sentiment])];
             $content = $reviewTemplates[$sentiment][array_rand($reviewTemplates[$sentiment])];
@@ -125,14 +125,23 @@ class ReviewSeeder extends Seeder
         }
     }
 
-    protected function randomSentiment(): string
+    protected function randomSentiment(\App\Models\Movie|\App\Models\TvShow $media): string
     {
-        $roll = rand(1, 10);
-        if ($roll <= 5)
-            return 'positive';   // 50%
-        if ($roll <= 8)
-            return 'neutral';    // 30%
-        return 'negative';                   // 20%
+        // Danh sách ID các phim/TV Shows nổi tiếng, kinh điển
+        $famousIds = [278, 238, 155, 13, 122, 680, 550, 157336, 11, 603, 155, 27205, 597, 109445, 1726, 101, 769, 510, 24428, 1399, 1396, 66732, 93405, 60625, 84958, 60059, 1402, 1416, 85271, 100088, 1424, 76479, 76331, 60574, 94997];
+        
+        $roll = rand(1, 100);
+        
+        if (in_array($media->tmdb_id, $famousIds)) {
+            // Phim kinh điển: 90% positive, 10% neutral
+            if ($roll <= 90) return 'positive';
+            return 'neutral';
+        }
+        
+        // Phim thông thường (vốn đã được filter chất lượng cao từ TMDB): 70% positive, 20% neutral, 10% negative
+        if ($roll <= 70) return 'positive';
+        if ($roll <= 90) return 'neutral';
+        return 'negative';
     }
 
     protected function ratingForSentiment(string $sentiment): int

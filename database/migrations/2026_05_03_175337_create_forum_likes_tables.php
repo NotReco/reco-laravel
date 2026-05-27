@@ -13,27 +13,21 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('forum_thread_likes', function (Blueprint $table) {
-            $table->increments('id');
-            $table->unsignedInteger('user_id');
-            $table->unsignedInteger('forum_thread_id');
+            $table->id();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('forum_thread_id')->constrained('forum_threads')->cascadeOnDelete();
             $table->timestamps();
 
             $table->unique(['user_id', 'forum_thread_id']);
-
-            $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
-            $table->foreign('forum_thread_id')->references('id')->on('forum_threads')->cascadeOnDelete();
         });
 
         Schema::create('forum_reply_likes', function (Blueprint $table) {
-            $table->increments('id');
-            $table->unsignedInteger('user_id');
-            $table->unsignedInteger('forum_reply_id');
+            $table->id();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('forum_reply_id')->constrained('forum_replies')->cascadeOnDelete();
             $table->timestamps();
 
             $table->unique(['user_id', 'forum_reply_id']);
-
-            $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
-            $table->foreign('forum_reply_id')->references('id')->on('forum_replies')->cascadeOnDelete();
         });
     }
 

@@ -1,7 +1,14 @@
 {{-- Review Form Component --}}
-{{-- Usage: <x-review-form :movie="$movie" /> --}}
+{{-- Usage: <x-review-form :movie="$movie" /> hoặc <x-review-form :tvShow="$tvShow" /> --}}
 
-@props(['movie'])
+@props(['movie' => null, 'tvShow' => null])
+@php
+    $reviewable = $movie ?? $tvShow;
+    $isTvShow = $tvShow !== null && $movie === null;
+    $formAction = $isTvShow
+        ? route('tv-shows.reviews.store', $tvShow)
+        : route('reviews.store', $movie);
+@endphp
 
 @auth
 <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm" x-data="{
@@ -11,6 +18,7 @@
     title: '',
     isSpoiler: false,
     maxLength: 500,
+    minLength: 50,
     get ratingColor() {
         const s = this.hover || this.score;
         if (s >= 9) return '#f59e0b';
@@ -23,10 +31,16 @@
         const s = this.hover || this.score;
         const labels = ['', 'Rất tệ', 'Tệ', 'Dưới TB', 'Tạm được', 'Trung bình', 'Khá', 'Tốt', 'Rất tốt', 'Xuất sắc', 'Kiệt tác'];
         return labels[s] || '';
+    },
+    get isValid() {
+        return this.score > 0 && this.content.trim().length >= this.minLength;
+    },
+    get contentTooShort() {
+        return this.content.trim().length > 0 && this.content.trim().length < this.minLength;
     }
 }">
 
-    <form action="{{ route('reviews.store', $movie) }}" method="POST">
+    <form action="{{ $formAction }}" method="POST">
         @csrf
 
         {{-- Star Rating --}}
@@ -76,13 +90,23 @@
         {{-- Content --}}
         <div class="mb-2">
             <div class="flex items-center justify-between mb-1.5">
-                <label class="text-sm font-semibold text-gray-700">Nội dung</label>
-                <span class="text-xs font-semibold text-gray-500" x-text="'(' + content.length + '/' + maxLength + ')'"></span>
+                <label class="text-sm font-semibold text-gray-700">
+                    Nội dung
+                    <span class="text-red-500 ml-0.5">*</span>
+                </label>
+                <span class="text-xs font-semibold"
+                    :class="contentTooShort ? 'text-orange-500' : (content.length >= minLength ? 'text-green-500' : 'text-gray-500')"
+                    x-text="content.length + '/' + maxLength + (content.length < minLength ? ' (cần thêm ' + (minLength - content.length) + ' ký tự)' : '')"></span>
             </div>
-            <textarea name="content" rows="4" x-model="content"
+            <textarea name="content" rows="5" x-model="content" required
                 class="w-full bg-gray-50 border border-gray-200 rounded-xl py-2.5 px-3.5 text-sm text-gray-900 placeholder-gray-400 focus:border-sky-400 focus:ring-2 focus:ring-sky-100 outline-none transition-all resize-none"
+                :class="contentTooShort ? 'border-orange-300 focus:border-orange-400 focus:ring-orange-100' : ''"
                 :maxlength="maxLength"
-                placeholder="Chia sẻ cảm nhận của bạn về bộ phim..."></textarea>
+                placeholder="Chia sẻ cảm nhận chi tiết của bạn về bộ phim (tối thiểu 50 ký tự)..."></textarea>
+            {{-- Client-side hint --}}
+            <p class="text-xs text-orange-500 mt-1" x-show="contentTooShort" x-cloak>
+                Nội dung cần tối thiểu {{ 50 }} ký tự để đảm bảo chất lượng đánh giá.
+            </p>
             <x-input-error :messages="$errors->get('content')" class="mt-1" />
         </div>
 
@@ -101,9 +125,13 @@
         <div class="flex items-center gap-3">
             <button type="submit"
                 class="px-5 py-2.5 bg-sky-500 hover:bg-sky-600 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl shadow-sm shadow-sky-500/20 transition-all"
-                :disabled="!score">
-                Đánh giá
+                :disabled="!isValid"
+                :title="!score ? 'Vui lòng chọn điểm' : (!isValid ? 'Nội dung cần tối thiểu 50 ký tự' : '')">
+                Gửi đánh giá
             </button>
+            <span class="text-xs text-gray-400" x-show="!isValid && score > 0" x-cloak>
+                Còn thiếu <span class="font-semibold text-orange-500" x-text="Math.max(0, minLength - content.trim().length)"></span> ký tự
+            </span>
         </div>
     </form>
 </div>

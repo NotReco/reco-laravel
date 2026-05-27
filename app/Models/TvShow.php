@@ -66,9 +66,35 @@ class TvShow extends Model
             return false;
         }
 
-        $adultRatings = ['18+', 'T18', 'R', 'NC-17', 'TV-MA'];
-        
-        return in_array(trim(strtoupper($this->age_rating)), $adultRatings, true);
+        $adultRatings = ['18+', 't18', 'r', 'nc-17', 'tv-ma'];
+        return in_array(strtolower(trim($this->age_rating)), $adultRatings, true);
+    }
+
+    /**
+     * Lấy mô tả giải thích cho độ tuổi.
+     */
+    public function getAgeRatingDescription(): string
+    {
+        if (empty($this->age_rating)) {
+            return '';
+        }
+
+        $rating = strtoupper(trim($this->age_rating));
+
+        return match ($rating) {
+            'G', 'TV-G' => 'Phù hợp với mọi lứa tuổi.',
+            'PG', 'TV-PG' => 'Nên có phụ huynh hướng dẫn.',
+            'PG-13' => 'Phụ huynh nên cân nhắc, có thể không phù hợp với trẻ dưới 13 tuổi.',
+            'R' => 'Nội dung dành cho người trưởng thành hoặc cần có phụ huynh đi kèm.',
+            'NC-17' => 'Không phù hợp với người dưới 17 tuổi.',
+            'TV-Y' => 'Phù hợp với trẻ nhỏ.',
+            'TV-14' => 'Có thể không phù hợp với người dưới 14 tuổi.',
+            'TV-MA' => 'Nội dung dành cho người trưởng thành.',
+            'T13' => 'Không phù hợp với người dưới 13 tuổi.',
+            'T16' => 'Không phù hợp với người dưới 16 tuổi.',
+            'T18', '18+' => 'Nội dung giới hạn độ tuổi, dành cho người từ 18 tuổi trở lên.',
+            default => 'Phân loại độ tuổi theo nguồn dữ liệu TMDb.',
+        };
     }
 
     /**

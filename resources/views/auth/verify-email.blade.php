@@ -62,9 +62,9 @@
 
         {{-- Actions row --}}
         <div class="flex items-center justify-between">
-            <a href="{{ route('profile.edit') }}"
+            <a href="{{ route('home') }}"
                 class="text-[14px] text-gray-500 hover:text-gray-800 font-medium transition-colors">
-                ← Quay lại hồ sơ
+                ← Về trang chủ
             </a>
             <form method="POST" action="{{ route('logout') }}" class="inline">
                 @csrf
