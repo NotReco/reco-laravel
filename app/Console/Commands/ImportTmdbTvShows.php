@@ -38,17 +38,17 @@ class ImportTmdbTvShows extends Command
         // 1. Import curated famous series first
         $this->info("🌟 Đang import Curated TV Shows...");
         foreach ($curatedIds as $tmdbId) {
-            if ($this->created + $this->updated >= $target) break;
+            if (TvShow::count() >= $target) break;
             $this->importTvShow($tmdbId);
         }
 
         // 2. Loop through sources
         foreach ($sources as $source) {
-            if ($this->created + $this->updated >= $target) break;
+            if (TvShow::count() >= $target) break;
 
             $this->info("📄 Lấy từ nguồn: {$source}");
             for ($page = 1; $page <= $maxPages; $page++) {
-                if ($this->created + $this->updated >= $target) break;
+                if (TvShow::count() >= $target) break;
 
                 $this->info("   Trang {$page}");
                 $data = match ($source) {
@@ -64,7 +64,7 @@ class ImportTmdbTvShows extends Command
                 }
 
                 foreach ($data['results'] as $item) {
-                    if ($this->created + $this->updated >= $target) break;
+                    if (TvShow::count() >= $target) break;
                     
                     // Filter: adult
                     if (($item['adult'] ?? false) === true) continue;

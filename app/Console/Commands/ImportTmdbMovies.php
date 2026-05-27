@@ -39,17 +39,17 @@ class ImportTmdbMovies extends Command
         // 1. Import curated famous movies first
         $this->info("🌟 Đang import Curated Movies...");
         foreach ($curatedIds as $tmdbId) {
-            if ($this->moviesCreated + $this->moviesUpdated >= $target) break;
+            if (Movie::count() >= $target) break;
             $this->importMovie($tmdbId);
         }
 
         // 2. Loop through sources
         foreach ($sources as $source) {
-            if ($this->moviesCreated + $this->moviesUpdated >= $target) break;
+            if (Movie::count() >= $target) break;
 
             $this->info("📄 Lấy từ nguồn: {$source}");
             for ($page = 1; $page <= $maxPages; $page++) {
-                if ($this->moviesCreated + $this->moviesUpdated >= $target) break;
+                if (Movie::count() >= $target) break;
 
                 $this->info("   Trang {$page}");
                 $data = match ($source) {
@@ -64,7 +64,7 @@ class ImportTmdbMovies extends Command
                 }
 
                 foreach ($data['results'] as $movieData) {
-                    if ($this->moviesCreated + $this->moviesUpdated >= $target) break;
+                    if (Movie::count() >= $target) break;
                     
                     // Filter: adult
                     if (($movieData['adult'] ?? false) === true) continue;
