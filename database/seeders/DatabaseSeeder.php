@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -13,55 +14,32 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->seedDefaultAccounts();
-
         $this->call([
             RolesAndPermissionsSeeder::class,
             UserSeeder::class,
+        ]);
+
+        $this->command->info('Đang import TMDB Genres...');
+        \Illuminate\Support\Facades\Artisan::call('tmdb:import-genres');
+        $this->command->info(\Illuminate\Support\Facades\Artisan::output());
+
+        $this->command->info('Đang import TMDB Movies (target: 120)...');
+        \Illuminate\Support\Facades\Artisan::call('tmdb:import-movies', [
+            '--target' => 120,
+        ]);
+        $this->command->info(\Illuminate\Support\Facades\Artisan::output());
+
+        $this->command->info('Đang import TMDB TV Shows (target: 100)...');
+        \Illuminate\Support\Facades\Artisan::call('tmdb:import-tvshows', [
+            '--target' => 100,
+        ]);
+        $this->command->info(\Illuminate\Support\Facades\Artisan::output());
+
+        $this->call([
             ReviewSeeder::class,
             InteractionSeeder::class,
             ForumSeeder::class,
             UserRewardSeeder::class,
         ]);
-    }
-
-    /**
-     * Tạo tài khoản mặc định cho mỗi role.
-     */
-    protected function seedDefaultAccounts(): void
-    {
-        $accounts = [
-            [
-                'name' => 'Admin',
-                'email' => 'thongnguyen.111004@gmail.com',
-                'password' => '123456',
-                'role' => UserRole::ADMIN,
-            ],
-            [
-                'name' => 'Moderator',
-                'email' => 'mod@gmail.com',
-                'password' => '123456',
-                'role' => UserRole::MODERATOR,
-            ],
-            [
-                'name' => 'Tester',
-                'email' => 'tester.test@gmail.com',
-                'password' => '123456',
-                'role' => UserRole::TESTER,
-            ],
-            [
-                'name' => 'User',
-                'email' => 'user@gmail.com',
-                'password' => '123456',
-                'role' => UserRole::USER,
-            ],
-        ];
-
-        foreach ($accounts as $account) {
-            User::updateOrCreate(
-                ['email' => $account['email']],
-                $account
-            );
-        }
     }
 }

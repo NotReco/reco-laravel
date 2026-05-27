@@ -12,8 +12,9 @@ use Illuminate\Support\Str;
 class ImportTmdbMovies extends Command
 {
     protected $signature = 'tmdb:import-movies
-                            {--pages=3 : Số trang cần lấy (mỗi trang 20 phim)}
-                            {--source=popular : Nguồn phim: popular, top_rated, now_playing, upcoming}';
+                            {--target=120 : Số lượng phim mục tiêu cần import}
+                            {--max-pages=50 : Số trang tối đa được quét để tránh lặp vô hạn}
+                            {--source=mixed : Nguồn phim (mixed sẽ kết hợp nhiều nguồn)}';
 
     protected $description = 'Import phim từ TMDb API (bao gồm cast & crew)';
 
@@ -25,44 +26,71 @@ class ImportTmdbMovies extends Command
     public function handle(TmdbService $tmdb): int
     {
         $this->tmdb = $tmdb;
-        $pages = (int) $this->option('pages');
-        $source = $this->option('source');
+        $target = (int) $this->option('target');
+        $maxPages = (int) $this->option('max-pages');
+        $sourceOption = $this->option('source');
 
-        $this->info("🎬 Import phim từ TMDb ({$source}) — {$pages} trang...");
+        $this->info("🎬 Import phim từ TMDb (Target: {$target}, Max Pages: {$maxPages}, Source: {$sourceOption})...");
         $this->newLine();
 
-        for ($page = 1; $page <= $pages; $page++) {
-            $this->info("📄 Trang {$page}/{$pages}");
+        $sources = $sourceOption === 'mixed' ? ['popular', 'top_rated', 'discover'] : [$sourceOption];
+        $curatedIds = [278, 238, 155, 13, 122, 680, 550, 157336, 11, 603, 155, 27205, 597, 109445, 1726, 101, 769, 510, 24428];
 
-            $data = match ($source) {
-                'top_rated' => $tmdb->getTopRatedMovies($page),
-                'now_playing' => $tmdb->getNowPlayingMovies($page),
-                'upcoming' => $tmdb->getUpcomingMovies($page),
-                default => $tmdb->getPopularMovies($page),
-            };
+        // 1. Import curated famous movies first
+        $this->info("🌟 Đang import Curated Movies...");
+        foreach ($curatedIds as $tmdbId) {
+            if ($this->moviesCreated + $this->moviesUpdated >= $target) break;
+            $this->importMovie($tmdbId);
+        }
 
-            if (!$data || empty($data['results'])) {
-                $this->warn("⚠️  Không có dữ liệu trang {$page}");
-                continue;
-            }
+        // 2. Loop through sources
+        foreach ($sources as $source) {
+            if ($this->moviesCreated + $this->moviesUpdated >= $target) break;
 
-            $bar = $this->output->createProgressBar(count($data['results']));
-            $bar->start();
+            $this->info("📄 Lấy từ nguồn: {$source}");
+            for ($page = 1; $page <= $maxPages; $page++) {
+                if ($this->moviesCreated + $this->moviesUpdated >= $target) break;
 
-            foreach ($data['results'] as $movieData) {
-                $this->importMovie($movieData['id']);
-                $bar->advance();
-            }
+                $this->info("   Trang {$page}");
+                $data = match ($source) {
+                    'top_rated' => $tmdb->getTopRatedMovies($page),
+                    'discover' => $tmdb->discoverMovies(['vote_count.gte' => 500, 'vote_average.gte' => 7.0], $page),
+                    default => $tmdb->getPopularMovies($page),
+                };
 
-            $bar->finish();
-            $this->newLine(2);
+                if (!$data || empty($data['results'])) {
+                    $this->warn("⚠️  Không có dữ liệu trang {$page}");
+                    break;
+                }
 
-            // Rate limit: đợi 250ms giữa các trang
-            if ($page < $pages) {
+                foreach ($data['results'] as $movieData) {
+                    if ($this->moviesCreated + $this->moviesUpdated >= $target) break;
+                    
+                    // Filter: adult
+                    if (($movieData['adult'] ?? false) === true) continue;
+                    
+                    // Filter: minimum quality (vote & popularity)
+                    if (($movieData['vote_count'] ?? 0) < 500 || ($movieData['vote_average'] ?? 0) < 6.5 || ($movieData['popularity'] ?? 0) < 10) continue;
+                    
+                    // Filter: must have poster and backdrop
+                    if (empty($movieData['poster_path']) || empty($movieData['backdrop_path'])) continue;
+                    
+                    // Filter: readability
+                    $title = $movieData['title'] ?? $movieData['original_title'] ?? '';
+                    if (preg_match('/[\p{Cyrillic}\p{Han}\p{Hiragana}\p{Katakana}\p{Hangul}]/u', $title) && !in_array($movieData['original_language'] ?? '', ['en', 'vi'])) {
+                        // try to skip if title still contains strange chars
+                        continue;
+                    }
+
+                    $this->importMovie($movieData['id']);
+                }
+
+                // Rate limit
                 usleep(250000);
             }
         }
 
+        $this->newLine();
         $this->info("✅ Hoàn tất!");
         $this->table(
             ['Metric', 'Count'],
@@ -113,10 +141,15 @@ class ImportTmdbMovies extends Command
             if (isset($ratings['VN'])) {
                 $ageRating = $ratings['VN'];
             } elseif (isset($ratings['US'])) {
-                $ageRating = $ratings['US'];
+                $ageRating = $this->normalizeCertification($ratings['US']);
             } elseif (!empty($ratings)) {
                 $ageRating = reset($ratings);
             }
+        }
+
+        // Fallback: nếu không có certification nhưng adult=true thì bắt buộc là 18+
+        if (empty($ageRating) && ($detail['adult'] ?? false) === true) {
+            $ageRating = '18+';
         }
 
         $movieAttributes = [
@@ -276,32 +309,53 @@ class ImportTmdbMovies extends Command
                 ->filter(fn($a) => $a !== ($detail['name'] ?? ''))
                 ->values()->all();
 
-            $person = Person::create([
-                'tmdb_id'        => $tmdbId,
-                'name'           => $detail['name'] ?? $data['name'] ?? 'Unknown',
-                'photo'          => $this->tmdb->profileUrl($detail['profile_path'] ?? $data['profile_path'] ?? null, 'large'),
-                'biography'      => $detail['biography'] ?? null,
-                'bio'            => $detail['biography'] ?? null,
-                'known_for'      => $detail['known_for_department'] ?? $data['known_for_department'] ?? null,
-                'gender'         => $detail['gender'] ?? 0,
-                'place_of_birth' => $detail['place_of_birth'] ?? null,
-                'also_known_as'  => !empty($aliases) ? $aliases : null,
-                'homepage'       => !empty($detail['homepage']) ? $detail['homepage'] : null,
-                'imdb_id'        => $ext['imdb_id'] ?? null,
-                'instagram_id'   => $ext['instagram_id'] ?? null,
-                'twitter_id'     => $ext['twitter_id'] ?? null,
-                'date_of_birth'  => !empty($detail['birthday']) ? $detail['birthday'] : null,
-                'date_of_death'  => !empty($detail['deathday']) ? $detail['deathday'] : null,
-                'nationality'    => isset($detail['place_of_birth']) && str_contains($detail['place_of_birth'], ',')
-                    ? trim(substr($detail['place_of_birth'], strrpos($detail['place_of_birth'], ',') + 1))
-                    : null,
-            ]);
-            $this->peopleCreated++;
+            try {
+                $person = Person::create([
+                    'tmdb_id'        => $tmdbId,
+                    'name'           => $detail['name'] ?? $data['name'] ?? 'Unknown',
+                    'photo'          => $this->tmdb->profileUrl($detail['profile_path'] ?? $data['profile_path'] ?? null, 'large'),
+                    'biography'      => $detail['biography'] ?? null,
+                    'bio'            => $detail['biography'] ?? null,
+                    'known_for'      => $detail['known_for_department'] ?? $data['known_for_department'] ?? null,
+                    'gender'         => $detail['gender'] ?? 0,
+                    'place_of_birth' => $detail['place_of_birth'] ?? null,
+                    'also_known_as'  => !empty($aliases) ? $aliases : null,
+                    'homepage'       => !empty($detail['homepage']) ? $detail['homepage'] : null,
+                    'imdb_id'        => $ext['imdb_id'] ?? null,
+                    'instagram_id'   => $ext['instagram_id'] ?? null,
+                    'twitter_id'     => $ext['twitter_id'] ?? null,
+                    'date_of_birth'  => !empty($detail['birthday']) ? $detail['birthday'] : null,
+                    'date_of_death'  => !empty($detail['deathday']) ? $detail['deathday'] : null,
+                    'nationality'    => isset($detail['place_of_birth']) && str_contains($detail['place_of_birth'], ',')
+                        ? trim(substr($detail['place_of_birth'], strrpos($detail['place_of_birth'], ',') + 1))
+                        : null,
+                ]);
+                $this->peopleCreated++;
+            } catch (\Illuminate\Database\QueryException $e) {
+                // Nếu bị duplicate thì fetch lại từ db
+                $person = Person::withTrashed()->where('tmdb_id', $tmdbId)->first();
+            }
 
             // Rate limit nhẹ để tránh vượt quota
             usleep(100000); // 100ms
         }
 
         return $person;
+    }
+
+    /**
+     * Map TMDB US certification sang age rating nội bộ của hệ thống.
+     * Chỉ áp dụng khi không có VN certification.
+     */
+    protected function normalizeCertification(string $cert): string
+    {
+        return match (strtoupper(trim($cert))) {
+            'NC-17', 'R', 'TV-MA', '18+', 'A' => '18+',
+            'PG-13', 'TV-14', 'U/A 13+' => 'T13',
+            'TV-15', '15', 'U/A 16+', '16+' => 'T16',
+            'G', 'PG', 'TV-G', 'TV-Y', 'TV-PG', 'U' => 'P',
+            'NR', 'N/A', '', 'NULL' => 'Chưa phân loại',
+            default => 'Chưa phân loại', // Nếu không map được thì đưa về Chưa phân loại thay vì giữ nguyên raw
+        };
     }
 }

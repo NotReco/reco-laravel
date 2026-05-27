@@ -80,10 +80,51 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         $faker = \Faker\Factory::create('vi_VN');
-
         $avatarStyles = ['adventurer', 'avataaars', 'bottts', 'personas', 'pixel-art'];
 
-        for ($i = 1; $i <= 30; $i++) {
+        $accounts = [
+            [
+                'name' => 'Thông Nguyễn',
+                'email' => 'thongnguyen.111004@gmail.com',
+                'password' => \Illuminate\Support\Facades\Hash::make('123456'),
+                'role' => \App\Enums\UserRole::ADMIN,
+                'is_active' => true,
+            ],
+            [
+                'name' => 'Thanh Nguyễn',
+                'email' => 'holorblack@gmail.com',
+                'password' => \Illuminate\Support\Facades\Hash::make('123456'),
+                'role' => \App\Enums\UserRole::MODERATOR,
+                'is_active' => true,
+            ],
+            [
+                'name' => 'Tester Trần',
+                'email' => 'recothelizard369@gmail.com',
+                'password' => \Illuminate\Support\Facades\Hash::make('123456'),
+                'role' => \App\Enums\UserRole::TESTER,
+                'is_active' => true,
+            ],
+            [
+                'name' => 'Thông Đức',
+                'email' => 'thong.nd.64cntt@ntu.edu.vn',
+                'password' => \Illuminate\Support\Facades\Hash::make('123456'),
+                'role' => \App\Enums\UserRole::USER,
+                'is_active' => true,
+            ],
+        ];
+
+        foreach ($accounts as $account) {
+            $style = $avatarStyles[array_rand($avatarStyles)];
+            User::updateOrCreate(
+                ['email' => $account['email']],
+                array_merge($account, [
+                    'avatar' => "https://api.dicebear.com/7.x/{$style}/svg?seed=" . urlencode($account['name']),
+                ])
+            );
+        }
+
+        // Random users
+        for ($i = 1; $i <= 46; $i++) {
             $style = $avatarStyles[array_rand($avatarStyles)];
             $gender = $faker->randomElement(['male', 'female']);
             $name = $this->randomVietnameseName($gender);
@@ -124,6 +165,6 @@ class UserSeeder extends Seeder
             );
         }
 
-        $this->command->info("✅ Tạo 30 user giả thành công!");
+        $this->command->info("✅ Tạo 4 accounts chính và 46 users ngẫu nhiên thành công!");
     }
 }

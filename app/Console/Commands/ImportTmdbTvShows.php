@@ -11,8 +11,9 @@ use Illuminate\Console\Command;
 class ImportTmdbTvShows extends Command
 {
     protected $signature = 'tmdb:import-tvshows
-                            {--pages=3 : Số trang cần lấy (mỗi trang 20 series)}
-                            {--source=popular : Nguồn: popular, top_rated, airing_today, on_the_air}';
+                            {--target=100 : Số lượng series mục tiêu cần import}
+                            {--max-pages=50 : Số trang tối đa được quét để tránh lặp vô hạn}
+                            {--source=mixed : Nguồn (mixed sẽ kết hợp nhiều nguồn)}';
 
     protected $description = 'Import TV series từ TMDb API (bao gồm cast & crew)';
 
@@ -24,43 +25,71 @@ class ImportTmdbTvShows extends Command
     public function handle(TmdbService $tmdb): int
     {
         $this->tmdb = $tmdb;
-        $pages  = (int) $this->option('pages');
-        $source = $this->option('source');
+        $target  = (int) $this->option('target');
+        $maxPages = (int) $this->option('max-pages');
+        $sourceOption = $this->option('source');
 
-        $this->info("📺 Import TV series từ TMDb ({$source}) — {$pages} trang...");
+        $this->info("📺 Import TV series từ TMDb (Target: {$target}, Max Pages: {$maxPages}, Source: {$sourceOption})...");
         $this->newLine();
 
-        for ($page = 1; $page <= $pages; $page++) {
-            $this->info("📄 Trang {$page}/{$pages}");
+        $sources = $sourceOption === 'mixed' ? ['popular', 'top_rated'] : [$sourceOption];
+        $curatedIds = [1399, 1396, 66732, 93405, 60625, 84958, 60059, 1402, 1416, 85271, 100088, 1424, 76479, 76331, 60574, 94997]; // Game of Thrones, Breaking Bad, Stranger Things, Squid Game, Rick and Morty, Loki, Better Call Saul...
 
-            $data = match ($source) {
-                'top_rated'    => $tmdb->getTopRatedTvShows($page),
-                'airing_today' => $tmdb->getAiringTodayTvShows($page),
-                'on_the_air'   => $tmdb->getOnTheAirTvShows($page),
-                default        => $tmdb->getPopularTvShows($page),
-            };
+        // 1. Import curated famous series first
+        $this->info("🌟 Đang import Curated TV Shows...");
+        foreach ($curatedIds as $tmdbId) {
+            if ($this->created + $this->updated >= $target) break;
+            $this->importTvShow($tmdbId);
+        }
 
-            if (!$data || empty($data['results'])) {
-                $this->warn("⚠️  Không có dữ liệu trang {$page}");
-                continue;
-            }
+        // 2. Loop through sources
+        foreach ($sources as $source) {
+            if ($this->created + $this->updated >= $target) break;
 
-            $bar = $this->output->createProgressBar(count($data['results']));
-            $bar->start();
+            $this->info("📄 Lấy từ nguồn: {$source}");
+            for ($page = 1; $page <= $maxPages; $page++) {
+                if ($this->created + $this->updated >= $target) break;
 
-            foreach ($data['results'] as $item) {
-                $this->importTvShow($item['id']);
-                $bar->advance();
-            }
+                $this->info("   Trang {$page}");
+                $data = match ($source) {
+                    'top_rated' => $tmdb->getTopRatedTvShows($page),
+                    'airing_today' => $tmdb->getAiringTodayTvShows($page),
+                    'on_the_air' => $tmdb->getOnTheAirTvShows($page),
+                    default => $tmdb->getPopularTvShows($page),
+                };
 
-            $bar->finish();
-            $this->newLine(2);
+                if (!$data || empty($data['results'])) {
+                    $this->warn("⚠️  Không có dữ liệu trang {$page}");
+                    break;
+                }
 
-            if ($page < $pages) {
-                usleep(250000); // 250ms rate limit
+                foreach ($data['results'] as $item) {
+                    if ($this->created + $this->updated >= $target) break;
+                    
+                    // Filter: adult
+                    if (($item['adult'] ?? false) === true) continue;
+                    
+                    // Filter: minimum quality
+                    if (($item['vote_count'] ?? 0) < 300 || ($item['vote_average'] ?? 0) < 6.5 || ($item['popularity'] ?? 0) < 10) continue;
+                    
+                    // Filter: must have poster and backdrop
+                    if (empty($item['poster_path']) || empty($item['backdrop_path'])) continue;
+                    
+                    // Filter: readability
+                    $title = $item['name'] ?? $item['original_name'] ?? '';
+                    if (preg_match('/[\p{Cyrillic}\p{Han}\p{Hiragana}\p{Katakana}\p{Hangul}]/u', $title) && !in_array($item['original_language'] ?? '', ['en', 'vi'])) {
+                        continue;
+                    }
+
+                    $this->importTvShow($item['id']);
+                }
+
+                // Rate limit
+                usleep(250000);
             }
         }
 
+        $this->newLine();
         $this->info('✅ Hoàn tất!');
         $this->table(
             ['Metric', 'Count'],
@@ -110,10 +139,15 @@ class ImportTmdbTvShows extends Command
             if (isset($ratings['VN'])) {
                 $ageRating = $ratings['VN'];
             } elseif (isset($ratings['US'])) {
-                $ageRating = $ratings['US'];
+                $ageRating = $this->normalizeCertification($ratings['US']);
             } elseif (!empty($ratings)) {
                 $ageRating = reset($ratings);
             }
+        }
+
+        // Fallback: nếu không có rating nhưng adult=true thì bắt buộc là 18+
+        if (empty($ageRating) && ($detail['adult'] ?? false) === true) {
+            $ageRating = '18+';
         }
 
         $attributes = [
@@ -268,5 +302,20 @@ class ImportTmdbTvShows extends Command
         }
 
         return $person;
+    }
+
+    /**
+     * Map TMDB US content rating sang age rating nội bộ của hệ thống.
+     */
+    protected function normalizeCertification(string $cert): string
+    {
+        return match (strtoupper(trim($cert))) {
+            'NC-17', 'R', 'TV-MA', '18+', 'A' => '18+',
+            'PG-13', 'TV-14', 'U/A 13+' => 'T13',
+            'TV-15', '15', 'U/A 16+', '16+' => 'T16',
+            'G', 'PG', 'TV-G', 'TV-Y', 'TV-PG', 'U' => 'P',
+            'NR', 'N/A', '', 'NULL' => 'Chưa phân loại',
+            default => 'Chưa phân loại',
+        };
     }
 }

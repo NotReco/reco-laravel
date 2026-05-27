@@ -74,10 +74,9 @@ class ReviewSeeder extends Seeder
         $bar->start();
 
         $totalReviews = 0;
-        $totalQuickRatings = 0;
 
         foreach ($movies as $movie) {
-            $this->seedReviewsForMedia($movie, 'movie_id', $users, $reviewTemplates, $titleTemplates, $totalReviews, $totalQuickRatings);
+            $this->seedReviewsForMedia($movie, 'movie_id', $users, $reviewTemplates, $titleTemplates, $totalReviews);
             $bar->advance();
         }
 
@@ -89,54 +88,40 @@ class ReviewSeeder extends Seeder
         $bar2->start();
 
         foreach ($tvShows as $tvShow) {
-            $this->seedReviewsForMedia($tvShow, 'tv_show_id', $users, $reviewTemplates, $titleTemplates, $totalReviews, $totalQuickRatings);
+            $this->seedReviewsForMedia($tvShow, 'tv_show_id', $users, $reviewTemplates, $titleTemplates, $totalReviews);
             $bar2->advance();
         }
 
         $bar2->finish();
         $this->command->newLine(2);
-        $this->command->info("✅ Tạo {$totalReviews} reviews + {$totalQuickRatings} quick ratings!");
+        $this->command->info("✅ Tạo {$totalReviews} reviews!");
     }
 
-    protected function seedReviewsForMedia($media, $foreignKey, $users, $reviewTemplates, $titleTemplates, &$totalReviews, &$totalQuickRatings)
+    protected function seedReviewsForMedia($media, $foreignKey, $users, $reviewTemplates, $titleTemplates, &$totalReviews)
     {
-        $reviewCount = rand(2, 6);
+        // Each movie must have at least 1 review
+        $reviewCount = rand(4, 8);
         $reviewerIds = (array) array_rand(array_flip($users), min($reviewCount, count($users)));
 
         foreach ($reviewerIds as $userId) {
-            if (rand(1, 10) <= 7) {
-                $sentiment = $this->randomSentiment();
-                $rating = $this->ratingForSentiment($sentiment);
-                $title = $titleTemplates[$sentiment][array_rand($titleTemplates[$sentiment])];
-                $content = $reviewTemplates[$sentiment][array_rand($reviewTemplates[$sentiment])];
+            $sentiment = $this->randomSentiment();
+            $rating = $this->ratingForSentiment($sentiment);
+            $title = $titleTemplates[$sentiment][array_rand($titleTemplates[$sentiment])];
+            $content = $reviewTemplates[$sentiment][array_rand($reviewTemplates[$sentiment])];
 
-                Review::create([
-                    'user_id' => $userId,
-                    $foreignKey => $media->id,
-                    'title' => $title,
-                    'excerpt' => Str::limit($content, 100),
-                    'content' => $content,
-                    'rating' => $rating,
-                    'is_spoiler' => rand(1, 10) <= 2,
-                    'status' => 'published',
-                    'published_at' => now()->subDays(rand(1, 90)),
-                    'view_count' => rand(10, 500),
-                ]);
-                $totalReviews++;
-            } else {
-                $rating = rand(40, 100) / 10;
-
-                Review::create([
-                    'user_id' => $userId,
-                    $foreignKey => $media->id,
-                    'title' => null,
-                    'content' => null,
-                    'rating' => $rating,
-                    'status' => 'published',
-                    'published_at' => now()->subDays(rand(1, 60)),
-                ]);
-                $totalQuickRatings++;
-            }
+            Review::create([
+                'user_id' => $userId,
+                $foreignKey => $media->id,
+                'title' => $title,
+                'excerpt' => Str::limit($content, 100),
+                'content' => $content,
+                'rating' => $rating,
+                'is_spoiler' => rand(1, 10) <= 2,
+                'status' => 'published',
+                'published_at' => now()->subDays(rand(1, 90)),
+                'view_count' => rand(10, 500),
+            ]);
+            $totalReviews++;
         }
     }
 
@@ -150,12 +135,12 @@ class ReviewSeeder extends Seeder
         return 'negative';                   // 20%
     }
 
-    protected function ratingForSentiment(string $sentiment): float
+    protected function ratingForSentiment(string $sentiment): int
     {
         return match ($sentiment) {
-            'positive' => rand(75, 100) / 10,  // 7.5 - 10.0
-            'neutral' => rand(50, 74) / 10,   // 5.0 - 7.4
-            'negative' => rand(20, 49) / 10,   // 2.0 - 4.9
+            'positive' => rand(8, 10),  // 8, 9, 10
+            'neutral'  => rand(5, 7),   // 5, 6, 7
+            'negative' => rand(2, 4),   // 2, 3, 4
         };
     }
 }
