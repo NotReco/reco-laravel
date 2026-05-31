@@ -4,6 +4,16 @@
     {{-- ═══ Hero Banner Carousel ═══ --}}
     <x-hero-carousel :items="$heroItems" />
 
+    {{-- ═══ Section 0: Recommendations – bg xám nhạt --}}
+    @if(isset($recommendedItems) && $recommendedItems->isNotEmpty())
+        <div class="bg-gray-50 py-6 border-b border-gray-100">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <x-mixed-section title="Gợi Ý Dành Cho Bạn"
+                    subtitle="Dựa trên sở thích và lịch sử xem của bạn." :items="$recommendedItems" />
+            </div>
+        </div>
+    @endif
+
     {{-- ═══ Section 1: Trending – full-width bg xen kẽ --}}
     <div class="bg-white py-6 border-b border-gray-100">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

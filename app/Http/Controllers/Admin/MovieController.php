@@ -51,6 +51,7 @@ class MovieController extends Controller
             'revenue'        => 'nullable|integer|min:0',
             'status'         => 'nullable|in:active,hidden,upcoming',
             'is_approved'    => 'boolean',
+            'age_rating'     => 'nullable|string|max:20|in:P,K,T13,T16,T18,18+,PG,PG-13,R,NC-17,TV-MA',
             'genres'         => 'nullable|array',
             'genres.*'       => 'exists:genres,id',
         ]);

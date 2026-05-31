@@ -107,6 +107,12 @@ Route::get('/api/search', function (\Illuminate\Http\Request $request) {
     // Sort by view_count DESC first, then by relevance score ASC
     $results = $results->sortByDesc('view_count')->sortBy('relevance_score')->take(8)->values();
 
+    // Ghi nhận lịch sử tìm kiếm
+    if ($q !== '') {
+        $interactionService = app(\App\Services\UserInteractionService::class);
+        $interactionService->recordSearch(auth()->user(), $q, $results->count());
+    }
+
     // Map again to keep response small and clean
     $cleanResults = $results->map(function ($item) {
         return [

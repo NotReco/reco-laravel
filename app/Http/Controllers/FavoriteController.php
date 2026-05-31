@@ -23,9 +23,27 @@ class FavoriteController extends Controller
             return response()->json(['success' => false, 'message' => 'Missing ID'], 400);
         }
 
-        $userId = Auth::id();
+        $user = Auth::user();
 
-        $query = Favorite::where('user_id', $userId);
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Bạn cần đăng nhập để thực hiện chức năng này.',
+            ], 401);
+        }
+
+        // Kiểm tra xác minh email
+        if (!$user->hasVerifiedEmail()) {
+            return response()->json([
+                'success'  => false,
+                'code'     => 'email_not_verified',
+                'message'  => 'Bạn cần xác minh email trước khi sử dụng chức năng yêu thích.',
+            ], 403);
+        }
+
+        $userId = $user->id;
+
+        $query = Favorite::query()->where('user_id', $userId);
         if ($request->movie_id) {
             $query->where('movie_id', $request->movie_id);
         } else {
@@ -37,22 +55,22 @@ class FavoriteController extends Controller
         if ($favorite) {
             $favorite->delete();
             return response()->json([
-                'success' => true,
-                'is_favorited' => false,
-                'message' => 'Đã gỡ khỏi danh sách Yêu thích.',
+                'success'   => true,
+                'favorited' => false,
+                'message'   => 'Đã gỡ khỏi danh sách Yêu thích.',
             ]);
         }
 
         Favorite::create([
-            'user_id' => $userId,
-            'movie_id' => $request->movie_id,
+            'user_id'    => $userId,
+            'movie_id'   => $request->movie_id,
             'tv_show_id' => $request->tv_show_id,
         ]);
 
         return response()->json([
-            'success' => true,
-            'is_favorited' => true,
-            'message' => 'Đã thêm vào danh sách Yêu thích ❤️.',
+            'success'   => true,
+            'favorited' => true,
+            'message'   => 'Đã thêm vào danh sách Yêu thích ❤️.',
         ]);
     }
 }

@@ -15,15 +15,15 @@ class AgeRatingHelper
             return self::mappedResult('18+', 'Phim dành cho người từ 18 tuổi trở lên', 'bg-red-600 text-white shadow-md shadow-red-500/20');
         }
 
-        // 2. Rỗng hoặc NR (Not Rated)
+        // 2. Rỗng hoặc NR (Not Rated) — badge rỗng, không hiển thị
         if (empty($cert) || in_array(strtoupper(trim($cert)), ['NR', 'N/A'])) {
-            return self::mappedResult('Chưa phân loại', 'Chưa có dữ liệu phân loại độ tuổi', 'bg-gray-500 text-white shadow-md');
+            return self::mappedResult('', 'Chưa phân loại', 'bg-gray-500 text-white shadow-md');
         }
 
         $upper = strtoupper(trim($cert));
 
         // 3. Phân loại 18+
-        if (in_array($upper, ['R', 'NC-17', 'TV-MA', '18+', 'A'])) {
+        if (in_array($upper, ['R', 'NC-17', 'TV-MA', '18+', 'A', 'T18'])) {
             return self::mappedResult('18+', 'Phim dành cho người từ 18 tuổi trở lên', 'bg-red-600 text-white shadow-md shadow-red-500/20');
         }
 
@@ -37,21 +37,26 @@ class AgeRatingHelper
             return self::mappedResult('T13', 'Phù hợp với khán giả từ 13 tuổi trở lên', 'bg-yellow-600 text-white shadow-md');
         }
 
-        // 6. Phân loại P (Mọi độ tuổi)
+        // 6. Phân loại K (trẻ em)
+        if (in_array($upper, ['K'])) {
+            return self::mappedResult('K', 'Dành cho trẻ em', 'bg-blue-500 text-white shadow-md');
+        }
+
+        // 7. Phân loại P (Mọi độ tuổi)
         if (in_array($upper, ['G', 'PG', 'TV-G', 'TV-Y', 'TV-PG', 'U', 'P'])) {
             return self::mappedResult('P', 'Phù hợp với mọi độ tuổi', 'bg-green-600 text-white shadow-md');
         }
 
-        // 7. Fallback nếu không thuộc các chuẩn trên
-        return self::mappedResult($upper, "Phân loại: $upper", 'bg-gray-900/70 backdrop-blur text-gray-200');
+        // 8. Fallback — hiển thị giá trị gốc với đúng case (uppercase chỉ là class CSS, không đổi nội dung)
+        return self::mappedResult($upper, 'Phân loại: ' . $upper, 'bg-gray-900/70 backdrop-blur text-gray-200');
     }
 
     private static function mappedResult(string $badge, string $desc, string $color): array
     {
         return [
-            'badge' => $badge,
+            'badge'      => $badge,
             'description' => $desc,
-            'colorClass' => $color,
+            'colorClass'  => $color,
         ];
     }
 }

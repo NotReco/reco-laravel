@@ -188,6 +188,11 @@ class TvShowController extends Controller
         // Lấy media (Videos, Backdrops, Posters)
         $tmdbService = app(\App\Services\TmdbService::class);
         $media = $tmdbService->getMedia($tvShow->tmdb_id, 'tv');
+        $trailerCandidates = $tmdbService->getTrailerCandidates($media['videos'] ?? []);
+
+        // Ghi nhận lượt xem
+        $interactionService = app(\App\Services\UserInteractionService::class);
+        $interactionService->recordView(auth()->user(), $tvShow, 'tv_detail');
 
         // Series liên quan (cùng thể loại)
         $relatedTvShows = TvShow::with('genres')
@@ -247,6 +252,7 @@ class TvShowController extends Controller
             'distribution',
             'ratingHistory',
             'media',
+            'trailerCandidates',
         ));
     }
 }

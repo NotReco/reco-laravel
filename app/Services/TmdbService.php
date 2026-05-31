@@ -296,6 +296,87 @@ class TmdbService
     // ═══════════════════════════════════════
 
     /**
+     * Lấy danh sách các ứng viên trailer phù hợp từ mảng videos của TMDB.
+     */
+    public function getTrailerCandidates(array $videos): array
+    {
+        if (empty($videos)) {
+            return [];
+        }
+
+        $candidates = [];
+        
+        foreach ($videos as $video) {
+            if ($video['site'] !== 'YouTube') {
+                continue;
+            }
+
+            $name = mb_strtolower($video['name'] ?? '', 'UTF-8');
+            
+            // Tránh các video không phải là trailer thực sự
+            if (preg_match('/(clip|featurette|interview|recap|behind the scenes|making of)/', $name)) {
+                continue;
+            }
+
+            $isOfficial = ($video['official'] ?? false) === true;
+            $isTrailer = in_array($video['type'], ['Trailer', 'Teaser']);
+            $isGoodName = preg_match('/(official trailer|trailer|teaser)/', $name);
+
+            if ($isTrailer || $isGoodName) {
+                // Tính điểm ưu tiên (cao hơn = ưu tiên hơn)
+                $score = 0;
+                if ($isOfficial) $score += 10;
+                if ($video['type'] === 'Trailer') $score += 5;
+                if ($video['type'] === 'Teaser') $score += 2;
+                if (str_contains($name, 'official trailer')) $score += 5;
+
+                $candidates[] = [
+                    'key' => $video['key'],
+                    'name' => $video['name'],
+                    'type' => $video['type'],
+                    'score' => $score,
+                    'url' => "https://www.youtube.com/watch?v={$video['key']}",
+                    'embed_url' => "https://www.youtube.com/embed/{$video['key']}?autoplay=1&rel=0",
+                ];
+            }
+        }
+
+        // Sắp xếp theo score giảm dần
+        usort($candidates, fn($a, $b) => $b['score'] <=> $a['score']);
+
+        // Tuỳ chọn kiểm tra YouTube API nếu có YOUTUBE_API_KEY
+        $apiKey = env('YOUTUBE_API_KEY');
+        if ($apiKey && !empty($candidates)) {
+            $videoIds = implode(',', array_column($candidates, 'key'));
+            try {
+                $response = Http::timeout(10)->get('https://www.googleapis.com/youtube/v3/videos', [
+                    'part' => 'status',
+                    'id' => $videoIds,
+                    'key' => $apiKey,
+                ]);
+
+                if ($response->successful()) {
+                    $items = $response->json('items') ?? [];
+                    $validIds = [];
+                    foreach ($items as $item) {
+                        $status = $item['status'] ?? [];
+                        if (($status['embeddable'] ?? false) === true && ($status['privacyStatus'] ?? '') === 'public') {
+                            $validIds[] = $item['id'];
+                        }
+                    }
+                    // Lọc những candidates hợp lệ
+                    $candidates = array_filter($candidates, fn($c) => in_array($c['key'], $validIds));
+                }
+            } catch (\Exception $e) {
+                Log::warning("YouTube API error in getTrailerCandidates: " . $e->getMessage());
+            }
+        }
+
+        return array_values($candidates);
+    }
+
+
+    /**
      * Lấy media (videos, backdrops, posters) từ TMDb (có cache).
      */
     public function getMedia(int $tmdbId, string $type = 'movie'): array

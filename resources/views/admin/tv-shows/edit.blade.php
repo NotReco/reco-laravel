@@ -217,6 +217,38 @@
                         </div>
                     </div>
 
+                    {{-- Phân loại độ tuổi --}}
+                    <div class="card p-5">
+                        <h3 class="text-sm font-semibold text-dark-300 uppercase tracking-wide mb-4">Phân loại độ tuổi</h3>
+                        <div>
+                            <label for="age_rating" class="block text-sm font-medium text-dark-200 mb-1.5">Độ tuổi</label>
+                            <select id="age_rating" name="age_rating" class="input-dark text-sm">
+                                <option value="">-- Chưa phân loại --</option>
+                                @foreach ([
+                                    'P'     => 'P — Phù hợp mọi lứa tuổi',
+                                    'K'     => 'K — Dành cho trẻ em',
+                                    'T13'   => 'T13 — Từ 13 tuổi trở lên',
+                                    'T16'   => 'T16 — Từ 16 tuổi trở lên',
+                                    'T18'   => 'T18 — Từ 18 tuổi trở lên',
+                                    '18+'   => '18+ — Giới hạn 18+',
+                                    'PG'    => 'PG — Phụ huynh hướng dẫn',
+                                    'PG-13' => 'PG-13 — Phụ huynh cân nhắc (dưới 13)',
+                                    'R'     => 'R — Người trưởng thành',
+                                    'NC-17' => 'NC-17 — Không dưới 17 tuổi',
+                                    'TV-MA' => 'TV-MA — Chỉ dành cho người lớn',
+                                ] as $val => $label)
+                                    <option value="{{ $val }}"
+                                        {{ old('age_rating', $tvShow->age_rating) === $val ? 'selected' : '' }}>
+                                        {{ $label }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('age_rating')
+                                <p class="text-red-400 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+
                     {{-- Thông tin phát sóng --}}
                     <div class="card p-5">
                         <h3 class="text-sm font-semibold text-dark-300 uppercase tracking-wide mb-4">Phát sóng</h3>

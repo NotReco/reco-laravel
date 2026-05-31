@@ -173,11 +173,9 @@ class ImportTmdbMovies extends Command
 
         // Xử lý trailer YouTube từ videos
         if (isset($detail['videos']['results'])) {
-            foreach ($detail['videos']['results'] as $video) {
-                if ($video['site'] === 'YouTube' && in_array($video['type'], ['Trailer', 'Teaser'])) {
-                    $movieAttributes['trailer_url'] = "https://www.youtube.com/watch?v={$video['key']}";
-                    break;
-                }
+            $candidates = $this->tmdb->getTrailerCandidates($detail['videos']['results']);
+            if (!empty($candidates)) {
+                $movieAttributes['trailer_url'] = $candidates[0]['url'];
             }
         }
 

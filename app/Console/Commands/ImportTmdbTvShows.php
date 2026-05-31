@@ -174,11 +174,9 @@ class ImportTmdbTvShows extends Command
         ];
 
         // Trailer từ videos
-        foreach ($detail['videos']['results'] ?? [] as $video) {
-            if ($video['site'] === 'YouTube' && in_array($video['type'], ['Trailer', 'Teaser'])) {
-                $attributes['trailer_url'] = "https://www.youtube.com/watch?v={$video['key']}";
-                break;
-            }
+        $candidates = $this->tmdb->getTrailerCandidates($detail['videos']['results'] ?? []);
+        if (!empty($candidates)) {
+            $attributes['trailer_url'] = $candidates[0]['url'];
         }
 
         $show = TvShow::withTrashed()->where('tmdb_id', $tmdbId)->first();

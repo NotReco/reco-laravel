@@ -38,10 +38,28 @@ class WatchlistController extends Controller
             return response()->json(['success' => false, 'message' => 'Missing ID'], 400);
         }
 
-        $userId = Auth::id();
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Bạn cần đăng nhập để thực hiện chức năng này.',
+            ], 401);
+        }
+
+        // Kiểm tra xác minh email
+        if (!$user->hasVerifiedEmail()) {
+            return response()->json([
+                'success'  => false,
+                'code'     => 'email_not_verified',
+                'message'  => 'Bạn cần xác minh email trước khi sử dụng chức năng My List.',
+            ], 403);
+        }
+
+        $userId = $user->id;
         $status = $request->status ?? 'want_to_watch';
 
-        $query = Watchlist::where('user_id', $userId);
+        $query = Watchlist::query()->where('user_id', $userId);
         
         if ($request->movie_id) {
             $query->where('movie_id', $request->movie_id);
@@ -60,7 +78,7 @@ class WatchlistController extends Controller
                 if ($request->wantsJson() || $request->ajax()) {
                     return response()->json([
                         'success' => true,
-                        'in_watchlist' => true,
+                        'watchlisted' => true,
                         'status' => $status,
                         'message' => 'Đã cập nhật trạng thái.',
                     ]);
@@ -74,7 +92,7 @@ class WatchlistController extends Controller
             if ($request->wantsJson() || $request->ajax()) {
                 return response()->json([
                     'success' => true,
-                    'in_watchlist' => false,
+                    'watchlisted' => false,
                     'status' => null,
                     'message' => 'Đã xóa khỏi danh sách của bạn.',
                 ]);
@@ -93,7 +111,7 @@ class WatchlistController extends Controller
         if ($request->wantsJson() || $request->ajax()) {
             return response()->json([
                 'success' => true,
-                'in_watchlist' => true,
+                'watchlisted' => true,
                 'status' => $status,
                 'message' => 'Đã thêm vào danh sách của bạn.',
             ]);

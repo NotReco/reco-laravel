@@ -207,6 +207,11 @@ class MovieController extends Controller
         // Lấy media (Videos, Backdrops, Posters)
         $tmdbService = app(\App\Services\TmdbService::class);
         $media = $tmdbService->getMedia($movie->tmdb_id, 'movie');
+        $trailerCandidates = $tmdbService->getTrailerCandidates($media['videos'] ?? []);
+
+        // Ghi nhận lượt xem
+        $interactionService = app(\App\Services\UserInteractionService::class);
+        $interactionService->recordView(auth()->user(), $movie, 'movie_detail');
 
         // Phim liên quan (cùng thể loại)
         $relatedMovies = Movie::with('genres')
@@ -268,6 +273,7 @@ class MovieController extends Controller
             'distribution',
             'ratingHistory',
             'media',
+            'trailerCandidates',
         ));
     }
 }

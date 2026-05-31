@@ -1,41 +1,7 @@
 <x-app-layout>
     <x-slot:title>{{ $tvShow->title }}</x-slot:title>
 
-    <div x-data="{
-        showTrailer: false,
-        trailerUrl: '',
-        isAdult: {{ $tvShow->isAdultRated() ? 'true' : 'false' }},
-
-        init() {
-            if (this.isAdult && localStorage.getItem('reco_age_confirmed') !== 'true') {
-                this.$nextTick(() => {
-                    window.dispatchEvent(new CustomEvent('open-age-modal', {
-                        detail: {
-                            onConfirm: () => {},
-                            onCancel: () => {
-                                if (window.history.length > 1) {
-                                    window.history.back();
-                                } else {
-                                    window.location.href = '{{ route('tv-shows.index') }}';
-                                }
-                            }
-                        }
-                    }));
-                });
-            }
-        },
-
-        openTrailer(url) {
-            if (!url) return;
-            const videoId = url.includes('v=') ? url.split('v=')[1].split('&')[0] : url.split('/').pop();
-            this.trailerUrl = 'https://www.youtube.com/embed/' + videoId + '?autoplay=1&rel=0';
-            this.showTrailer = true;
-        },
-        closeTrailer() {
-            this.showTrailer = false;
-            this.trailerUrl = '';
-        }
-    }" @keydown.escape.window="closeTrailer()">
+    <div x-data="tvShowDetailData">
 
         {{-- ══════════════════════════════════════════════════ --}}
         {{-- HERO: Backdrop + Gradient to white                 --}}
@@ -198,7 +164,15 @@
                                     body: JSON.stringify({ tv_show_id: {{ $tvShow->id }} })
                                 });
                                 const data = await res.json();
-                                if (data.success) this.isFavorited = data.is_favorited;
+                                if (res.status === 401) {
+                                    window.location.href = '{{ route('login') }}';
+                                } else if (res.status === 403 && data.code === 'email_not_verified') {
+                                    window.dispatchEvent(new CustomEvent('verify-email-required', { detail: { message: data.message } }));
+                                } else if (data.success) {
+                                    this.isFavorited = data.favorited !== undefined ? data.favorited : data.is_favorited;
+                                } else {
+                                    console.error('Favorite toggle failed:', data);
+                                }
                             },
                             async updateWatchlist(status) {
                                 @guest window.location.href = '{{ route('login') }}';
@@ -210,7 +184,10 @@
                                     body: JSON.stringify({ tv_show_id: {{ $tvShow->id }}, status: status })
                                 });
                                 const data = await res.json();
-                                if (data.success) this.watchlistStatus = data.in_watchlist ? data.status : '';
+                                if (data.success) {
+                                    const isWatchlisted = data.watchlisted !== undefined ? data.watchlisted : data.in_watchlist;
+                                    this.watchlistStatus = isWatchlisted ? data.status : '';
+                                }
                             }
                         }"
                             @vibes-updated.window="topMoods = [...$event.detail.top_moods]; myMood = $event.detail.mood;">
@@ -465,8 +442,8 @@
                             <div class="flex flex-wrap items-center gap-4">
 
                                 {{-- Actions --}}
-                                @if ($tvShow->trailer_url)
-                                    <button @click="openTrailer('{{ $tvShow->trailer_url }}')"
+                                @if (!empty($trailerCandidates) || $tvShow->trailer_url)
+                                    <button @click="$store.trailerModal.open('{{ !empty($trailerCandidates) ? '' : $tvShow->trailer_url }}', {!! Js::from(!empty($trailerCandidates) ? $trailerCandidates : []) !!})"
                                         class="inline-flex items-center gap-2 px-5 py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-sky-600/30">
                                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                             <path fill-rule="evenodd"
@@ -810,7 +787,7 @@
                                     @if($topVideo)
                                         <div class="shrink-0 w-72 sm:w-80 snap-start">
                                             <div class="relative aspect-video rounded-xl overflow-hidden group cursor-pointer shadow-sm border border-gray-100"
-                                                @click="openTrailer('https://www.youtube.com/watch?v={{ $topVideo['key'] }}')">
+                                                @click="$store.trailerModal.open('https://www.youtube.com/watch?v={{ $topVideo['key'] }}', [])">
                                                 <img src="https://img.youtube.com/vi/{{ $topVideo['key'] }}/mqdefault.jpg"
                                                     alt="{{ $topVideo['name'] }}"
                                                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
@@ -853,7 +830,7 @@
                                             @if ($video['site'] === 'YouTube')
                                                 <div class="shrink-0 w-72 sm:w-80 snap-start">
                                                     <div class="relative aspect-video rounded-xl overflow-hidden group cursor-pointer shadow-sm border border-gray-100"
-                                                        @click="openTrailer('https://www.youtube.com/watch?v={{ $video['key'] }}')">
+                                                        @click="$store.trailerModal.open('https://www.youtube.com/watch?v={{ $video['key'] }}', [])">
                                                         <img src="https://img.youtube.com/vi/{{ $video['key'] }}/mqdefault.jpg"
                                                             alt="{{ $video['name'] }}"
                                                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
@@ -923,7 +900,7 @@
                         @endif
 
                         {{-- Review Form --}}
-                        <section id="review-form">
+                        <section id="review-form" class="scroll-mt-24">
                             <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                                 <span class="w-1 h-5 bg-sky-500 rounded-full inline-block"></span>
                                 Viết đánh giá
@@ -1017,11 +994,37 @@
             </div>
         </div>
 
-        {{-- Trailer Modal --}}
-        <x-trailer-modal />
     </div>
 </x-app-layout>
 
+@push('scripts')
+<script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('tvShowDetailData', () => ({
+            isAdult: {{ $tvShow->isAdultRated() ? 'true' : 'false' }},
+
+            init() {
+                if (this.isAdult && localStorage.getItem('reco_age_confirmed') !== 'true') {
+                    this.$nextTick(() => {
+                        window.dispatchEvent(new CustomEvent('open-age-modal', {
+                            detail: {
+                                onConfirm: () => {},
+                                onCancel: () => {
+                                    if (window.history.length > 1) {
+                                        window.history.back();
+                                    } else {
+                                        window.location.href = '{{ route('tv-shows.index') }}';
+                                    }
+                                }
+                            }
+                        }));
+                    });
+                }
+            }
+        }));
+    });
+</script>
+@endpush
 <script>
     function userScore(config) {
         return {

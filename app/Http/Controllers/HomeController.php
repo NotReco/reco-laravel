@@ -20,6 +20,14 @@ class HomeController extends Controller
             ->take(20)
             ->values();
 
+        // Gợi ý dành cho bạn
+        $recommendationService = app(\App\Services\RecommendationService::class);
+        if (auth()->check()) {
+            $recommendedItems = $recommendationService->getRecommendationsForUser(auth()->user(), 12);
+        } else {
+            $recommendedItems = $recommendationService->getFallbackRecommendations(12);
+        }
+
         // 🔥 Trending — 10 phim xem nhiều nhất
         $trendingMovies = Movie::with('genres')
             ->whereNotNull('poster')
@@ -88,6 +96,7 @@ class HomeController extends Controller
             'upcomingMovies',
             'latestReviews',
             'genres',
+            'recommendedItems',
         ));
     }
 }

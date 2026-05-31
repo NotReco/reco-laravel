@@ -8,8 +8,6 @@
     x-data="{
         current: 0,
         total: {{ $items->count() }},
-        trailerUrl: '',
-        showTrailer: false,
         autoplay: null,
         startAutoplay() {
             this.autoplay = setInterval(() => this.next(), 6000);
@@ -22,22 +20,11 @@
         },
         prev() {
             this.current = (this.current - 1 + this.total) % this.total;
-        },
-        openTrailer(url) {
-            if (!url) return;
-            const videoId = url.includes('v=') ? url.split('v=')[1].split('&')[0] : url.split('/').pop();
-            this.trailerUrl = 'https://www.youtube.com/embed/' + videoId + '?autoplay=1&rel=0';
-            this.showTrailer = true;
-            this.stopAutoplay();
-        },
-        closeTrailer() {
-            this.showTrailer = false;
-            this.trailerUrl = '';
-            this.startAutoplay();
         }
     }"
     x-init="startAutoplay()"
-    @keydown.escape.window="closeTrailer()"
+    @trailer-opened.window="stopAutoplay()"
+    @trailer-closed.window="startAutoplay()"
 >
 
     {{-- Backdrop Slides --}}
@@ -130,10 +117,9 @@
                                 </p>
                             @endif
 
-                            {{-- CTA Buttons --}}
                             <div class="flex items-center gap-3 mt-5">
                                 @if($item->trailer_url)
-                                    <button @click="openTrailer('{{ $item->trailer_url }}')" class="px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-sky-600 hover:bg-sky-500 transition-colors shadow-md shadow-sky-200 flex items-center">
+                                    <button @click="$store.trailerModal.open('{{ $item->trailer_url }}', [])" class="px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-sky-600 hover:bg-sky-500 transition-colors shadow-md shadow-sky-200 flex items-center">
                                         <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
                                         Xem trailer
                                     </button>
@@ -207,10 +193,6 @@
                 :class="{ 'bg-sky-500 w-8': current === {{ $i }}, 'bg-gray-300 w-2 hover:bg-gray-400': current !== {{ $i }} }"></button>
         @endfor
     </div>
-
-
-    {{-- Trailer Modal --}}
-    <x-trailer-modal />
 
 </section>
 @else

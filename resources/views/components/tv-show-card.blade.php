@@ -44,7 +44,11 @@ try {
                     body: JSON.stringify({ tv_show_id: {{ $tvShow->id }} })
                 });
                 const data = await res.json();
-                if (data.success) { this.isFavorited = data.is_favorited; }
+                if (res.status === 403 && data.code === 'email_not_verified') {
+                    window.dispatchEvent(new CustomEvent('verify-email-required', { detail: { message: data.message } }));
+                } else if (data.success) {
+                    this.isFavorited = data.is_favorited;
+                }
             } catch(e) {}
             this.open = false; @endauth
     }
@@ -218,13 +222,13 @@ try {
     @php
         $normalizedAge = \App\Helpers\AgeRatingHelper::normalize($tvShow->age_rating, $tvShow->adult ?? false);
     @endphp
-    @if ($normalizedAge['badge'])
+    @if (!empty($normalizedAge['badge']))
         <div class="absolute top-2 left-2 z-30 group/tooltip" x-show="!open">
-            <div class="text-[10px] font-bold px-1.5 py-0.5 rounded {{ $normalizedAge['colorClass'] }} uppercase tracking-wide cursor-help transition-transform hover:scale-110">
+            <div class="text-[10px] font-bold px-1.5 py-0.5 rounded {{ $normalizedAge['colorClass'] }} tracking-wide cursor-help transition-transform hover:scale-110">
                 {{ $normalizedAge['badge'] }}
             </div>
-            {{-- Tooltip (z-50 đảm bảo nằm trên mọi thứ) --}}
-            <div class="absolute left-0 top-full mt-1.5 hidden group-hover/tooltip:block w-max max-w-[200px] p-2 bg-gray-900 text-white text-xs rounded shadow-lg z-[50] whitespace-normal leading-relaxed pointer-events-none">
+            {{-- Tooltip --}}
+            <div class="absolute left-0 top-full mt-1.5 hidden group-hover/tooltip:block w-max max-w-[200px] p-2 bg-gray-900 border border-gray-700 text-white text-xs rounded-lg shadow-xl z-[50] whitespace-normal leading-relaxed pointer-events-none">
                 {{ $normalizedAge['description'] }}
             </div>
         </div>
