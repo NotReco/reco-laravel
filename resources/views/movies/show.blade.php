@@ -448,29 +448,31 @@
                                 {{-- Actions --}}
                                 @if (!empty($trailerCandidates) || $movie->trailer_url)
                                     <button @click="$store.trailerModal.open('{{ !empty($trailerCandidates) ? '' : $movie->trailer_url }}', {!! Js::from(!empty($trailerCandidates) ? $trailerCandidates : []) !!})"
-                                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-sky-600/30">
+                                        title="Trailer"
+                                        class="inline-flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-5 py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-sky-600/30">
                                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                             <path fill-rule="evenodd"
                                                 d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
                                                 clip-rule="evenodd" />
                                         </svg>
-                                        Trailer
+                                        <span class="hidden md:inline">Trailer</span>
                                     </button>
                                 @endif
 
                                 <a href="#review-form"
-                                    class="inline-flex items-center gap-2 px-5 py-2.5 bg-white hover:bg-gray-50 text-gray-700 font-semibold rounded-xl border border-gray-200 transition-all duration-200 shadow-sm">
+                                    title="Viết review"
+                                    class="inline-flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-5 py-2.5 bg-white hover:bg-gray-50 text-gray-700 font-semibold rounded-xl border border-gray-200 transition-all duration-200 shadow-sm">
                                     <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor"
                                         viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                                     </svg>
-                                    Viết review
+                                    <span class="hidden md:inline">Viết review</span>
                                 </a>
 
                                 {{-- Favorite --}}
                                 <button @click="toggleFavorite()" title="Yêu thích"
-                                    class="p-2.5 rounded-xl border transition-all flex items-center justify-center h-[46px] w-[46px]"
+                                    class="p-2 md:p-2.5 rounded-xl border transition-all flex items-center justify-center h-[42px] w-[42px] md:h-[46px] md:w-[46px] shrink-0 animate-pulse-once"
                                     :class="isFavorited ? 'bg-rose-50 border-rose-300 text-rose-500' :
                                         'bg-white text-gray-400 hover:text-rose-500 hover:border-rose-300 shadow-sm border-gray-200'">
                                     <svg class="w-5 h-5" :fill="isFavorited ? 'currentColor' : 'none'"
@@ -485,7 +487,7 @@
                                 <div x-data="{ showSharePopup: false }">
                                     <button @click="navigator.clipboard.writeText(window.location.href).then(() => { showSharePopup = true; setTimeout(() => showSharePopup = false, 3000); })"
                                         title="Chia sẻ"
-                                        class="p-2.5 rounded-xl border bg-white border-gray-200 text-gray-500 hover:text-sky-600 hover:border-sky-300 hover:bg-sky-50 transition-all shadow-sm flex items-center justify-center h-[46px] w-[46px]">
+                                        class="p-2 md:p-2.5 rounded-xl border bg-white border-gray-200 text-gray-500 hover:text-sky-600 hover:border-sky-300 hover:bg-sky-50 transition-all shadow-sm flex items-center justify-center h-[42px] w-[42px] md:h-[46px] md:w-[46px] shrink-0">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
@@ -536,8 +538,8 @@
                                     };
                                 @endphp
                                 <div class="relative" x-data="{ open: false }" @click.outside="open = false">
-                                    <button @click="open = !open"
-                                        class="flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-all"
+                                    <button @click="open = !open" title="Danh sách theo dõi"
+                                        class="flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-4 py-2.5 rounded-xl border text-sm font-medium transition-all"
                                         :class="{
                                             'bg-sky-50 border-sky-400 text-sky-700': watchlistStatus === 'want_to_watch',
                                             'bg-amber-50 border-amber-400 text-amber-700': watchlistStatus === 'watching',
@@ -552,7 +554,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                                         </svg>
-                                        <span
+                                        <span class="hidden sm:inline"
                                             x-text="watchlistStatus === 'want_to_watch' ? 'Muốn xem' : (watchlistStatus === 'watching' ? 'Đang xem' : (watchlistStatus === 'watched' ? 'Đã xem' : (watchlistStatus === 'dropped' ? 'Bỏ dở' : 'Watchlist')))">{{ $wlText }}</span>
                                         <svg class="w-3.5 h-3.5 opacity-50" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">

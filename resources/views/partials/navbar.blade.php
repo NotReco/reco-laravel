@@ -37,8 +37,8 @@
                 
                 {{-- Mobile: hamburger on the left --}}
                 <div class="md:hidden flex items-center">
-                    <button @click="mobileOpen = !mobileOpen"
-                        class="w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 -ml-2"
+                    <button @click="mobileOpen = !mobileOpen" aria-label="Toggle Menu"
+                        class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 -ml-2"
                         :class="darkHero ? 'text-white/80 hover:text-white hover:bg-white/10' :
                             'text-gray-500 hover:text-gray-900 hover:bg-gray-100'">
                         <svg x-show="!mobileOpen" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -96,8 +96,8 @@
 
                 @auth
                     {{-- Gamified Event Button --}}
-                    <a href="{{ route('events.index') }}" 
-                        class="relative h-10 flex items-center gap-1.5 px-4 rounded-full transition-all duration-300 border bg-gray-100 border-gray-200 text-gray-600 hover:text-gray-900 hover:bg-gray-200/70 hover:border-gray-300 mr-1 group"
+                    <a href="{{ route('events.index') }}" title="Sự kiện"
+                        class="relative h-10 flex items-center justify-center gap-1.5 px-2.5 sm:px-4 rounded-full transition-all duration-300 border bg-gray-100 border-gray-200 text-gray-600 hover:text-gray-900 hover:bg-gray-200/70 hover:border-gray-300 mr-1 group"
                         :class="{
                             'bg-white/10 border-white/20 text-white/80 hover:text-white hover:bg-white/20 hover:border-white/30': darkHero,
                             'bg-gray-100 border-gray-200 text-gray-600 hover:text-gray-900 hover:bg-gray-200/70 hover:border-gray-300': !darkHero
@@ -758,6 +758,20 @@
                                     <span>Cài đặt</span>
                                 </a>
 
+                                @if (Auth::user()->can('manage_roles'))
+                                    <a href="{{ route('super.dashboard') }}"
+                                        class="flex items-center gap-3 px-2 py-2 rounded-xl text-[14px] font-semibold text-gray-900 hover:bg-gray-100 transition-colors group mt-1">
+                                        <div class="w-9 h-9 rounded-full bg-gray-100 group-hover:bg-purple-100 flex items-center justify-center shrink-0 transition-colors">
+                                            <svg class="w-5 h-5 text-gray-500 group-hover:text-purple-600 transition-colors" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                            </svg>
+                                        </div>
+                                        <span>Admin Panel</span>
+                                    </a>
+                                @endif
+
                                 @if (Auth::user()->isStaff())
                                     <a href="{{ route('admin.dashboard') }}"
                                         class="flex items-center gap-3 px-2 py-2 rounded-xl text-[14px] font-semibold text-gray-900 hover:bg-gray-100 transition-colors group mt-1">
@@ -771,7 +785,6 @@
                                         <span>Control Panel</span>
                                     </a>
                                 @endif
-
 
 
                                 <form method="POST" action="{{ route('logout') }}" class="w-full block m-0 mt-1">
@@ -852,6 +865,21 @@
                       {{ request()->routeIs('person.*') ? 'bg-sky-50 text-sky-600' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50' }}">
                 Diễn viên
             </a>
+
+            {{-- Community Links Mobile --}}
+            <div class="pt-3 border-t border-gray-100">
+                <span class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Cộng đồng</span>
+                <a href="https://zalo.me/g/5o5ee8fot0igcgsrooht" target="_blank" rel="noopener noreferrer"
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors text-gray-600 hover:text-gray-900 hover:bg-gray-50 mt-1">
+                    <svg class="w-4 h-4 text-blue-500" viewBox="0 0 24 24" fill="currentColor"><path d="M22.048 11.233c0-4.99-4.886-9.034-10.912-9.034C5.112 2.2 0 6.244 0 11.233c0 2.65 1.4 5.05 3.633 6.643V22.25c0 .542.617.857 1.074.562l3.666-2.355c.91.26 1.875.405 2.875.405 6.026 0 10.912-4.044 10.912-9.034h-.112zm-6.935 3.42H10.15c-.32 0-.578-.26-.578-.577s.26-.577.578-.577h2.443l-2.32-2.833a.604.604 0 0 1-.068-.168v-1.253c0-.32.26-.578.578-.578h4.963c.32 0 .578.26.578.578s-.26.578-.578.578h-2.443l2.32 2.833c.044.054.067.112.067.18v1.25c.002.28-.27.545-.578.545z"/></svg>
+                    Nhóm Zalo
+                </a>
+                <a href="https://www.facebook.com/groups/recodb" target="_blank" rel="noopener noreferrer"
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors text-gray-600 hover:text-gray-900 hover:bg-gray-50">
+                    <svg class="w-4 h-4 text-[#1877f2]" fill="currentColor" viewBox="0 0 24 24"><path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"/></svg>
+                    Nhóm Facebook
+                </a>
+            </div>
 
             {{-- Mobile auth --}}
             @guest

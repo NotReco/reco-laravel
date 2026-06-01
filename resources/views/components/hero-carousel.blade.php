@@ -51,7 +51,7 @@
     {{-- Content Layer --}}
     <div class="absolute inset-0 flex items-end pb-16 lg:pb-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-            <div class="flex flex-col lg:flex-row items-end justify-between gap-8">
+            <div class="flex flex-col lg:flex-row items-start lg:items-end justify-between gap-8">
 
                 {{-- Left: Movie Info --}}
                 <div class="flex-1 max-w-2xl space-y-4">

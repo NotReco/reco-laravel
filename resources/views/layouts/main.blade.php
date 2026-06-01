@@ -290,6 +290,12 @@
     {{-- ── Global Report Modal ─────────────────────────── --}}
     <x-report-modal />
 
+    {{-- ── Community Connect ───────────────────────────── --}}
+    <x-community-connect />
+
+    {{-- ── AI Assistant Widget ───────────────────────────── --}}
+    <x-ai-assistant-widget />
+
     {{-- ── Age Confirmation Modal ──────────────────────── --}}
     <x-age-confirmation-modal />
 

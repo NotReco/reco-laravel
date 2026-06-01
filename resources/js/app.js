@@ -188,7 +188,7 @@ async function initRichTextEditors() {
                 // Debug image insertion
                 editor.on("NodeChange", (e) => {
                     if (e.element && e.element.tagName === "IMG") {
-                        console.log("Image inserted:", e.element.src);
+                        // Debug log removed
                     }
                 });
             },
@@ -198,7 +198,7 @@ async function initRichTextEditors() {
             options.automatic_uploads = true;
             options.images_upload_handler = async (blobInfo, progress) => {
                 try {
-                    console.log("Starting upload for:", blobInfo.filename());
+                    // Debug log removed
                     const file = blobInfo.blob();
                     const name = blobInfo.filename();
                     const wrapped =
@@ -209,7 +209,7 @@ async function initRichTextEditors() {
                         wrapped,
                         uploadUrl,
                     );
-                    console.log("Upload successful, URL:", url);
+                    // Debug log removed
                     return url;
                 } catch (err) {
                     console.error("TinyMCE upload error:", err);
@@ -218,7 +218,7 @@ async function initRichTextEditors() {
             };
             options.file_picker_types = "image media";
             options.file_picker_callback = (callback, value, meta) => {
-                console.log("File picker opened for:", meta.filetype);
+                // Debug log removed
 
                 if (meta.filetype === "image") {
                     // Create a simple file input
@@ -231,16 +231,12 @@ async function initRichTextEditors() {
                         if (!file) return;
 
                         try {
-                            console.log("File selected:", file.name);
+                            // Debug log removed
                             const url = await uploadEditorFileToServer(
                                 file,
                                 uploadUrl,
                             );
-                            console.log("Upload successful, URL:", url);
-                            console.log(
-                                "Full image URL for verification:",
-                                window.location.origin + url,
-                            ); // Log full URL
+                            // Debug log removed
 
                             // For image dialog, callback with the URL
                             // TinyMCE will only insert when user clicks "Save" in the dialog
@@ -265,12 +261,12 @@ async function initRichTextEditors() {
                         const file = input.files?.[0];
                         if (!file) return;
                         try {
-                            console.log("File selected:", file.name);
+                            // Debug log removed
                             const url = await uploadEditorFileToServer(
                                 file,
                                 uploadUrl,
                             );
-                            console.log("Upload successful, URL:", url);
+                            // Debug log removed
                             callback(url);
                         } catch (err) {
                             console.error("File picker error:", err);

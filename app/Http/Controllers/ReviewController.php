@@ -57,7 +57,14 @@ class ReviewController extends Controller
                 ->withErrors(['content' => $warning]);
         }
 
-        Review::create([
+        // ── Rule-based Moderation ──
+        $status = 'published';
+        $moderation = $this->handleModeration($request, (string) $request->input('title', ''), $content, $status);
+        if (is_string($moderation)) {
+            return back()->withInput()->withErrors(['content' => $moderation]);
+        }
+
+        $review = Review::create([
             'user_id' => Auth::id(),
             'movie_id' => $movieId,
             'tv_show_id' => $tvShowId,
@@ -66,13 +73,35 @@ class ReviewController extends Controller
             'excerpt' => \Illuminate\Support\Str::limit($content, 100),
             'rating' => $rating,
             'is_spoiler' => $request->boolean('is_spoiler'),
-            'status' => 'published',
+            'status' => $status,
             'published_at' => now(),
         ]);
 
         $score = 5; // full review
         Auth::user()->increment('reputation_score', $score);
         
+        if (is_array($moderation) && !$moderation['is_clean'] && $moderation['action'] === 'hide') {
+            $actionName = ($moderation['source'] ?? 'rule') === 'ai' ? 'moderation.review.ai_flagged' : 'moderation.review.flagged';
+            \App\Models\ActivityLog::create([
+                'user_id' => Auth::id(),
+                'action' => $actionName,
+                'target_type' => get_class($review),
+                'target_id' => $review->id,
+                'description' => sprintf(
+                    "Nguồn: %s | Phân loại: [%s] | Mức độ: %s | Hành động: %s | Tự tin: %s | Từ khóa: [%s]\nNội dung: %s",
+                    strtoupper($moderation['source'] ?? 'rule'),
+                    implode(', ', $moderation['categories'] ?? []),
+                    $moderation['severity'] ?? 'N/A',
+                    $moderation['action'] ?? 'hide',
+                    $moderation['confidence'] ?? 'N/A',
+                    implode(', ', $moderation['matched_words'] ?? []),
+                    \Illuminate\Support\Str::limit($content, 120)
+                ),
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+        }
+
         if ($movieId) {
             $model = Movie::find($movieId);
             $route = route('movies.show', $model);
@@ -111,13 +140,43 @@ class ReviewController extends Controller
             return back()->withInput()->withErrors(['content' => $warning]);
         }
 
+        // ── Rule-based Moderation ──
+        $status = $review->status; // giữ nguyên status hiện tại nếu không vi phạm
+        $moderation = $this->handleModeration($request, (string) $request->input('title', ''), $content, $status, $review);
+        if (is_string($moderation)) {
+            return back()->withInput()->withErrors(['content' => $moderation]);
+        }
+
         $review->update([
             'title' => $request->input('title'),
             'content' => $content,
             'excerpt' => \Illuminate\Support\Str::limit($content, 100),
             'rating' => $rating,
             'is_spoiler' => $request->boolean('is_spoiler'),
+            'status' => $status,
         ]);
+
+        if (is_array($moderation) && !$moderation['is_clean'] && $moderation['action'] === 'hide') {
+            $actionName = ($moderation['source'] ?? 'rule') === 'ai' ? 'moderation.review.ai_flagged' : 'moderation.review.flagged';
+            \App\Models\ActivityLog::create([
+                'user_id' => Auth::id(),
+                'action' => $actionName,
+                'target_type' => get_class($review),
+                'target_id' => $review->id,
+                'description' => sprintf(
+                    "Nguồn: %s | Phân loại: [%s] | Mức độ: %s | Hành động: %s | Tự tin: %s | Từ khóa: [%s]\nNội dung: %s",
+                    strtoupper($moderation['source'] ?? 'rule'),
+                    implode(', ', $moderation['categories'] ?? []),
+                    $moderation['severity'] ?? 'N/A',
+                    $moderation['action'] ?? 'hide',
+                    $moderation['confidence'] ?? 'N/A',
+                    implode(', ', $moderation['matched_words'] ?? []),
+                    \Illuminate\Support\Str::limit($content, 120)
+                ),
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+        }
 
         return back()->with('success', 'Đã cập nhật đánh giá thành công! ✨');
     }
@@ -134,6 +193,47 @@ class ReviewController extends Controller
         $review->delete();
 
         return back()->with('success', 'Đã xóa đánh giá thành công! 🗑️');
+    }
+
+    /**
+     * Xử lý moderation check cho review.
+     */
+    protected function handleModeration(Request $request, string $title, string $content, string &$status, ?Review $review = null)
+    {
+        $moderationService = app(\App\Services\ModerationService::class);
+        $moderationResult = $moderationService->check($title . ' ' . $content);
+
+        if (!$moderationResult['is_clean']) {
+            if (in_array($moderationResult['action'], ['pending', 'delete'])) {
+                $actionName = ($moderationResult['source'] ?? 'rule') === 'ai' ? 'moderation.review.ai_flagged' : 'moderation.review.flagged';
+                \App\Models\ActivityLog::create([
+                    'user_id' => Auth::id(),
+                    'action' => $actionName,
+                    'target_type' => $review ? get_class($review) : null,
+                    'target_id' => $review ? $review->id : null,
+                    'description' => sprintf(
+                        "Nguồn: %s | Phân loại: [%s] | Mức độ: %s | Hành động: %s | Tự tin: %s | Từ khóa: [%s]\nNội dung: %s",
+                        strtoupper($moderationResult['source'] ?? 'rule'),
+                        implode(', ', $moderationResult['categories'] ?? []),
+                        $moderationResult['severity'] ?? 'N/A',
+                        $moderationResult['action'] ?? 'N/A',
+                        $moderationResult['confidence'] ?? 'N/A',
+                        implode(', ', $moderationResult['matched_words'] ?? []),
+                        \Illuminate\Support\Str::limit($content, 120)
+                    ),
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                ]);
+
+                return $moderationResult['message']; // trả về chuỗi lỗi
+            }
+
+            if ($moderationResult['action'] === 'hide') {
+                $status = 'hidden';
+            }
+        }
+        
+        return $moderationResult;
     }
 
     /**

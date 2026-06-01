@@ -20,6 +20,8 @@ class CommentController extends Controller
             'content' => ['required', 'string', 'max:1000'],
         ]);
 
+        $this->handleModeration($request, $request->input('content'));
+
         $comment = Comment::create([
             'user_id' => Auth::id(),
             'review_id' => $request->input('review_id'),
@@ -71,6 +73,8 @@ class CommentController extends Controller
         $request->validate([
             'content' => ['required', 'string', 'max:1000'],
         ]);
+
+        $this->handleModeration($request, $request->input('content'), $comment);
 
         $comment->update([
             'content' => $request->input('content'),
@@ -124,5 +128,40 @@ class CommentController extends Controller
             'isLiked' => $isLiked,
             'likesCount' => $comment->likes()->count(),
         ]);
+    }
+
+    /**
+     * Xử lý moderation check cho comment.
+     */
+    protected function handleModeration(Request $request, string $content, ?Comment $comment = null)
+    {
+        $moderationService = app(\App\Services\ModerationService::class);
+        $moderationResult = $moderationService->check($content);
+
+        if (!$moderationResult['is_clean']) {
+            $actionName = ($moderationResult['source'] ?? 'rule') === 'ai' ? 'moderation.comment.ai_flagged' : 'moderation.comment.flagged';
+            \App\Models\ActivityLog::create([
+                'user_id' => Auth::id(),
+                'action' => $actionName,
+                'target_type' => $comment ? get_class($comment) : null,
+                'target_id' => $comment ? $comment->id : null,
+                'description' => sprintf(
+                    "Nguồn: %s | Phân loại: [%s] | Mức độ: %s | Hành động: %s | Tự tin: %s | Từ khóa: [%s]\nNội dung: %s",
+                    strtoupper($moderationResult['source'] ?? 'rule'),
+                    implode(', ', $moderationResult['categories'] ?? []),
+                    $moderationResult['severity'] ?? 'N/A',
+                    $moderationResult['action'] ?? 'N/A',
+                    $moderationResult['confidence'] ?? 'N/A',
+                    implode(', ', $moderationResult['matched_words'] ?? []),
+                    \Illuminate\Support\Str::limit($content, 120)
+                ),
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'content' => $moderationResult['message']
+            ]);
+        }
     }
 }

@@ -224,19 +224,21 @@ try {
     @endphp
     @if (!empty($normalizedAge['badge']))
         <div class="absolute top-2 left-2 z-30 group/tooltip" x-show="!open">
-            <div class="text-[10px] font-bold px-1.5 py-0.5 rounded {{ $normalizedAge['colorClass'] }} tracking-wide cursor-help transition-transform hover:scale-110">
+            <div class="text-[10px] font-bold px-2 py-0.5 rounded-md {{ $normalizedAge['colorClass'] }} tracking-wide backdrop-blur-sm pointer-events-none select-none">
                 {{ $normalizedAge['badge'] }}
             </div>
-            {{-- Tooltip --}}
-            <div class="absolute left-0 top-full mt-1.5 hidden group-hover/tooltip:block w-max max-w-[200px] p-2 bg-gray-900 border border-gray-700 text-white text-xs rounded-lg shadow-xl z-[50] whitespace-normal leading-relaxed pointer-events-none">
+            {{-- Tooltip: chỉ hiện nếu có description --}}
+            @if(!empty($normalizedAge['description']))
+            <div class="absolute left-0 top-full mt-1.5 hidden group-hover/tooltip:block w-max max-w-[180px] p-2 bg-gray-900/95 border border-gray-700 text-white text-[11px] rounded-lg shadow-xl z-[50] whitespace-normal leading-relaxed pointer-events-none">
                 {{ $normalizedAge['description'] }}
             </div>
+            @endif
         </div>
     @endif
 
     {{-- Title & Meta --}}
     <a href="{{ route('tv-shows.show', $tvShow) }}" class="block mt-2">
-        <h3 class="text-sm font-bold text-gray-900 group-hover:text-sky-600 transition-colors font-heading">
+        <h3 class="text-sm font-bold text-gray-900 group-hover:text-sky-600 transition-colors font-heading line-clamp-2">
             {{ $tvShow->title }}
             @if (!isset($hideOriginalTitle) || !$hideOriginalTitle)
                 @if ($tvShow->original_title && $tvShow->original_title !== $tvShow->title)

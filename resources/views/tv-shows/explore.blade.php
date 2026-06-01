@@ -51,7 +51,7 @@
                                         <label class="block text-sm text-gray-700 font-medium mb-2">Sắp xếp kết quả
                                             theo</label>
                                         <select name="sort"
-                                            class="w-full text-sm rounded-lg border-gray-300 focus:border-sky-500 focus:ring-sky-500 shadow-sm"
+                                            class="w-full text-sm py-2.5 pr-8 rounded-lg border-gray-300 focus:border-sky-500 focus:ring-sky-500 shadow-sm"
                                             @change="fetchResults()">
                                             <option value="popularity_desc"
                                                 {{ in_array($sort, ['popularity_desc', 'latest']) ? 'selected' : '' }}>Phổ biến nhất
@@ -119,12 +119,12 @@
                                             <div class="flex items-center gap-2">
                                                 <input type="number" name="year_from"
                                                     value="{{ request('year_from') }}" placeholder="Từ năm"
-                                                    class="w-full text-sm rounded-lg border-gray-300 focus:border-sky-500 focus:ring-sky-500 shadow-sm"
+                                                    class="w-full text-sm py-2.5 rounded-lg border-gray-300 focus:border-sky-500 focus:ring-sky-500 shadow-sm"
                                                     min="1800" max="{{ date('Y') + 5 }}" step="1" onkeydown="if(['-','+','e','E','.'].includes(event.key)) event.preventDefault();" @change="fetchResults()">
                                                 <span class="text-gray-500">-</span>
                                                 <input type="number" name="year_to" value="{{ request('year_to') }}"
                                                     placeholder="Đến năm"
-                                                    class="w-full text-sm rounded-lg border-gray-300 focus:border-sky-500 focus:ring-sky-500 shadow-sm"
+                                                    class="w-full text-sm py-2.5 rounded-lg border-gray-300 focus:border-sky-500 focus:ring-sky-500 shadow-sm"
                                                     min="1800" max="{{ date('Y') + 5 }}" step="1" onkeydown="if(['-','+','e','E','.'].includes(event.key)) event.preventDefault();" @change="fetchResults()">
                                             </div>
                                         </div>
@@ -135,7 +135,7 @@
                                         <div>
                                             <label class="block text-sm font-medium text-gray-900 mb-3">Quốc gia</label>
                                             <select name="country"
-                                                class="w-full text-sm rounded-lg border-gray-300 focus:border-sky-500 focus:ring-sky-500 shadow-sm"
+                                                class="w-full text-sm py-2.5 pr-8 rounded-lg border-gray-300 focus:border-sky-500 focus:ring-sky-500 shadow-sm"
                                                 @change="fetchResults()">
                                                 <option value="">Tất cả quốc gia</option>
                                                 @foreach ($countries as $code => $name)

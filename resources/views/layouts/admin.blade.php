@@ -219,7 +219,7 @@
                     <span class="whitespace-nowrap sidebar-label pr-3" :class="sidebarOpen ? 'opacity-100' : 'opacity-0'">Về
                         trang chính</span>
                 </div>
-                @if(Auth::user()->hasRole('Super Admin'))
+                @if(Auth::user()->can('manage_roles'))
                     <div class="flex items-center rounded-xl py-1 mt-1 cursor-default" onclick="window.location.href='{{ route('super.dashboard') }}'">
                         <div class="w-12 flex items-center justify-center shrink-0">
                             <div class="w-8 h-8 rounded-full bg-gradient-to-br from-sky-500 to-sky-700 flex items-center justify-center overflow-hidden shrink-0 ring-2 ring-dark-700">

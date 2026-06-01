@@ -8,6 +8,7 @@ use App\Http\Controllers\PersonController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ForumController;
+use App\Http\Controllers\Api\AiAssistantController;
 use Illuminate\Support\Facades\Route;
 
 // ═══════════════════════════════════════════════════
@@ -27,6 +28,9 @@ Route::get('/movie/{movie}', [MovieController::class, 'show'])->name('movies.sho
 // TV Shows
 Route::get('/tv-shows', [\App\Http\Controllers\TvShowController::class, 'index'])->name('tv-shows.index');
 Route::get('/tv-shows/{tvShow:slug}', [\App\Http\Controllers\TvShowController::class, 'show'])->name('tv-shows.show');
+
+// AI Assistant API
+Route::post('/api/ai-assistant', [AiAssistantController::class, 'ask'])->name('api.ai-assistant');
 
 // Search API cho Navbar Live Search
 Route::get('/api/search', function (\Illuminate\Http\Request $request) {
@@ -233,6 +237,13 @@ Route::middleware(['auth', 'can:access_admin_panel'])->prefix('staff')->name('ad
         Route::post('/reviews/{review}/unhide', [\App\Http\Controllers\Admin\ReviewController::class, 'unhide'])->name('reviews.unhide');
         Route::post('/reviews/{review}/dismiss-reports', [\App\Http\Controllers\Admin\ReviewController::class, 'dismissReports'])->name('reviews.dismissReports');
         Route::delete('/reviews/{review}', [\App\Http\Controllers\Admin\ReviewController::class, 'destroy'])->name('reviews.destroy');
+
+        // Banned Words
+        Route::get('/banned-words', [\App\Http\Controllers\Admin\BannedWordController::class, 'index'])->name('banned_words.index');
+        Route::post('/banned-words', [\App\Http\Controllers\Admin\BannedWordController::class, 'store'])->name('banned_words.store');
+        Route::put('/banned-words/{bannedWord}', [\App\Http\Controllers\Admin\BannedWordController::class, 'update'])->name('banned_words.update');
+        Route::delete('/banned-words/{bannedWord}', [\App\Http\Controllers\Admin\BannedWordController::class, 'destroy'])->name('banned_words.destroy');
+        Route::post('/banned-words/{bannedWord}/toggle', [\App\Http\Controllers\Admin\BannedWordController::class, 'toggle'])->name('banned_words.toggle');
     });
 
     // Users
@@ -293,6 +304,9 @@ Route::middleware(['auth', 'can:manage_roles'])->prefix('admin')->name('super.')
     Route::get('/', function () {
         return redirect()->route('super.roles.index');
     })->name('dashboard');
+
+    // Nhật ký hoạt động
+    Route::get('/activity-logs', [\App\Http\Controllers\Admin\ActivityLogController::class, 'index'])->name('activity-logs.index');
 
     // Roles (RBAC)
     Route::resource('roles', \App\Http\Controllers\Admin\RoleController::class)->except(['show']);

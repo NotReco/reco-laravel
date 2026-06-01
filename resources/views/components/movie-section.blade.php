@@ -59,18 +59,18 @@
                 {{-- Navigation Buttons --}}
                 @if ($totalPages > 1)
                     {{-- Nút trái --}}
-                    <button x-show="canGoPrev" @click="goPrev()"
-                        class="absolute left-0 top-[40%] -translate-y-1/2 -translate-x-1/2 z-10 w-11 h-11 border-2 border-gray-600 bg-white text-gray-700 rounded-full flex items-center justify-center opacity-0 group-hover/slider:opacity-100 hover:text-sky-600 transition-all duration-300 shadow-lg hidden sm:flex">
-                        <svg class="w-6 h-6 pr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <button x-show="canGoPrev" @click="goPrev()" aria-label="Previous"
+                        class="absolute left-1 md:-left-4 top-[40%] -translate-y-1/2 z-10 w-8 h-8 md:w-10 md:h-10 bg-black/40 backdrop-blur text-white rounded-full flex items-center justify-center opacity-80 hover:opacity-100 transition-all duration-300 shadow-lg">
+                        <svg class="w-5 h-5 md:w-6 md:h-6 pr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                                 d="M15 19l-7-7 7-7" />
                         </svg>
                     </button>
 
                     {{-- Nút phải --}}
-                    <button x-show="canGoNext" @click="goNext()"
-                        class="absolute right-0 top-[40%] -translate-y-1/2 translate-x-1/2 z-10 w-11 h-11 border-2 border-gray-600 bg-white text-gray-700 rounded-full flex items-center justify-center opacity-0 group-hover/slider:opacity-100 hover:text-sky-600 transition-all duration-300 shadow-lg hidden sm:flex">
-                        <svg class="w-6 h-6 pl-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <button x-show="canGoNext" @click="goNext()" aria-label="Next"
+                        class="absolute right-1 md:-right-4 top-[40%] -translate-y-1/2 z-10 w-8 h-8 md:w-10 md:h-10 bg-black/40 backdrop-blur text-white rounded-full flex items-center justify-center opacity-80 hover:opacity-100 transition-all duration-300 shadow-lg">
+                        <svg class="w-5 h-5 md:w-6 md:h-6 pl-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
                         </svg>
                     </button>
