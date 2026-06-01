@@ -63,6 +63,11 @@ class MovieController extends Controller
         $movie->update($validated);
         $movie->genres()->sync($genres);
 
+        // Clear cache
+        $cache = app(\App\Services\CacheService::class);
+        $cache->forget($cache->movieDetailKey($movie->id));
+        $cache->clearHomeCache();
+
         return redirect()
             ->route('admin.movies.index')
             ->with('success', "Đã cập nhật phim lẻ «{$movie->title}».");
@@ -71,7 +76,13 @@ class MovieController extends Controller
     public function destroy(Movie $movie)
     {
         $title = $movie->title;
+        $id = $movie->id;
         $movie->delete();
+
+        // Clear cache
+        $cache = app(\App\Services\CacheService::class);
+        $cache->forget($cache->movieDetailKey($id));
+        $cache->clearHomeCache();
 
         return redirect()
             ->route('admin.movies.index')

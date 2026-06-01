@@ -43,6 +43,12 @@ class UserInteractionService
             'ip_address' => $ip,
         ]);
 
+        // Xóa cache recommendation của user để cập nhật gợi ý mới
+        if ($user) {
+            $cache = app(\App\Services\CacheService::class);
+            $cache->forget($cache->userRecommendationKey($user->id));
+        }
+
         // 2. Tạo user_interactions (nếu có user)
         if ($user) {
             // Kiểm tra trùng lặp trong user_interactions
@@ -95,6 +101,12 @@ class UserInteractionService
             'ip_address' => $ip,
         ]);
 
+        // Xóa cache recommendation của user để cập nhật gợi ý mới
+        if ($user) {
+            $cache = app(\App\Services\CacheService::class);
+            $cache->forget($cache->userRecommendationKey($user->id));
+        }
+
         if ($user) {
             $recentInteraction = UserInteraction::where('user_id', $user->id)
                 ->where('type', 'search')
@@ -111,7 +123,7 @@ class UserInteractionService
     /**
      * Ghi nhận tương tác chung.
      */
-    public function recordInteraction($user, ?Model $interactable, string $type, float $score = 0, array $metadata = [])
+    public function recordInteraction($user, ?Model $interactable, string $type, int|float $score = 0, array $metadata = [])
     {
         if (!$user) return;
 

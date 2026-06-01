@@ -181,84 +181,116 @@ class MovieController extends Controller
      */
     public function show(Movie $movie)
     {
-        $movie->load([
-            'genres',
-            'tags',
-            'people' => fn($q) => $q->orderBy('display_order'),
-            'reviews' => fn($q) => $q->published()
-                ->fullReview()
-                ->with([
-                    'user.activeFrame',
-                    'likes',
-                    'comments.user.activeFrame',
-                    'reports' => fn($r) => $r->where('is_public', true)
-                                            ->where('status', 'resolved')
-                                            ->with('user')
-                                            ->latest(),
-                ])
-                ->latest('published_at')
-                ->take(10),
-        ]);
+        $cache = app(\App\Services\CacheService::class);
+        $key = $cache->movieDetailKey($movie->id);
 
-        // Tính rating trung bình
-        $avgRating = $movie->reviews()->whereNotNull('rating')->avg('rating');
-        $ratingCount = $movie->reviews()->whereNotNull('rating')->count();
+        $cachedData = $cache->remember($key, 60, function () use ($movie) {
+            $movie->load([
+                'genres',
+                'tags',
+                'people' => fn($q) => $q->orderBy('display_order'),
+                'reviews' => fn($q) => $q->published()
+                    ->fullReview()
+                    ->with([
+                        'user.activeFrame',
+                        'likes',
+                        'comments.user.activeFrame',
+                        'reports' => fn($r) => $r->where('is_public', true)
+                                                ->where('status', 'resolved')
+                                                ->with('user')
+                                                ->latest(),
+                    ])
+                    ->latest('published_at')
+                    ->take(10),
+            ]);
 
-        // Lấy media (Videos, Backdrops, Posters)
-        $tmdbService = app(\App\Services\TmdbService::class);
-        $media = $tmdbService->getMedia($movie->tmdb_id, 'movie');
-        $trailerCandidates = $tmdbService->getTrailerCandidates($media['videos'] ?? []);
+            // Tính rating trung bình
+            $avgRating = $movie->reviews()->whereNotNull('rating')->avg('rating');
+            $ratingCount = $movie->reviews()->whereNotNull('rating')->count();
+
+            // Lấy media (Videos, Backdrops, Posters)
+            $tmdbService = app(\App\Services\TmdbService::class);
+            $media = $tmdbService->getMedia($movie->tmdb_id, 'movie');
+            $trailerCandidates = $tmdbService->getTrailerCandidates($media['videos'] ?? []);
+
+            // Phim liên quan (cùng thể loại)
+            $relatedMovies = Movie::with('genres')
+                ->whereNotNull('poster')
+                ->where('id', '!=', $movie->id)
+                ->whereHas('genres', fn($q) => $q->whereIn('genres.id', $movie->genres->pluck('id')))
+                ->inRandomOrder()
+                ->take(6)
+                ->get();
+
+            // Cast & Crew tách riêng
+            $cast = $movie->people->where('pivot.role', 'actor');
+            $directors = $movie->people->where('pivot.role', 'director');
+            $writers = $movie->people->where('pivot.role', 'writer');
+
+            // Phân phối điểm (số lượng đánh giá theo từng điểm 1-10)
+            $ratingDistribution = $movie->reviews()
+                ->where('status', 'published')
+                ->whereNotNull('rating')
+                ->selectRaw('ROUND(rating) as score, COUNT(*) as count')
+                ->groupBy('score')
+                ->orderBy('score')
+                ->pluck('count', 'score')
+                ->toArray();
+            
+            // Đảm bảo đủ 10 mức
+            $distribution = [];
+            for ($i = 1; $i <= 10; $i++) {
+                $distribution[$i] = $ratingDistribution[$i] ?? 0;
+            }
+
+            // Lịch sử đánh giá theo tháng (12 tháng gần nhất)
+            $ratingHistory = $movie->reviews()
+                ->where('status', 'published')
+                ->whereNotNull('rating')
+                ->where('created_at', '>=', now()->subMonths(12))
+                ->selectRaw('DATE_FORMAT(created_at, "%Y-%m") as month, AVG(rating) as avg_score, COUNT(*) as count')
+                ->groupBy('month')
+                ->orderBy('month')
+                ->get()
+                ->keyBy('month')
+                ->toArray();
+
+            return [
+                'movie' => $movie,
+                'avgRating' => $avgRating,
+                'ratingCount' => $ratingCount,
+                'media' => $media,
+                'trailerCandidates' => $trailerCandidates,
+                'relatedMovies' => $relatedMovies,
+                'cast' => $cast,
+                'directors' => $directors,
+                'writers' => $writers,
+                'distribution' => $distribution,
+                'ratingHistory' => $ratingHistory,
+            ];
+        });
+
+        $movie = $cachedData['movie'];
+        $avgRating = $cachedData['avgRating'];
+        $ratingCount = $cachedData['ratingCount'];
+        $media = $cachedData['media'];
+        $trailerCandidates = $cachedData['trailerCandidates'];
+        $relatedMovies = $cachedData['relatedMovies'];
+        $cast = $cachedData['cast'];
+        $directors = $cachedData['directors'];
+        $writers = $cachedData['writers'];
+        $distribution = $cachedData['distribution'];
+        $ratingHistory = $cachedData['ratingHistory'];
 
         // Ghi nhận lượt xem
         $interactionService = app(\App\Services\UserInteractionService::class);
         $interactionService->recordView(auth()->user(), $movie, 'movie_detail');
-
-        // Phim liên quan (cùng thể loại)
-        $relatedMovies = Movie::with('genres')
-            ->whereNotNull('poster')
-            ->where('id', '!=', $movie->id)
-            ->whereHas('genres', fn($q) => $q->whereIn('genres.id', $movie->genres->pluck('id')))
-            ->inRandomOrder()
-            ->take(6)
-            ->get();
-
-        // Cast & Crew tách riêng
-        $cast = $movie->people->where('pivot.role', 'actor');
-        $directors = $movie->people->where('pivot.role', 'director');
-        $writers = $movie->people->where('pivot.role', 'writer');
 
         // Tên quốc gia tiếng Việt
         $countryName = config('countries')[$movie->country] ?? $movie->country;
 
         // Tên ngôn ngữ gốc tiếng Việt
         $languageName = config('languages')[$movie->language] ?? $movie->language;
-
-        // Phân phối điểm (số lượng đánh giá theo từng điểm 1-10)
-        $ratingDistribution = $movie->reviews()
-            ->where('status', 'published')
-            ->whereNotNull('rating')
-            ->selectRaw('ROUND(rating) as score, COUNT(*) as count')
-            ->groupBy('score')
-            ->orderBy('score')
-            ->pluck('count', 'score')
-            ->toArray();
-        // Đảm bảo đủ 10 mức
-        $distribution = [];
-        for ($i = 1; $i <= 10; $i++) {
-            $distribution[$i] = $ratingDistribution[$i] ?? 0;
-        }
-
-        // Lịch sử đánh giá theo tháng (12 tháng gần nhất)
-        $ratingHistory = $movie->reviews()
-            ->where('status', 'published')
-            ->whereNotNull('rating')
-            ->where('created_at', '>=', now()->subMonths(12))
-            ->selectRaw('DATE_FORMAT(created_at, "%Y-%m") as month, AVG(rating) as avg_score, COUNT(*) as count')
-            ->groupBy('month')
-            ->orderBy('month')
-            ->get()
-            ->keyBy('month')
-            ->toArray();
 
         return view('movies.show', compact(
             'movie',

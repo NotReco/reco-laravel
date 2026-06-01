@@ -65,6 +65,11 @@ class TvShowController extends Controller
         $tvShow->update($validated);
         $tvShow->genres()->sync($genres);
 
+        // Clear cache
+        $cache = app(\App\Services\CacheService::class);
+        $cache->forget($cache->tvShowDetailKey($tvShow->id));
+        $cache->clearHomeCache();
+
         return redirect()
             ->route('admin.tv-shows.index')
             ->with('success', "Đã cập nhật phim bộ «{$tvShow->title}».");
@@ -73,7 +78,13 @@ class TvShowController extends Controller
     public function destroy(TvShow $tvShow)
     {
         $title = $tvShow->title;
+        $id = $tvShow->id;
         $tvShow->delete();
+
+        // Clear cache
+        $cache = app(\App\Services\CacheService::class);
+        $cache->forget($cache->tvShowDetailKey($id));
+        $cache->clearHomeCache();
 
         return redirect()
             ->route('admin.tv-shows.index')

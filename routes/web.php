@@ -30,101 +30,31 @@ Route::get('/tv-shows/{tvShow:slug}', [\App\Http\Controllers\TvShowController::c
 
 // Search API cho Navbar Live Search
 Route::get('/api/search', function (\Illuminate\Http\Request $request) {
-    $q = trim($request->query('q', ''));
+    $rawQuery = trim($request->query('q', ''));
 
-    // Strip SQL wildcards
-    $q = str_replace(['%', '_'], '', $q);
+    // Uỷ thác toàn bộ logic cho SearchService
+    /** @var \App\Services\SearchService $searchService */
+    $searchService = app(\App\Services\SearchService::class);
 
-    // Only require minimum 2 chars
-    if (mb_strlen($q) < 2) {
+    // Chuẩn hoá keyword (strip wildcard, lowercase, v.v.)
+    $keyword = $searchService->normalizeKeyword($rawQuery);
+
+    // Tối thiểu 2 ký tự mới tìm
+    if (mb_strlen($keyword) < 2) {
         return response()->json([]);
     }
 
-    $movies = \App\Models\Movie::query()->where(function ($qb) use ($q) {
-            $qb->where('title', 'like', "%{$q}%")
-               ->orWhere('original_title', 'like', "%{$q}%")
-               ->orWhereHas('tags', function($qTag) use ($q) {
-                   $qTag->where('name', 'like', "%{$q}%");
-               });
-        })
-        ->select('id', 'slug', 'title', 'poster', 'release_date', 'view_count')
-        ->limit(10)
-        ->get()
-        ->map(function ($m) {
-            $m->url = route('movies.show', $m->slug);
-            $m->release_year = $m->release_date ? \Carbon\Carbon::parse($m->release_date)->format('Y') : '';
-            return $m;
-        });
+    // Tìm kiếm (có cache nếu keyword >= 3 ký tự)
+    $results = $searchService->search($rawQuery);
 
-    $tvShows = \App\Models\TvShow::query()->where(function ($qb) use ($q) {
-            $qb->where('title', 'like', "%{$q}%")
-               ->orWhere('original_title', 'like', "%{$q}%")
-               ->orWhereHas('tags', function($qTag) use ($q) {
-                   $qTag->where('name', 'like', "%{$q}%");
-               });
-        })
-        ->select('id', 'slug', 'title', 'poster', 'first_air_date as release_date', 'view_count')
-        ->limit(10)
-        ->get()
-        ->map(function ($t) {
-            $t->url = route('tv-shows.show', $t->slug);
-            $t->release_year = $t->release_date ? \Carbon\Carbon::parse($t->release_date)->format('Y') : '';
-            return $t;
-        });
-
-    $results = $movies->concat($tvShows);
-
-    // Calculate relevance score for sorting (1 is best match, 9 is worst)
-    $results = $results->map(function ($item) use ($q) {
-        $title = mb_strtolower(\Illuminate\Support\Str::ascii($item->title));
-        $orig = mb_strtolower(\Illuminate\Support\Str::ascii($item->original_title ?? ''));
-        $qLower = mb_strtolower(\Illuminate\Support\Str::ascii($q));
-        
-        if ($title === $qLower) {
-            $score = 1;
-        } elseif (str_starts_with($title, $qLower . ' ')) {
-            $score = 2;
-        } elseif (str_contains($title, ' ' . $qLower . ' ') || str_ends_with($title, ' ' . $qLower)) {
-            $score = 3;
-        } elseif (str_starts_with($title, $qLower)) {
-            $score = 4;
-        } elseif ($orig === $qLower) {
-            $score = 5;
-        } elseif (str_starts_with($orig, $qLower . ' ')) {
-            $score = 6;
-        } elseif (str_contains($orig, ' ' . $qLower . ' ') || str_ends_with($orig, ' ' . $qLower)) {
-            $score = 7;
-        } elseif (str_starts_with($orig, $qLower)) {
-            $score = 8;
-        } else {
-            $score = 9;
-        }
-        
-        $item->relevance_score = $score;
-        return $item;
-    });
-
-    // Sort by view_count DESC first, then by relevance score ASC
-    $results = $results->sortByDesc('view_count')->sortBy('relevance_score')->take(8)->values();
-
-    // Ghi nhận lịch sử tìm kiếm
-    if ($q !== '') {
+    // Ghi nhận lịch sử tìm kiếm (chỉ khi keyword >= 3 ký tự)
+    if (mb_strlen($keyword) >= 3) {
         $interactionService = app(\App\Services\UserInteractionService::class);
-        $interactionService->recordSearch(auth()->user(), $q, $results->count());
+        $interactionService->recordSearch(auth()->user(), $rawQuery, $results->count());
     }
 
-    // Map again to keep response small and clean
-    $cleanResults = $results->map(function ($item) {
-        return [
-            'id' => $item->id,
-            'title' => $item->title,
-            'url' => $item->url,
-            'poster' => $item->poster,
-            'release_year' => $item->release_year,
-        ];
-    });
-
-    return response()->json($cleanResults);
+    // Format response (tương thích frontend, thêm field 'type')
+    return response()->json($searchService->formatForResponse($results));
 })->name('api.search');
 
 // Random suggestions for Top 4 Movies picker

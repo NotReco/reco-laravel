@@ -162,83 +162,112 @@ class TvShowController extends Controller
      */
     public function show(TvShow $tvShow)
     {
-        $tvShow->load([
-            'genres',
-            'tags',
-            'people' => fn($q) => $q->orderBy('display_order'),
-            'reviews' => fn($q) => $q->published()
-                ->fullReview()
-                ->with([
-                    'user.activeFrame',
-                    'likes',
-                    'comments.user.activeFrame',
-                    'reports' => fn($r) => $r->where('is_public', true)
-                                            ->where('status', 'resolved')
-                                            ->with('user')
-                                            ->latest(),
-                ])
-                ->latest('published_at')
-                ->take(10),
-        ]);
+        $cache = app(\App\Services\CacheService::class);
+        $key = $cache->tvShowDetailKey($tvShow->id);
 
-        // Tính rating trung bình
-        $avgRating = $tvShow->reviews()->whereNotNull('rating')->avg('rating');
-        $ratingCount = $tvShow->reviews()->whereNotNull('rating')->count();
+        $cachedData = $cache->remember($key, 60, function () use ($tvShow) {
+            $tvShow->load([
+                'genres',
+                'tags',
+                'people' => fn($q) => $q->orderBy('display_order'),
+                'reviews' => fn($q) => $q->published()
+                    ->fullReview()
+                    ->with([
+                        'user.activeFrame',
+                        'likes',
+                        'comments.user.activeFrame',
+                        'reports' => fn($r) => $r->where('is_public', true)
+                                                ->where('status', 'resolved')
+                                                ->with('user')
+                                                ->latest(),
+                    ])
+                    ->latest('published_at')
+                    ->take(10),
+            ]);
 
-        // Lấy media (Videos, Backdrops, Posters)
-        $tmdbService = app(\App\Services\TmdbService::class);
-        $media = $tmdbService->getMedia($tvShow->tmdb_id, 'tv');
-        $trailerCandidates = $tmdbService->getTrailerCandidates($media['videos'] ?? []);
+            // Tính rating trung bình
+            $avgRating = $tvShow->reviews()->whereNotNull('rating')->avg('rating');
+            $ratingCount = $tvShow->reviews()->whereNotNull('rating')->count();
+
+            // Lấy media (Videos, Backdrops, Posters)
+            $tmdbService = app(\App\Services\TmdbService::class);
+            $media = $tmdbService->getMedia($tvShow->tmdb_id, 'tv');
+            $trailerCandidates = $tmdbService->getTrailerCandidates($media['videos'] ?? []);
+
+            // Series liên quan (cùng thể loại)
+            $relatedTvShows = TvShow::with('genres')
+                ->whereNotNull('poster')
+                ->where('id', '!=', $tvShow->id)
+                ->whereHas('genres', fn($q) => $q->whereIn('genres.id', $tvShow->genres->pluck('id')))
+                ->inRandomOrder()
+                ->take(6)
+                ->get();
+
+            // Cast & Crew tách riêng
+            $cast = $tvShow->people->where('pivot.role', 'actor');
+            $creators = $tvShow->people->whereIn('pivot.role', ['director', 'writer', 'producer']);
+
+            // Phân phối điểm
+            $ratingDistribution = $tvShow->reviews()
+                ->where('status', 'published')
+                ->whereNotNull('rating')
+                ->selectRaw('ROUND(rating) as score, COUNT(*) as count')
+                ->groupBy('score')
+                ->orderBy('score')
+                ->pluck('count', 'score')
+                ->toArray();
+                
+            $distribution = [];
+            for ($i = 1; $i <= 10; $i++) {
+                $distribution[$i] = $ratingDistribution[$i] ?? 0;
+            }
+
+            // Lịch sử đánh giá
+            $ratingHistory = $tvShow->reviews()
+                ->where('status', 'published')
+                ->whereNotNull('rating')
+                ->where('created_at', '>=', now()->subMonths(12))
+                ->selectRaw('DATE_FORMAT(created_at, "%Y-%m") as month, AVG(rating) as avg_score, COUNT(*) as count')
+                ->groupBy('month')
+                ->orderBy('month')
+                ->get()
+                ->keyBy('month')
+                ->toArray();
+
+            return [
+                'tvShow' => $tvShow,
+                'avgRating' => $avgRating,
+                'ratingCount' => $ratingCount,
+                'media' => $media,
+                'trailerCandidates' => $trailerCandidates,
+                'relatedTvShows' => $relatedTvShows,
+                'cast' => $cast,
+                'creators' => $creators,
+                'distribution' => $distribution,
+                'ratingHistory' => $ratingHistory,
+            ];
+        });
+
+        $tvShow = $cachedData['tvShow'];
+        $avgRating = $cachedData['avgRating'];
+        $ratingCount = $cachedData['ratingCount'];
+        $media = $cachedData['media'];
+        $trailerCandidates = $cachedData['trailerCandidates'];
+        $relatedTvShows = $cachedData['relatedTvShows'];
+        $cast = $cachedData['cast'];
+        $creators = $cachedData['creators'];
+        $distribution = $cachedData['distribution'];
+        $ratingHistory = $cachedData['ratingHistory'];
 
         // Ghi nhận lượt xem
         $interactionService = app(\App\Services\UserInteractionService::class);
         $interactionService->recordView(auth()->user(), $tvShow, 'tv_detail');
-
-        // Series liên quan (cùng thể loại)
-        $relatedTvShows = TvShow::with('genres')
-            ->whereNotNull('poster')
-            ->where('id', '!=', $tvShow->id)
-            ->whereHas('genres', fn($q) => $q->whereIn('genres.id', $tvShow->genres->pluck('id')))
-            ->inRandomOrder()
-            ->take(6)
-            ->get();
-
-        // Cast & Crew tách riêng
-        $cast = $tvShow->people->where('pivot.role', 'actor');
-        $creators = $tvShow->people->whereIn('pivot.role', ['director', 'writer', 'producer']);
 
         // Tên quốc gia tiếng Việt
         $countryName = config('countries')[$tvShow->country] ?? $tvShow->country;
 
         // Tên ngôn ngữ gốc tiếng Việt
         $languageName = config('languages')[$tvShow->language] ?? $tvShow->language;
-
-        // Phân phối điểm
-        $ratingDistribution = $tvShow->reviews()
-            ->where('status', 'published')
-            ->whereNotNull('rating')
-            ->selectRaw('ROUND(rating) as score, COUNT(*) as count')
-            ->groupBy('score')
-            ->orderBy('score')
-            ->pluck('count', 'score')
-            ->toArray();
-            
-        $distribution = [];
-        for ($i = 1; $i <= 10; $i++) {
-            $distribution[$i] = $ratingDistribution[$i] ?? 0;
-        }
-
-        // Lịch sử đánh giá
-        $ratingHistory = $tvShow->reviews()
-            ->where('status', 'published')
-            ->whereNotNull('rating')
-            ->where('created_at', '>=', now()->subMonths(12))
-            ->selectRaw('DATE_FORMAT(created_at, "%Y-%m") as month, AVG(rating) as avg_score, COUNT(*) as count')
-            ->groupBy('month')
-            ->orderBy('month')
-            ->get()
-            ->keyBy('month')
-            ->toArray();
 
         return view('tv-shows.show', compact(
             'tvShow',

@@ -14,70 +14,75 @@ class RecommendationService
      */
     public function getRecommendationsForUser(User $user, int $limit = 12)
     {
-        $viewedMovieIds = $this->getViewedItemIds($user, Movie::class);
-        $viewedTvShowIds = $this->getViewedItemIds($user, TvShow::class);
+        $cache = app(\App\Services\CacheService::class);
+        $key = $cache->userRecommendationKey($user->id);
 
-        $genreIds = $this->getFavoriteGenreIds($user);
+        return $cache->remember($key, 10, function () use ($user, $limit) {
+            $viewedMovieIds = $this->getViewedItemIds($user, Movie::class);
+            $viewedTvShowIds = $this->getViewedItemIds($user, TvShow::class);
 
-        if (empty($genreIds)) {
-            return $this->getFallbackRecommendations($limit);
-        }
+            $genreIds = $this->getFavoriteGenreIds($user);
 
-        $recommendations = collect();
-        
-        // Phân bổ số lượng theo top genres (VD: Top 1 lấy 6, Top 2 lấy 4, Top 3 lấy 2)
-        $allocations = [ceil($limit * 0.5), ceil($limit * 0.3), ceil($limit * 0.2)];
-
-        foreach ($genreIds as $index => $genreId) {
-            $takeLimit = $allocations[$index] ?? 2;
-            
-            // Phân nửa cho Movie, nửa cho TvShow
-            $movieLimit = ceil($takeLimit / 2);
-            $tvLimit = floor($takeLimit / 2);
-
-            $movies = Movie::with('genres')
-                ->whereNotNull('poster')
-                ->whereNotIn('id', $viewedMovieIds)
-                ->whereHas('genres', function ($q) use ($genreId) {
-                    $q->where('genres.id', $genreId);
-                })
-                ->orderByDesc('view_count')
-                ->take($movieLimit)
-                ->get();
-
-            $tvShows = TvShow::with('genres')
-                ->whereNotNull('poster')
-                ->whereNotIn('id', $viewedTvShowIds)
-                ->whereHas('genres', function ($q) use ($genreId) {
-                    $q->where('genres.id', $genreId);
-                })
-                ->orderByDesc('view_count')
-                ->take($tvLimit)
-                ->get();
-
-            $recommendations = $recommendations->concat($movies)->concat($tvShows);
-
-            // Cập nhật id đã lấy để không bị trùng lặp ở genre sau
-            $viewedMovieIds = array_merge($viewedMovieIds, $movies->pluck('id')->toArray());
-            $viewedTvShowIds = array_merge($viewedTvShowIds, $tvShows->pluck('id')->toArray());
-        }
-
-        // Shuffle nhẹ hoặc sắp xếp lại theo view_count
-        $recommendations = $recommendations->sortByDesc('view_count')->take($limit)->values();
-
-        // Nếu vẫn không đủ (ví dụ lấy thiếu), thì bổ sung fallback
-        if ($recommendations->count() < $limit) {
-            $fallback = $this->getFallbackRecommendations($limit);
-            // Lọc những item chưa có trong recommendations
-            foreach ($fallback as $item) {
-                if (!$recommendations->contains('id', $item->id)) {
-                    $recommendations->push($item);
-                }
-                if ($recommendations->count() >= $limit) break;
+            if (empty($genreIds)) {
+                return $this->getFallbackRecommendations($limit);
             }
-        }
 
-        return $recommendations->isEmpty() ? $this->getFallbackRecommendations($limit) : $recommendations;
+            $recommendations = collect();
+            
+            // Phân bổ số lượng theo top genres (VD: Top 1 lấy 6, Top 2 lấy 4, Top 3 lấy 2)
+            $allocations = [ceil($limit * 0.5), ceil($limit * 0.3), ceil($limit * 0.2)];
+
+            foreach ($genreIds as $index => $genreId) {
+                $takeLimit = $allocations[$index] ?? 2;
+                
+                // Phân nửa cho Movie, nửa cho TvShow
+                $movieLimit = ceil($takeLimit / 2);
+                $tvLimit = floor($takeLimit / 2);
+
+                $movies = Movie::with('genres')
+                    ->whereNotNull('poster')
+                    ->whereNotIn('id', $viewedMovieIds)
+                    ->whereHas('genres', function ($q) use ($genreId) {
+                        $q->where('genres.id', $genreId);
+                    })
+                    ->orderByDesc('view_count')
+                    ->take($movieLimit)
+                    ->get();
+
+                $tvShows = TvShow::with('genres')
+                    ->whereNotNull('poster')
+                    ->whereNotIn('id', $viewedTvShowIds)
+                    ->whereHas('genres', function ($q) use ($genreId) {
+                        $q->where('genres.id', $genreId);
+                    })
+                    ->orderByDesc('view_count')
+                    ->take($tvLimit)
+                    ->get();
+
+                $recommendations = $recommendations->concat($movies)->concat($tvShows);
+
+                // Cập nhật id đã lấy để không bị trùng lặp ở genre sau
+                $viewedMovieIds = array_merge($viewedMovieIds, $movies->pluck('id')->toArray());
+                $viewedTvShowIds = array_merge($viewedTvShowIds, $tvShows->pluck('id')->toArray());
+            }
+
+            // Shuffle nhẹ hoặc sắp xếp lại theo view_count
+            $recommendations = $recommendations->sortByDesc('view_count')->take($limit)->values();
+
+            // Nếu vẫn không đủ (ví dụ lấy thiếu), thì bổ sung fallback
+            if ($recommendations->count() < $limit) {
+                $fallback = $this->getFallbackRecommendations($limit);
+                // Lọc những item chưa có trong recommendations
+                foreach ($fallback as $item) {
+                    if (!$recommendations->contains('id', $item->id)) {
+                        $recommendations->push($item);
+                    }
+                    if ($recommendations->count() >= $limit) break;
+                }
+            }
+
+            return $recommendations->isEmpty() ? $this->getFallbackRecommendations($limit) : $recommendations;
+        });
     }
 
     /**
@@ -85,22 +90,27 @@ class RecommendationService
      */
     public function getFallbackRecommendations(int $limit = 12)
     {
-        $movies = Movie::with('genres')
-            ->whereNotNull('poster')
-            ->orderByDesc('view_count')
-            ->take(ceil($limit / 2))
-            ->get();
+        $cache = app(\App\Services\CacheService::class);
+        $key = 'recommendations.fallback';
 
-        $tvShows = TvShow::with('genres')
-            ->whereNotNull('poster')
-            ->orderByDesc('view_count')
-            ->take(floor($limit / 2))
-            ->get();
+        return $cache->remember($key, 30, function () use ($limit) {
+            $movies = Movie::with('genres')
+                ->whereNotNull('poster')
+                ->orderByDesc('view_count')
+                ->take(ceil($limit / 2))
+                ->get();
 
-        return $movies->concat($tvShows)
-            ->sortByDesc('view_count')
-            ->take($limit)
-            ->values();
+            $tvShows = TvShow::with('genres')
+                ->whereNotNull('poster')
+                ->orderByDesc('view_count')
+                ->take(floor($limit / 2))
+                ->get();
+
+            return $movies->concat($tvShows)
+                ->sortByDesc('view_count')
+                ->take($limit)
+                ->values();
+        });
     }
 
     /**

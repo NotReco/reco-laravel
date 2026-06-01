@@ -18,7 +18,7 @@ class UserInteraction extends Model
     ];
 
     protected $casts = [
-        'score' => 'float',
+        'score'    => 'decimal:2', // Đổi từ float → decimal để tránh sai số dấu phẩy động
         'metadata' => 'array',
     ];
 
