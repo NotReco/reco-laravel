@@ -192,7 +192,7 @@
 
                             {{-- Thao tác --}}
                             <td class="px-5 py-4">
-                                <div class="flex items-center justify-end gap-1">
+                                <div class="flex items-center justify-end gap-2">
 
                                     @if ($review->status === 'hidden')
                                         {{-- Bỏ ẩn --}}

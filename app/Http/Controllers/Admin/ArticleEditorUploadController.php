@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Illuminate\Http\UploadedFile;
 
 class ArticleEditorUploadController extends Controller
 {
@@ -24,8 +24,9 @@ class ArticleEditorUploadController extends Controller
         /** @var UploadedFile $file */
         $file = $request->file('file');
         $mime = $file->getMimeType() ?: '';
+        $ext = strtolower($file->getClientOriginalExtension());
 
-        if (str_starts_with($mime, 'image/')) {
+        if (str_starts_with($mime, 'image/') || in_array($ext, ['jpg', 'jpeg', 'png', 'webp', 'gif'])) {
             $request->validate([
                 'file' => ['image', 'max:5120'],
             ]);
@@ -35,7 +36,10 @@ class ArticleEditorUploadController extends Controller
             'video/webm',
             'video/quicktime',
             'video/ogg',
-        ], true)) {
+            'application/mp4',
+            'application/octet-stream', // Fallback for Windows
+            'video/x-m4v'
+        ], true) || in_array($ext, ['mp4', 'webm', 'mov', 'ogg'])) {
             if ($file->getSize() > self::MAX_VIDEO_BYTES) {
                 return response()->json([
                     'error' => 'Video tối đa 50MB.',
@@ -48,7 +52,9 @@ class ArticleEditorUploadController extends Controller
             ], 422);
         }
 
-        $url = Storage::disk('public')->url($path);
+        /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
+        $disk = Storage::disk('public');
+        $url = $disk->url($path);
 
         // Return relative URL to avoid port issues
         // TinyMCE will resolve it relative to current domain

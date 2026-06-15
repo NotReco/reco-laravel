@@ -181,6 +181,13 @@
                                                     </div>
                                                     <span class="text-sm font-medium text-gray-700 group-hover:text-red-600 transition-colors">Bao gồm nội dung 18+</span>
                                                 </label>
+                                                
+                                                <div class="mt-3 pl-8">
+                                                    <button type="button" @click="$dispatch('open-age-explanation')" class="inline-flex items-center gap-1.5 text-xs text-sky-600 hover:text-sky-700 font-medium transition-colors focus:outline-none">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                                        Giải thích ký hiệu độ tuổi
+                                                    </button>
+                                                </div>
                                             </div>
 
                                         </div>
@@ -351,4 +358,84 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
         </svg>
     </button>
+
+    {{-- Age Rating Explanation Modal --}}
+    <div x-data="{ show: false }" 
+         @open-age-explanation.window="show = true" 
+         @keydown.escape.window="show = false"
+         @ai-opened.window="show = false"
+         @community-opened.window="show = false"
+         class="relative z-[100]" 
+         aria-labelledby="modal-title" 
+         role="dialog" 
+         aria-modal="true" 
+         x-show="show" 
+         style="display: none;">
+        
+        <div x-show="show" 
+             x-transition:enter="ease-out duration-300" 
+             x-transition:enter-start="opacity-0" 
+             x-transition:enter-end="opacity-100" 
+             x-transition:leave="ease-in duration-200" 
+             x-transition:leave-start="opacity-100" 
+             x-transition:leave-end="opacity-0" 
+             class="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity backdrop-blur-sm"></div>
+
+        <div class="fixed inset-0 z-10 overflow-y-auto">
+            <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                <div x-show="show" 
+                     @click.outside="show = false"
+                     x-transition:enter="ease-out duration-300" 
+                     x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
+                     x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" 
+                     x-transition:leave="ease-in duration-200" 
+                     x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" 
+                     x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
+                     class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+                    
+                    <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                        <div class="sm:flex sm:items-start">
+                            <div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-sky-100 sm:mx-0 sm:h-10 sm:w-10">
+                                <svg class="h-6 w-6 text-sky-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                                </svg>
+                            </div>
+                            <div class="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left w-full">
+                                <h3 class="text-lg font-bold leading-6 text-gray-900 font-heading" id="modal-title">Giải thích ký hiệu độ tuổi</h3>
+                                <div class="mt-5 space-y-4">
+                                    <div class="flex items-start gap-3">
+                                        <span class="inline-flex items-center justify-center w-11 shrink-0 text-xs font-bold px-2 py-1 rounded bg-green-700 text-white shadow-sm">P</span>
+                                        <p class="text-sm text-gray-600"><strong class="text-gray-900 block mb-0.5">Phù hợp mọi độ tuổi</strong> Nội dung thân thiện, an toàn cho tất cả người xem.</p>
+                                    </div>
+                                    <div class="flex items-start gap-3">
+                                        <span class="inline-flex items-center justify-center w-11 shrink-0 text-xs font-bold px-2 py-1 rounded bg-amber-600 text-white shadow-sm">T13</span>
+                                        <p class="text-sm text-gray-600"><strong class="text-gray-900 block mb-0.5">Từ 13 tuổi trở lên</strong> Phù hợp với người xem từ 13 tuổi.</p>
+                                    </div>
+                                    <div class="flex items-start gap-3">
+                                        <span class="inline-flex items-center justify-center w-11 shrink-0 text-xs font-bold px-2 py-1 rounded bg-orange-600 text-white shadow-sm">C16</span>
+                                        <p class="text-sm text-gray-600"><strong class="text-gray-900 block mb-0.5">Từ 16 tuổi trở lên</strong> Phù hợp với người xem từ 16 tuổi.</p>
+                                    </div>
+                                    <div class="flex items-start gap-3">
+                                        <span class="inline-flex items-center justify-center w-11 shrink-0 text-xs font-bold px-2 py-1 rounded bg-red-700 text-white shadow-sm">18+</span>
+                                        <p class="text-sm text-gray-600"><strong class="text-gray-900 block mb-0.5">Người trưởng thành</strong> Nội dung dành riêng cho người từ 18 tuổi trở lên. Có thể chứa yếu tố nhạy cảm, bạo lực hoặc ngôn ngữ mạnh.</p>
+                                    </div>
+                                    <div class="flex items-start gap-3 mt-4 pt-4 border-t border-gray-100">
+                                        <span class="inline-flex items-center justify-center w-11 shrink-0 text-[11px] font-bold px-1 py-1 rounded bg-gray-800 text-white shadow-sm">R/NC17</span>
+                                        <p class="text-sm text-gray-600"><strong class="text-gray-900 block mb-0.5">Phân loại quốc tế</strong> Các nhóm phân loại chuẩn quốc tế tương đương nhóm cần cân nhắc độ tuổi hoặc dành cho người trưởng thành.</p>
+                                    </div>
+                                    <div class="flex items-start gap-3">
+                                        <span class="inline-flex items-center justify-center w-11 shrink-0 text-[10px] font-bold px-1 py-1 rounded bg-gray-100 text-gray-500 border border-gray-200">N/A</span>
+                                        <p class="text-sm text-gray-600"><strong class="text-gray-900 block mb-0.5">Chưa phân loại</strong> Hệ thống chưa có đủ dữ liệu phân loại độ tuổi cho nội dung này.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+                        <button type="button" @click="show = false" class="mt-3 inline-flex w-full justify-center rounded-xl bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto transition-colors">Đóng</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </x-app-layout>

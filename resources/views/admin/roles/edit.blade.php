@@ -1,4 +1,4 @@
-<x-superadmin-layout :title="isset($role) ? 'Chỉnh sửa nhóm quyền hạn' : 'Tạo nhóm quyền hạn'" :pageTitle="isset($role) ? 'Chỉnh sửa nhóm quyền hạn' : 'Tạo nhóm quyền hạn'">
+﻿<x-superadmin-layout :title="isset($role) ? 'Chỉnh sửa nhóm quyền hạn' : 'Tạo nhóm quyền hạn'" :pageTitle="isset($role) ? 'Chỉnh sửa nhóm quyền hạn' : 'Tạo nhóm quyền hạn'">
 
     <div class="max-w-3xl">
         <form action="{{ isset($role) ? route('super.roles.update', $role) : route('super.roles.store') }}" method="POST"

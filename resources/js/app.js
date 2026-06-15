@@ -229,14 +229,21 @@ async function initRichTextEditors() {
                     input.onchange = async () => {
                         const file = input.files[0];
                         if (!file) return;
+                        let notification = null;
 
                         try {
-                            // Debug log removed
+                            if (window.tinymce?.activeEditor) {
+                                notification = window.tinymce.activeEditor.notificationManager.open({
+                                    text: 'Đang tải lên, vui lòng đợi...',
+                                    type: 'info',
+                                    timeout: 0
+                                });
+                            }
                             const url = await uploadEditorFileToServer(
                                 file,
                                 uploadUrl,
                             );
-                            // Debug log removed
+                            if (notification) notification.close();
 
                             // For image dialog, callback with the URL
                             // TinyMCE will only insert when user clicks "Save" in the dialog
@@ -245,6 +252,7 @@ async function initRichTextEditors() {
                                 title: file.name,
                             });
                         } catch (err) {
+                            if (notification) notification.close();
                             console.error("File picker error:", err);
                             alert(err?.message || "Upload thất bại");
                         }
@@ -260,15 +268,24 @@ async function initRichTextEditors() {
                     input.onchange = async () => {
                         const file = input.files?.[0];
                         if (!file) return;
+                        let notification = null;
+
                         try {
-                            // Debug log removed
+                            if (window.tinymce?.activeEditor) {
+                                notification = window.tinymce.activeEditor.notificationManager.open({
+                                    text: 'Đang tải lên video, vui lòng đợi (có thể mất vài phút)...',
+                                    type: 'info',
+                                    timeout: 0
+                                });
+                            }
                             const url = await uploadEditorFileToServer(
                                 file,
                                 uploadUrl,
                             );
-                            // Debug log removed
+                            if (notification) notification.close();
                             callback(url);
                         } catch (err) {
+                            if (notification) notification.close();
                             console.error("File picker error:", err);
                             alert(err?.message || "Upload thất bại");
                         }

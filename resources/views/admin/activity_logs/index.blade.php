@@ -1,4 +1,4 @@
-<x-superadmin-layout title="Nhật ký hoạt động" pageTitle="Nhật ký hoạt động">
+﻿<x-superadmin-layout title="Nhật ký hoạt động" pageTitle="Nhật ký hoạt động">
 
     {{-- ── Filters ───────────────────────────────────────────────── --}}
     <div class="mb-6">

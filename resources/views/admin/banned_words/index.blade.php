@@ -117,7 +117,12 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="px-5 py-10 text-center text-dark-500">Chưa có từ khóa nào được thiết lập.</td>
+                                    <td colspan="5" class="px-5 py-12 text-center text-dark-500">
+                                        <div class="flex flex-col items-center justify-center">
+                                            <svg class="w-12 h-12 mb-3 text-dark-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                            <p>Chưa có từ khóa cấm nào được thiết lập.</p>
+                                        </div>
+                                    </td>
                                 </tr>
                             @endforelse
                         </tbody>

@@ -19,6 +19,20 @@ class ReportController extends Controller
             'is_public'       => ['boolean'],
         ]);
 
+        $contentToModerate = $request->input('reason') . ' ' . $request->input('description', '');
+        $modResult = app(\App\Services\ModerationService::class)->moderateContent(
+            $contentToModerate,
+            'moderation.report',
+            null,
+            false
+        );
+
+        if (!$modResult['is_clean'] && in_array($modResult['action'], ['delete', 'block'])) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'reason' => 'Nội dung báo cáo có chứa từ khóa vi phạm quy định (spam/khiêu dâm). Vui lòng dùng từ ngữ phù hợp hơn để mô tả lỗi.'
+            ]);
+        }
+
         $user = Auth::user();
 
         // Kiểm tra xem user có đang bị cấm báo cáo không

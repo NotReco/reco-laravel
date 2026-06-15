@@ -22,6 +22,13 @@ class ArticleCommentController extends Controller
             'content'    => ['required', 'string', 'max:1000'],
         ]);
 
+        app(\App\Services\ModerationService::class)->moderateContent(
+            $request->input('content'),
+            'moderation.article_comment',
+            null,
+            true
+        );
+
         $parentId = $request->input('parent_id');
         if ($parentId) {
             $parentComment = ArticleComment::query()
@@ -162,6 +169,13 @@ class ArticleCommentController extends Controller
         $request->validate([
             'content' => ['required', 'string', 'max:1000'],
         ]);
+
+        app(\App\Services\ModerationService::class)->moderateContent(
+            $request->input('content'),
+            'moderation.article_comment',
+            $comment,
+            true
+        );
 
         $comment->update([
             'content' => $request->input('content'),

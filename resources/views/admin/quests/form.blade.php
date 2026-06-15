@@ -1,4 +1,4 @@
-<x-admin-layout :pageTitle="$quest->exists ? 'Sửa nhiệm vụ' : 'Thêm nhiệm vụ'">
+﻿<x-superadmin-layout :pageTitle="$quest->exists ? 'Sửa nhiệm vụ' : 'Thêm nhiệm vụ'">
 
     <div class="flex items-center justify-between mb-6">
         <div>
@@ -424,5 +424,5 @@
     </script>
     @endpush
 
-</x-admin-layout>
+</x-superadmin-layout>
 

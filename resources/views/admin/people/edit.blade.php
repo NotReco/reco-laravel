@@ -1,6 +1,8 @@
 <x-admin-layout :title="'Sửa — ' . $person->name" pageTitle="Sửa thông tin người">
 
-    <div class="max-w-5xl">
+    @include('admin.partials.mobile-admin-warning', ['mode' => 'blocked-form'])
+
+    <div class="hidden lg:block max-w-5xl">
         {{-- Breadcrumb --}}
         <nav class="flex items-center gap-2 text-sm text-dark-500 mb-6">
             <a href="{{ route('admin.people.index') }}" class="hover:text-white transition-colors">Quản lý Diễn viên</a>

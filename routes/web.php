@@ -271,15 +271,28 @@ Route::middleware(['auth', 'can:access_admin_panel'])->prefix('staff')->name('ad
     Route::resource('avatar-frames', \App\Http\Controllers\Admin\AvatarFrameController::class)->except(['show'])->middleware('can:manage_roles');
 
     // Quests (nhiệm vụ nhận khung/danh hiệu)
-    Route::resource('quests', \App\Http\Controllers\Admin\QuestController::class)->except(['show']);
+    Route::middleware('can:manage_roles')->group(function () {
+        Route::resource('quests', \App\Http\Controllers\Admin\QuestController::class)->except(['show']);
+    });
 
     // Reports
-    Route::get('/reports', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');
-    Route::post('/reports/{report}/resolve', [\App\Http\Controllers\Admin\ReportController::class, 'resolve'])->name('reports.resolve');
-    Route::post('/reports/{report}/dismiss', [\App\Http\Controllers\Admin\ReportController::class, 'dismiss'])->name('reports.dismiss');
-    Route::post('/reports/{report}/reopen', [\App\Http\Controllers\Admin\ReportController::class, 'reopen'])->name('reports.reopen');
-    Route::post('/reports/{report}/ban-reporter', [\App\Http\Controllers\Admin\ReportController::class, 'banReporter'])->name('reports.banReporter');
-    Route::delete('/reports/{report}', [\App\Http\Controllers\Admin\ReportController::class, 'destroy'])->name('reports.destroy');
+    Route::middleware('can:manage_reports')->group(function () {
+        Route::get('/reports', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');
+        Route::post('/reports/{report}/resolve', [\App\Http\Controllers\Admin\ReportController::class, 'resolve'])->name('reports.resolve');
+        Route::post('/reports/{report}/dismiss', [\App\Http\Controllers\Admin\ReportController::class, 'dismiss'])->name('reports.dismiss');
+        Route::post('/reports/{report}/reopen', [\App\Http\Controllers\Admin\ReportController::class, 'reopen'])->name('reports.reopen');
+        Route::post('/reports/{report}/ban-reporter', [\App\Http\Controllers\Admin\ReportController::class, 'banReporter'])->name('reports.banReporter');
+        Route::delete('/reports/{report}', [\App\Http\Controllers\Admin\ReportController::class, 'destroy'])->name('reports.destroy');
+    });
+
+    // AI Content Safety
+    Route::middleware('can:manage_reports')->group(function () {
+        Route::get('/ai-content-safety', [\App\Http\Controllers\Admin\AiContentSafetyController::class, 'index'])->name('ai-content-safety.index');
+        Route::post('/ai-content-safety/reports/{report}/resolve', [\App\Http\Controllers\Admin\AiContentSafetyController::class, 'resolveReport'])->name('ai-content-safety.resolveReport');
+        Route::post('/ai-content-safety/reports/{report}/dismiss', [\App\Http\Controllers\Admin\AiContentSafetyController::class, 'dismissReport'])->name('ai-content-safety.dismissReport');
+        Route::delete('/ai-content-safety/target/{type}/{id}', [\App\Http\Controllers\Admin\AiContentSafetyController::class, 'deleteTarget'])->name('ai-content-safety.deleteTarget');
+        Route::post('/ai-content-safety/target/{type}/{id}/hide', [\App\Http\Controllers\Admin\AiContentSafetyController::class, 'hideTarget'])->name('ai-content-safety.hideTarget');
+    });
 
 
     // Carousel
@@ -302,7 +315,7 @@ Route::middleware(['auth', 'can:access_admin_panel'])->prefix('staff')->name('ad
 Route::middleware(['auth', 'can:manage_roles'])->prefix('admin')->name('super.')->group(function () {
     // Tạm thời để dashboard là chuyển hướng sang roles hoặc có dashboard riêng.
     Route::get('/', function () {
-        return redirect()->route('super.roles.index');
+        return redirect()->route('super.staff.index');
     })->name('dashboard');
 
     // Nhật ký hoạt động

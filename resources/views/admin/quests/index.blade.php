@@ -1,4 +1,4 @@
-<x-admin-layout title="Nhiệm vụ" pageTitle="Quản lý nhiệm vụ">
+﻿<x-superadmin-layout title="Nhiệm vụ" pageTitle="Quản lý nhiệm vụ">
 
     <div class="flex justify-between items-center mb-6">
         <div>
@@ -148,4 +148,4 @@
         </div>
     </div>
 
-</x-admin-layout>
+</x-superadmin-layout>

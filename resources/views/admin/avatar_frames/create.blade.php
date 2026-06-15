@@ -1,4 +1,4 @@
-<x-admin-layout :pageTitle="isset($frame) ? 'Sửa khung avatar' : 'Thêm khung avatar'">
+﻿<x-superadmin-layout :pageTitle="isset($frame) ? 'Sửa khung avatar' : 'Thêm khung avatar'">
     <div class="flex items-center justify-between mb-6">
         <div>
             <h2 class="text-xl font-semibold text-white">
@@ -226,4 +226,4 @@
         </script>
     @endpush
 
-</x-admin-layout>
+</x-superadmin-layout>

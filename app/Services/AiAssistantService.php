@@ -19,10 +19,12 @@ class AiAssistantService
     public const FALLBACK_RATE_LIMITED     = 'rate_limited';
 
     protected AiContextService $contextService;
+    protected AiPersonaService $personaService;
 
-    public function __construct(AiContextService $contextService)
+    public function __construct(AiContextService $contextService, AiPersonaService $personaService)
     {
         $this->contextService = $contextService;
+        $this->personaService = $personaService;
     }
 
     /**
@@ -62,15 +64,112 @@ class AiAssistantService
         $intentName = $intent['intent'] ?? 'unknown';
         $keywords   = $intent['keywords'] ?? [];
         $wantsType  = $intent['wants_type'] ?? null;
+        $mood       = $intent['mood'] ?? null;
 
-        $dbContext     = $this->contextService->buildContext($message, $intentName, $keywords, $user, $userProfile, $recentItems, $wantsType);
+        $dbContext     = $this->contextService->buildContext($message, $intentName, $keywords, $user, $userProfile, $recentItems, $wantsType, $mood);
         $contextText   = $this->contextService->toPromptText($dbContext);
         $contextCount  = $dbContext['raw_count'] ?? 0;
 
         // LOCAL FIRST FOR LISTING
-        $isListingIntent = in_array($intentName, ['movie.recommend', 'movie.popular', 'movie.genre', 'movie.person']) || !empty($wantsType);
+        // Only trigger local recommendation for known movie intents.
+        // unknown / greeting / ack / smalltalk must NOT reach this path.
+        $isListingIntent = AiIntentService::isMovieRelatedIntent($intentName, $wantsType);
 
         if ($isListingIntent) {
+            // ── movie.mood: use mood-specific intro and empty handling ────────
+            if ($intentName === AiIntentService::INTENT_MOOD) {
+                $displayItems = array_slice($dbContext['items'] ?? [], 0, 3);
+
+                // Empty result → graceful message, NO Gemini, NO "AI bận"
+                if (empty($displayItems)) {
+                    return [
+                        'message'                   => $this->personaService->moodEmpty(),
+                        'source'                    => 'local_mood_recommendation',
+                        'fallback'                  => false,
+                        'fallback_reason'           => null,
+                        'used_local_formatter'      => true,
+                        'called_gemini'             => false,
+                        'context_items_count'       => 0,
+                        'suggested_items_count'     => 0,
+                        'excluded_recent_count'     => count($recentItems),
+                        'wants_type'                => $wantsType,
+                        'intent'                    => $intentName,
+                        'has_user_profile'          => $userProfile['available'] ?? false,
+                        'user_profile_genres_count' => count($userProfile['favorite_genres'] ?? []),
+                        'suggested_items'           => [],
+                    ];
+                }
+
+                // Has items → use mood intro from persona service
+                $moodIntro = $this->personaService->moodIntro($mood ?? 'buon');
+                $localMsg  = $this->contextService->formatMoodItemsResponse($dbContext, $moodIntro);
+
+                return [
+                    'message'                   => $localMsg,
+                    'source'                    => 'local_mood_recommendation',
+                    'fallback'                  => false,
+                    'fallback_reason'           => null,
+                    'used_local_formatter'      => true,
+                    'called_gemini'             => false,
+                    'context_items_count'       => $contextCount,
+                    'suggested_items_count'     => count($displayItems),
+                    'excluded_recent_count'     => count($recentItems),
+                    'wants_type'                => $wantsType,
+                    'intent'                    => $intentName,
+                    'has_user_profile'          => $userProfile['available'] ?? false,
+                    'user_profile_genres_count' => count($userProfile['favorite_genres'] ?? []),
+                    'suggested_items'           => $displayItems,
+                ];
+            }
+
+            // ── adult.movie_request: use adult-specific intro and empty handling ────────
+            if ($intentName === AiIntentService::INTENT_ADULT_MOVIE_REQUEST) {
+                $displayItems = array_slice($dbContext['items'] ?? [], 0, 3);
+
+                // Empty result → graceful message, NO Gemini
+                if (empty($displayItems)) {
+                    return [
+                        'message'                   => $this->personaService->adultMovieEmpty(),
+                        'source'                    => 'local_adult_recommendation',
+                        'fallback'                  => false,
+                        'fallback_reason'           => null,
+                        'used_local_formatter'      => true,
+                        'called_gemini'             => false,
+                        'context_items_count'       => 0,
+                        'suggested_items_count'     => 0,
+                        'excluded_recent_count'     => count($recentItems),
+                        'wants_type'                => $wantsType,
+                        'intent'                    => $intentName,
+                        'has_user_profile'          => $userProfile['available'] ?? false,
+                        'user_profile_genres_count' => count($userProfile['favorite_genres'] ?? []),
+                        'suggested_items'           => [],
+                    ];
+                }
+
+                // Has items → use adult intro from persona service
+                $adultIntro = $this->personaService->adultMovieIntro();
+                // Adult items can use standard context formatter since it doesn't need mood reasons
+                $localMsg  = $this->contextService->formatContextItemsResponse($dbContext, $adultIntro);
+
+                return [
+                    'message'                   => $localMsg,
+                    'source'                    => 'local_adult_recommendation',
+                    'fallback'                  => false,
+                    'fallback_reason'           => null,
+                    'used_local_formatter'      => true,
+                    'called_gemini'             => false,
+                    'context_items_count'       => $contextCount,
+                    'suggested_items_count'     => count($displayItems),
+                    'excluded_recent_count'     => count($recentItems),
+                    'wants_type'                => $wantsType,
+                    'intent'                    => $intentName,
+                    'has_user_profile'          => $userProfile['available'] ?? false,
+                    'user_profile_genres_count' => count($userProfile['favorite_genres'] ?? []),
+                    'suggested_items'           => $displayItems,
+                ];
+            }
+
+            // ── Standard local-first recommendation ──────────────────────────
             $localMsg = $this->contextService->formatContextItemsResponse($dbContext);
             $displayItems = array_slice($dbContext['items'] ?? [], 0, 3);
 
@@ -248,6 +347,8 @@ class AiAssistantService
                 'movie.genre'     => 'Phim theo thể loại',
                 'movie.popular'   => 'Phim nổi bật / trending',
                 'movie.detail'    => 'Thông tin chi tiết phim',
+                'movie.person'    => 'Phim của diễn viên / đạo diễn',
+                'movie.mood'      => 'Phim theo tâm trạng / mood',
                 'site.help'       => 'Hỗ trợ sử dụng RecoDB',
                 default           => '',
             };

@@ -12,7 +12,11 @@
         </a>
     </div>
 
-    <div class="bg-dark-900 border border-dark-800 rounded-2xl shadow-sm p-6 sm:p-8">
+    <div class="block lg:hidden">
+        @include('admin.partials.mobile-admin-warning', ['mode' => 'blocked-form'])
+    </div>
+
+    <div class="hidden lg:block bg-dark-900 border border-dark-800 rounded-2xl shadow-sm p-6 sm:p-8">
         <form action="{{ $category->exists ? route('admin.forum-categories.update', $category) : route('admin.forum-categories.store') }}"
               method="POST"
               class="max-w-2xl space-y-6">

@@ -1,7 +1,9 @@
 <x-admin-layout :title="'Chỉnh sửa bài viết'" pageTitle="Chỉnh sửa bài viết">
 
+    @include('admin.partials.mobile-admin-warning', ['mode' => 'blocked-form'])
+
     <form action="{{ route('admin.articles.update', $article) }}" method="POST" enctype="multipart/form-data"
-        class="max-w-4xl" id="article-form">
+        class="hidden lg:block max-w-4xl" id="article-form">
         @csrf
         @method('PUT')
 

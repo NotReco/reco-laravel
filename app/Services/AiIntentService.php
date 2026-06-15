@@ -16,16 +16,45 @@ class AiIntentService
     // -----------------------------------------------------------------------
     // Intent constants
     // -----------------------------------------------------------------------
-    public const INTENT_RECOMMEND = 'movie.recommend';
-    public const INTENT_SEARCH    = 'movie.search';
-    public const INTENT_REVIEW    = 'movie.review';
-    public const INTENT_GENRE     = 'movie.genre';
-    public const INTENT_POPULAR   = 'movie.popular';
-    public const INTENT_DETAIL    = 'movie.detail';
-    public const INTENT_PERSON    = 'movie.person';
-    public const INTENT_SITE_HELP = 'site.help';
+    public const INTENT_RECOMMEND  = 'movie.recommend';
+    public const INTENT_SEARCH     = 'movie.search';
+    public const INTENT_REVIEW     = 'movie.review';
+    public const INTENT_GENRE      = 'movie.genre';
+    public const INTENT_POPULAR    = 'movie.popular';
+    public const INTENT_DETAIL     = 'movie.detail';
+    public const INTENT_PERSON     = 'movie.person';
+    public const INTENT_MOOD       = 'movie.mood';  // phim theo tâm trạng / mood
+    public const INTENT_SITE_HELP  = 'site.help';
     public const INTENT_IRRELEVANT = 'irrelevant';
-    public const INTENT_UNKNOWN   = 'unknown';
+    public const INTENT_SENSITIVE  = 'sensitive';   // cực đoan, chính trị nhạy cảm
+    public const INTENT_ADULT_MOVIE_REQUEST = 'adult.movie_request';
+    public const INTENT_ADULT_EXPLICIT_VIOLATION = 'adult.explicit_violation';
+    public const INTENT_UNKNOWN    = 'unknown';
+    public const INTENT_GREETING   = 'greeting';
+    public const INTENT_ACK        = 'ack';         // cảm ơn / ok / được rồi
+    public const INTENT_SMALLTALK  = 'smalltalk';   // câu hỏi linh tinh không liên quan phim
+
+    /**
+     * Intents that are allowed to trigger local-first movie recommendations.
+     */
+    public const MOVIE_INTENTS = [
+        self::INTENT_RECOMMEND,
+        self::INTENT_SEARCH,
+        self::INTENT_GENRE,
+        self::INTENT_POPULAR,
+        self::INTENT_DETAIL,
+        self::INTENT_PERSON,
+        self::INTENT_MOOD,
+        self::INTENT_ADULT_MOVIE_REQUEST,
+    ];
+
+    /**
+     * Return true when the given intent should trigger local DB recommendation lookup.
+     */
+    public static function isMovieRelatedIntent(string $intent, ?string $wantsType = null): bool
+    {
+        return in_array($intent, self::MOVIE_INTENTS, true) || !empty($wantsType);
+    }
 
     // -----------------------------------------------------------------------
     // Keyword maps  (normalized/no-diacritic → real weight applied later)
@@ -204,7 +233,9 @@ class AiIntentService
         self::INTENT_IRRELEVANT => [
             // Mathematics / programming
             'giai phuong trinh' => 0.98,
-            'tinh toan'      => 0.90,
+            'giai toan'         => 0.98,
+            'tinh toan giup'    => 0.95,
+            'tinh toan'         => 0.90,
             'viet code'      => 0.98,
             'lap trinh'      => 0.95,
             'debug'          => 0.90,
@@ -238,6 +269,23 @@ class AiIntentService
             'benh'           => 0.80,
             'thuoc'          => 0.85,
             'bac si'         => 0.85,
+        ],
+
+        // ── Smalltalk: personal / off-topic questions ──────────────────────
+        self::INTENT_SMALLTALK => [
+            'dep trai khong'    => 0.99,
+            'toi dep trai'      => 0.99,
+            'ban co yeu toi'    => 0.99,
+            'yeu toi khong'     => 0.99,
+            'hom nay toi buon'  => 0.99,
+            'toi buon qua'      => 0.99,
+            'buon qua'          => 0.95,
+            'toi chan qua'      => 0.99,
+            'chan qua'          => 0.95,
+            'ke chuyen cuoi'    => 0.99,
+            'chuyen cuoi'       => 0.95,
+            'ban la ai'         => 0.95,
+            'ban lam duoc gi'   => 0.95,
         ],
     ];
 
@@ -293,8 +341,116 @@ class AiIntentService
     public function classify(string $message): array
     {
         $normalized = $this->normalize($message);
+
+        // ── Fast-path: Explicit Adult Violation ────────
+        $explicitKeywords = ['phim sex', 'gui phim sex', 'xxx', 'khieu dam', 'chat sex', 'mo ta canh sex', 'nude', 'thu dam', 'clip nong'];
+        foreach ($explicitKeywords as $kw) {
+            if (str_contains($normalized, $kw)) {
+                return [
+                    'intent'                 => self::INTENT_ADULT_EXPLICIT_VIOLATION,
+                    'confidence'             => 1.0,
+                    'keywords'               => [$kw],
+                    'is_personalized'        => false,
+                    'has_explicit_condition' => false,
+                    'wants_type'             => null,
+                    'mood'                   => null,
+                ];
+            }
+        }
+
+        // ── Fast-path: Adult Movie Request ────────
+        $adultRequestKeywords = ['toi muon phim co lien quan den quan he nam nu 18+', 'goi y phim 18+', 'phim 18+', 'phim nguoi lon', 'phim tinh cam truong thanh', 'phim tam ly tinh cam', 'phim danh cho nguoi truong thanh'];
+        foreach ($adultRequestKeywords as $kw) {
+            if (str_contains($normalized, $kw)) {
+                return [
+                    'intent'                 => self::INTENT_ADULT_MOVIE_REQUEST,
+                    'confidence'             => 1.0,
+                    'keywords'               => [$kw],
+                    'is_personalized'        => false,
+                    'has_explicit_condition' => false,
+                    'wants_type'             => null,
+                    'mood'                   => null,
+                ];
+            }
+        }
+
+        // ── Fast-path: Sensitive (chính trị cực đoan, phân biệt chủng tộc) ────────
+        // Nếu chứa từ khóa nhạy cảm NHƯNG không nhắc tới "phim", "movie", "review"... thì chặn ngay.
+        // Nếu có chữ "phim", ta cho qua để search phim lịch sử.
+        $sensitiveKeywords = ['hitler', 'phat xit', 'nazi', 'quoc xa', 'diet chung', 'cuc doan'];
+        $isSensitive = false;
+        foreach ($sensitiveKeywords as $kw) {
+            if (str_contains($normalized, $kw)) {
+                $isSensitive = true;
+                break;
+            }
+        }
+
+        if ($isSensitive) {
+            $movieSignals = ['phim', 'goi y', 'de xuat', 'movie', 'review', 'the loai'];
+            $isAskingAboutMovie = false;
+            foreach ($movieSignals as $signal) {
+                if (str_contains($normalized, $signal)) {
+                    $isAskingAboutMovie = true;
+                    break;
+                }
+            }
+
+            if (!$isAskingAboutMovie) {
+                return [
+                    'intent'                 => self::INTENT_SENSITIVE,
+                    'confidence'             => 1.0,
+                    'keywords'               => [],
+                    'is_personalized'        => false,
+                    'has_explicit_condition' => false,
+                    'wants_type'             => null,
+                    'mood'                   => null,
+                ];
+            }
+        }
+
         $isPersonalized = $this->isPersonalizedRequest($normalized);
         $hasExplicitCondition = $this->hasExplicitMovieCondition($normalized);
+
+        // ── Fast-path: greeting (rule-based, before keyword loop) ────────────
+        if ($this->isGreeting($normalized)) {
+            return [
+                'intent'                 => self::INTENT_GREETING,
+                'confidence'             => 1.0,
+                'keywords'               => [],
+                'is_personalized'        => false,
+                'has_explicit_condition' => false,
+                'wants_type'             => null,
+                'mood'                   => null,
+            ];
+        }
+
+        // ── Fast-path: acknowledgement (rule-based) ──────────────────────────
+        if ($this->isAck($normalized)) {
+            return [
+                'intent'                 => self::INTENT_ACK,
+                'confidence'             => 1.0,
+                'keywords'               => [],
+                'is_personalized'        => false,
+                'has_explicit_condition' => false,
+                'wants_type'             => null,
+                'mood'                   => null,
+            ];
+        }
+
+        // ── Fast-path: movie mood (phim + mood keyword) ─────────────────────
+        $moodResult = $this->detectMoodIntent($normalized);
+        if ($moodResult !== null) {
+            return [
+                'intent'                 => self::INTENT_MOOD,
+                'confidence'             => 0.95,
+                'keywords'               => [$moodResult['matched_keyword']],
+                'is_personalized'        => $isPersonalized,
+                'has_explicit_condition' => true,
+                'wants_type'             => $this->detectWantsType($message),
+                'mood'                   => $moodResult['mood'],
+            ];
+        }
 
         $scores   = [];   // intent → best confidence found
         $matched  = [];   // intent → matched keyword list
@@ -316,6 +472,21 @@ class AiIntentService
                 'keywords'               => [],
                 'is_personalized'        => $isPersonalized,
                 'has_explicit_condition' => $hasExplicitCondition,
+                'wants_type'             => null,
+                'mood'                   => null,
+            ];
+        }
+
+        // smalltalk wins over everything except irrelevant
+        if (isset($scores[self::INTENT_SMALLTALK]) && !isset($scores[self::INTENT_IRRELEVANT])) {
+            return [
+                'intent'                 => self::INTENT_SMALLTALK,
+                'confidence'             => $scores[self::INTENT_SMALLTALK],
+                'keywords'               => array_unique($matched[self::INTENT_SMALLTALK] ?? []),
+                'is_personalized'        => false,
+                'has_explicit_condition' => false,
+                'wants_type'             => null,
+                'mood'                   => null,
             ];
         }
 
@@ -327,6 +498,8 @@ class AiIntentService
                 'keywords'               => array_unique($matched[self::INTENT_IRRELEVANT] ?? []),
                 'is_personalized'        => $isPersonalized,
                 'has_explicit_condition' => $hasExplicitCondition,
+                'wants_type'             => null,
+                'mood'                   => null,
             ];
         }
 
@@ -343,6 +516,8 @@ class AiIntentService
                 'keywords'               => [],
                 'is_personalized'        => $isPersonalized,
                 'has_explicit_condition' => $hasExplicitCondition,
+                'wants_type'             => null,
+                'mood'                   => null,
             ];
         }
 
@@ -353,6 +528,7 @@ class AiIntentService
             'is_personalized'        => $isPersonalized,
             'has_explicit_condition' => $hasExplicitCondition,
             'wants_type'             => $this->detectWantsType($message),
+            'mood'                   => null,
         ];
     }
 
@@ -369,8 +545,15 @@ class AiIntentService
             self::INTENT_POPULAR    => 'Phim nổi bật',
             self::INTENT_DETAIL     => 'Chi tiết phim',
             self::INTENT_PERSON     => 'Phim của người',
+            self::INTENT_MOOD       => 'Phim theo tâm trạng',
             self::INTENT_SITE_HELP  => 'Hỗ trợ web',
             self::INTENT_IRRELEVANT => 'Không liên quan',
+            self::INTENT_SENSITIVE  => 'Chủ đề nhạy cảm',
+            self::INTENT_ADULT_MOVIE_REQUEST => 'Phim 18+',
+            self::INTENT_ADULT_EXPLICIT_VIOLATION => 'Vi phạm nội dung',
+            self::INTENT_GREETING   => 'Chào hỏi',
+            self::INTENT_ACK        => 'Xác nhận',
+            self::INTENT_SMALLTALK  => 'Ngoài chủ đề',
             default                 => 'Không xác định',
         };
     }
@@ -424,6 +607,117 @@ class AiIntentService
             }
         }
         return false;
+    }
+
+    // -----------------------------------------------------------------------
+    // Greeting / Ack fast-path helpers
+    // -----------------------------------------------------------------------
+
+    /**
+     * True if the message is purely a greeting with no movie signal.
+     * Checks the normalized (no-diacritic, lowercase) version.
+     */
+    private function isGreeting(string $normalized): bool
+    {
+        // Exact-match greetings (short messages only)
+        $exactGreetings = [
+            'xin chao', 'chao', 'hello', 'hi', 'alo', 'hey',
+            'ban oi', 'e', 'ey', 'yo',
+        ];
+
+        $trimmed = trim($normalized);
+
+        // Exact match first (highest precision)
+        if (in_array($trimmed, $exactGreetings, true)) {
+            return true;
+        }
+
+        // Starts-with greeting but message is short (≤ 30 chars) and has no movie keyword
+        $greetingPrefixes = ['xin chao', 'chao ban', 'chao bot', 'hello ban', 'hi ban', 'hey ban'];
+        foreach ($greetingPrefixes as $prefix) {
+            if (str_starts_with($trimmed, $prefix) && mb_strlen($trimmed) <= 30) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * True if the message is purely an acknowledgement (cảm ơn / ok / được rồi).
+     */
+    private function isAck(string $normalized): bool
+    {
+        $exactAcks = [
+            'cam on', 'cam on ban', 'thanks', 'thank you', 'ok', 'oke', 'okay',
+            'duoc roi', 'hay qua', 'tot', 'ngon', 'biet roi', 'ro roi',
+        ];
+
+        $trimmed = trim($normalized);
+        return in_array($trimmed, $exactAcks, true);
+    }
+
+    // -----------------------------------------------------------------------
+    // Mood detection (movie + mood keyword)
+    // -----------------------------------------------------------------------
+
+    /**
+     * Detect if the user is asking for movies by mood.
+     * Only matches when message contains a movie signal ('phim', 'goi y', 'de xuat')
+     * AND a mood keyword.
+     *
+     * "có phim nào buồn buồn không" → match (has 'phim' + 'buon')
+     * "gợi ý phim buồn"             → match (has 'goi y' + 'phim' + 'buon')
+     * "tôi buồn, gợi ý phim cho tôi"→ match (has 'goi y' + 'phim')
+     * "tôi buồn quá"                → NO match (no 'phim'/'goi y')
+     *
+     * @return null|array{mood: string, matched_keyword: string}
+     */
+    private function detectMoodIntent(string $normalized): ?array
+    {
+        // Must have a movie signal — prevents "tôi buồn quá" from matching
+        $movieSignals = ['phim', 'goi y', 'de xuat', 'recommend'];
+        $hasMovieSignal = false;
+        foreach ($movieSignals as $signal) {
+            if (str_contains($normalized, $signal)) {
+                $hasMovieSignal = true;
+                break;
+            }
+        }
+
+        if (!$hasMovieSignal) {
+            return null;
+        }
+
+        // Mood keywords → mood key (longer patterns first for greedy match)
+        $moodKeywords = [
+            'buon buon'   => 'buon',
+            'cam dong'    => 'cam_dong',
+            'nhe nhang'   => 'nhe_nhang',
+            'chua lanh'   => 'chua_lanh',
+            'am ap'       => 'am_ap',
+            'vui ve'      => 'vui',
+            'kich tinh'   => 'kich_tinh',
+            'cang nao'    => 'cang_nao',
+            'phieu luu'   => 'phieu_luu',
+            'hao hung'    => 'hao_hung',
+            'tinh cam'    => 'tinh_cam',
+            'lang man'    => 'tinh_cam',
+            'giai toa'    => 'giai_toa',
+            'buon'        => 'buon',
+            'khoc'        => 'khoc',
+            'chill'       => 'chill',
+            'vui'         => 'vui',
+            'hai'         => 'hai',
+        ];
+
+        foreach ($moodKeywords as $keyword => $mood) {
+            if (str_contains($normalized, $keyword)) {
+                return ['mood' => $mood, 'matched_keyword' => $keyword];
+            }
+        }
+
+        return null;
     }
 
     /**

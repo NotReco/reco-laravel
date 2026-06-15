@@ -1,6 +1,8 @@
 <x-admin-layout :title="'Sửa phim lẻ — ' . $movie->title" pageTitle="Sửa phim lẻ">
 
-    <div class="max-w-4xl">
+    @include('admin.partials.mobile-admin-warning', ['mode' => 'blocked-form'])
+
+    <div class="hidden lg:block max-w-4xl">
         {{-- Breadcrumb --}}
         <nav class="flex items-center gap-2 text-sm text-dark-500 mb-6">
             <a href="{{ route('admin.movies.index') }}" class="hover:text-white transition-colors">Quản lý phim lẻ</a>

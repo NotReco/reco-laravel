@@ -107,103 +107,153 @@
                         <img src="{{ asset('storage/images/logo-icon.svg') }}" alt="Logo" class="w-8 h-8">
                     </div>
                     <span class="text-lg font-bold text-white whitespace-nowrap sidebar-label"
-                        :class="sidebarOpen ? 'opacity-100' : 'opacity-0'">Control Panel</span>
+                        :class="sidebarOpen ? 'opacity-100' : 'opacity-0'">Bảng điều khiển</span>
                 </div>
             </div>
 
             {{-- Nav --}}
-            <nav class="flex-1 py-4 px-2 space-y-1 overflow-y-auto overflow-x-hidden">
+            <nav id="admin-sidebar-nav" class="flex-1 py-4 px-2 space-y-1 overflow-y-auto overflow-x-hidden">
                 @php
-                    $nav = [
+                    $navGroups = [
                         [
                             'label' => 'Tổng quan',
-                            'route' => 'admin.dashboard',
-                            'icon'  => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>',
+                            'items' => [
+                                [
+                                    'label' => 'Tổng quan',
+                                    'route' => 'admin.dashboard',
+                                    'icon'  => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>',
+                                    'permission' => 'access_admin_panel',
+                                ],
+                            ]
                         ],
                         [
-                            'label' => 'Phim lẻ',
-                            'route' => 'admin.movies.index',
-                            'icon'  => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"/>',
+                            'label' => 'Quản lý nội dung',
+                            'items' => [
+                                [
+                                    'label' => 'Phim lẻ',
+                                    'route' => 'admin.movies.index',
+                                    'icon'  => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"/>',
+                                    'permission' => 'manage_movies',
+                                ],
+                                [
+                                    'label' => 'Phim bộ',
+                                    'route' => 'admin.tv-shows.index',
+                                    'icon'  => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>',
+                                    'permission' => 'manage_tv_shows',
+                                ],
+                                [
+                                    'label' => 'Diễn viên',
+                                    'route' => 'admin.people.index',
+                                    'icon'  => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>',
+                                    'permission' => 'manage_movies',
+                                ],
+                                [
+                                    'label' => 'Tin tức',
+                                    'route' => 'admin.articles.index',
+                                    'icon'  => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>',
+                                    'permission' => 'manage_articles',
+                                ],
+                                [
+                                    'label' => 'Carousel',
+                                    'route' => 'admin.carousel.index',
+                                    'icon'  => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/>',
+                                    'permission' => 'manage_carousel',
+                                ],
+                            ]
                         ],
                         [
-                            'label' => 'Phim bộ',
-                            'route' => 'admin.tv-shows.index',
-                            'icon'  => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>',
+                            'label' => 'Cộng đồng',
+                            'items' => [
+                                [
+                                    'label' => 'Đánh giá',
+                                    'route' => 'admin.reviews.index',
+                                    'icon'  => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>',
+                                    'badge' => \App\Models\Review::whereHas('reports', fn($q) => $q->where('status', 'pending'))->count(),
+                                    'permission' => 'manage_reviews',
+                                ],
+                                [
+                                    'label' => 'Diễn đàn',
+                                    'route' => 'admin.forum-categories.index',
+                                    'icon'  => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"/>',
+                                    'permission' => 'manage_forum',
+                                ],
+                                [
+                                    'label' => 'Báo cáo',
+                                    'route' => 'admin.reports.index',
+                                    'icon'  => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"/>',
+                                    'badge' => \App\Models\Report::where('status', 'pending')->count(),
+                                    'permission' => 'manage_reports',
+                                ],
+                            ]
                         ],
                         [
-                            'label' => 'Diễn viên',
-                            'route' => 'admin.people.index',
-                            'icon'  => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>',
-                        ],
-                        [
-                            'label' => 'Carousel',
-                            'route' => 'admin.carousel.index',
-                            'icon'  => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/>',
-                        ],
-                        [
-                            'label' => 'Đánh giá',
-                            'route' => 'admin.reviews.index',
-                            'icon'  => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>',
-                            'badge' => \App\Models\Review::whereHas('reports', fn($q) => $q->where('status', 'pending'))->count(),
-                        ],
-                        [
-                            'label' => 'Tin tức',
-                            'route' => 'admin.articles.index',
-                            'icon'  => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>',
-                        ],
-                        [
-                            'label' => 'Diễn đàn',
-                            'route' => 'admin.forum-categories.index',
-                            'icon'  => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"/>',
-                        ],
-                        [
-                            'label' => 'Người dùng',
-                            'route' => 'admin.users.index',
-                            'icon'  => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>',
-                        ],
-                        [
-                            'label' => 'Báo cáo',
-                            'route' => 'admin.reports.index',
-                            'icon'  => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"/>',
-                            'badge' => \App\Models\Report::where('status', 'pending')->count(),
-                        ],
-                        [
-                            'label' => 'Danh hiệu',
-                            'route' => 'admin.user-titles.index',
-                            'icon'  => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>',
-                        ],
-                        [
-                            'label' => 'Khung Avatar',
-                            'route' => 'admin.avatar-frames.index',
-                            'icon'  => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>',
-                        ],
-                        [
-                            'label' => 'Nhiệm vụ',
-                            'route' => 'admin.quests.index',
-                            'icon'  => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>',
+                            'label' => 'AI & An toàn',
+                            'items' => [
+                                [
+                                    'label' => 'AI Safety Center',
+                                    'route' => 'admin.ai-content-safety.index',
+                                    'icon'  => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>',
+                                    'permission' => 'manage_reports',
+                                ],
+                                [
+                                    'label' => 'Từ khóa cấm',
+                                    'route' => 'admin.banned_words.index',
+                                    'icon'  => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>',
+                                    'permission' => 'manage_reviews',
+                                ],
+                            ]
                         ],
                     ];
                 @endphp
 
-                @foreach ($nav as $item)
-                    @php $active = request()->routeIs($item['route'] . '*') || request()->routeIs($item['route']); @endphp
-                    <div onclick="window.location.href='{{ route($item['route']) }}'"
-                        class="flex items-center rounded-xl text-sm font-medium transition-all cursor-pointer
-                              {{ $active ? 'bg-sky-600/20 text-sky-400' : 'text-dark-400 hover:text-white hover:bg-dark-800' }}">
-                        <div class="w-12 h-10 flex items-center justify-center shrink-0 {{ $active ? 'text-sky-400' : '' }}">
-                            <svg class="w-5 h-5 shrink-0" fill="none"
-                                stroke="currentColor" viewBox="0 0 24 24">{!! $item['icon'] !!}</svg>
-                        </div>
-                        <span class="whitespace-nowrap sidebar-label flex-1 pr-3"
-                            :class="sidebarOpen ? 'opacity-100' : 'opacity-0'">{{ $item['label'] }}</span>
-                        @if (!empty($item['badge']) && $item['badge'] > 0)
-                            <span class="sidebar-label mr-2 min-w-[20px] h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1"
-                                :class="sidebarOpen ? 'opacity-100' : 'opacity-0'">
-                                {{ $item['badge'] > 99 ? '99+' : $item['badge'] }}
-                            </span>
+                <div class="space-y-4">
+                    @foreach ($navGroups as $group)
+                        @php
+                            $hasVisibleItems = false;
+                            foreach ($group['items'] as $item) {
+                                if (Auth::user()->can($item['permission'])) {
+                                    $hasVisibleItems = true;
+                                    break;
+                                }
+                            }
+                        @endphp
+
+                        @if ($hasVisibleItems)
+                            <div class="group-container">
+                                <div class="px-3 pb-1 text-[11px] font-bold uppercase tracking-wider text-dark-500 sidebar-label truncate"
+                                    :class="sidebarOpen ? 'opacity-100' : 'opacity-0'">
+                                    {{ $group['label'] }}
+                                </div>
+                                <div class="space-y-0.5">
+                                    @foreach ($group['items'] as $item)
+                                        @can($item['permission'])
+                                            @php
+                                                $baseRoute = str_replace('.index', '', $item['route']);
+                                                $active = request()->routeIs($baseRoute . '.*') || request()->routeIs($item['route']);
+                                            @endphp
+                                            <div onclick="window.location.href='{{ route($item['route']) }}'"
+                                                class="flex items-center rounded-xl text-sm font-medium transition-all cursor-pointer
+                                                      {{ $active ? 'bg-sky-600/20 text-sky-400' : 'text-dark-400 hover:text-white hover:bg-dark-800' }}">
+                                                <div class="w-12 h-10 flex items-center justify-center shrink-0 {{ $active ? 'text-sky-400' : '' }}">
+                                                    <svg class="w-5 h-5 shrink-0" fill="none"
+                                                        stroke="currentColor" viewBox="0 0 24 24">{!! $item['icon'] !!}</svg>
+                                                </div>
+                                                <span class="whitespace-nowrap sidebar-label flex-1 pr-3 truncate"
+                                                    :class="sidebarOpen ? 'opacity-100' : 'opacity-0'">{{ $item['label'] }}</span>
+                                                @if (!empty($item['badge']) && $item['badge'] > 0)
+                                                    <span class="sidebar-label mr-2 min-w-[20px] h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1"
+                                                        :class="sidebarOpen ? 'opacity-100' : 'opacity-0'">
+                                                        {{ $item['badge'] > 99 ? '99+' : $item['badge'] }}
+                                                    </span>
+                                                @endif
+                                            </div>
+                                        @endcan
+                                    @endforeach
+                                </div>
+                            </div>
                         @endif
-                    </div>
-                @endforeach
+                    @endforeach
+                </div>
             </nav>
 
             {{-- Bottom: User + Back to Site --}}
@@ -273,6 +323,9 @@
 
             {{-- Content --}}
             <div class="p-6">
+                {{-- Global Mobile Warning Banner --}}
+                @include('admin.partials.mobile-admin-warning', ['mode' => 'banner'])
+
                 {{-- Lỗi validation (Laravel dùng $errors, không phải session error) --}}
                 @if ($errors->any())
                     <div class="mb-5 rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-100"
@@ -403,6 +456,23 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const nav = document.getElementById('admin-sidebar-nav');
+            if (nav) {
+                // Phục hồi vị trí cuộn
+                const savedScroll = sessionStorage.getItem('adminSidebarScroll');
+                if (savedScroll) {
+                    nav.scrollTop = parseInt(savedScroll, 10);
+                }
+                // Lưu vị trí cuộn
+                nav.addEventListener('scroll', () => {
+                    sessionStorage.setItem('adminSidebarScroll', nav.scrollTop);
+                }, { passive: true });
+            }
+        });
+    </script>
 
     @stack('scripts')
 </body>

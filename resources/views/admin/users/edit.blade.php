@@ -1,4 +1,4 @@
-<x-admin-layout pageTitle="Quản lý Thành Viên">
+﻿<x-superadmin-layout pageTitle="Quản lý Thành Viên">
     <div class="flex items-center justify-between mb-6">
         <div>
             <h2 class="text-xl font-semibold text-white">Chỉnh sửa: {{ $user->name }}</h2>
@@ -122,4 +122,4 @@
             </button>
         </div>
     </form>
-</x-admin-layout>
+</x-superadmin-layout>

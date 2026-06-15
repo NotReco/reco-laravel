@@ -72,6 +72,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('manage_movies', fn(User $user) => $user->canManageContent());
         Gate::define('manage_tv_shows', fn(User $user) => $user->canManageContent());
         Gate::define('manage_reviews', fn(User $user) => $user->canModerateReviews());
+        Gate::define('manage_reports', fn(User $user) => $user->canModerateReviews());
         Gate::define('manage_comments', fn(User $user) => $user->canManageContent());
         Gate::define('manage_genres', fn(User $user) => $user->canManageContent());
         Gate::define('manage_people', fn(User $user) => $user->canManageContent());

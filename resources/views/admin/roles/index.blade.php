@@ -1,4 +1,4 @@
-<x-superadmin-layout title="Nhóm quyền hạn" pageTitle="Quản lý nhóm quyền hạn">
+﻿<x-superadmin-layout title="Nhóm quyền hạn" pageTitle="Quản lý nhóm quyền hạn">
 
     <div x-data="{
         showDeleteModal: false,

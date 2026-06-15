@@ -6,10 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Services\AiAssistantService;
 use App\Services\AiIntentService;
 use App\Services\AiContextService;
+use App\Services\AiPersonaService;
 use App\Services\UserTasteProfileService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Cache;
+use App\Models\ActivityLog;
 
 class AiAssistantController extends Controller
 {
@@ -17,13 +19,20 @@ class AiAssistantController extends Controller
     protected AiIntentService $intentService;
     protected UserTasteProfileService $profileService;
     protected AiContextService $contextService;
+    protected AiPersonaService $personaService;
 
-    public function __construct(AiAssistantService $aiService, AiIntentService $intentService, UserTasteProfileService $profileService, AiContextService $contextService)
-    {
+    public function __construct(
+        AiAssistantService $aiService,
+        AiIntentService $intentService,
+        UserTasteProfileService $profileService,
+        AiContextService $contextService,
+        AiPersonaService $personaService
+    ) {
         $this->aiService      = $aiService;
         $this->intentService  = $intentService;
         $this->profileService = $profileService;
         $this->contextService = $contextService;
+        $this->personaService = $personaService;
     }
 
     /**
@@ -65,16 +74,164 @@ class AiAssistantController extends Controller
             ? config('ai_assistant.daily_limit_user', 50)
             : config('ai_assistant.daily_limit_guest', 20);
 
+        // ── Check if user is muted due to adult violations ───────────────────
+        $muteKey = "ai_assistant:muted:{$cacheIdentity}";
+        if (Cache::has($muteKey)) {
+            return response()->json([
+                'message'                   => $this->personaService->mutedWarning(),
+                'source'                    => 'system_muted',
+                'fallback'                  => false,
+                'fallback_reason'           => null,
+                'called_gemini'             => false,
+                'intent'                    => null,
+                'intent_confidence'         => 0.0,
+                'context_items_count'       => 0,
+                'suggested_items_count'     => 0,
+                'has_user_profile'          => false,
+                'user_profile_genres_count' => 0,
+                'suggested_items'           => [],
+            ], 200);
+        }
+
         // ── 1. Intent classification ─────────────────────────────────────────
         $intent = $this->intentService->classify($message);
+
+        // Block explicit adult violation – no Gemini, no card, increment violation count
+        if ($intent['intent'] === AiIntentService::INTENT_ADULT_EXPLICIT_VIOLATION) {
+            $violationKey = "ai_assistant:adult_violation:{$cacheIdentity}";
+            $limit = config('ai_assistant.adult_warning_limit', 3);
+            $window = config('ai_assistant.adult_warning_window', 10);
+            $muteMinutes = config('ai_assistant.mute_minutes', 15);
+            
+            if (!Cache::has($violationKey)) {
+                Cache::add($violationKey, 0, now()->addMinutes($window));
+            }
+            $count = Cache::increment($violationKey);
+            
+            // Log to ActivityLog
+            ActivityLog::create([
+                'user_id' => $user->id ?? null,
+                'action' => $count >= $limit ? 'ai_assistant.adult_muted' : 'ai_assistant.adult_violation',
+                'target_type' => null,
+                'target_id' => null,
+                'description' => "source=rule_based, intent=adult.explicit_violation, excerpt=" . mb_substr($message, 0, 120),
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
+            if ($count >= $limit) {
+                Cache::put($muteKey, true, now()->addMinutes($muteMinutes));
+                return response()->json([
+                    'message'                   => $this->personaService->mutedWarning(),
+                    'source'                    => 'system_muted',
+                    'fallback'                  => false,
+                    'fallback_reason'           => null,
+                    'called_gemini'             => false,
+                    'intent'                    => $intent['intent'],
+                    'intent_confidence'         => $intent['confidence'],
+                    'context_items_count'       => 0,
+                    'suggested_items_count'     => 0,
+                    'has_user_profile'          => false,
+                    'user_profile_genres_count' => 0,
+                    'suggested_items'           => [],
+                ], 200);
+            }
+
+            return response()->json([
+                'message'                   => $this->personaService->adultViolation(),
+                'source'                    => 'rule_based_adult_warning',
+                'fallback'                  => false,
+                'fallback_reason'           => null,
+                'called_gemini'             => false,
+                'intent'                    => $intent['intent'],
+                'intent_confidence'         => $intent['confidence'],
+                'context_items_count'       => 0,
+                'suggested_items_count'     => 0,
+                'has_user_profile'          => false,
+                'user_profile_genres_count' => 0,
+                'suggested_items'           => [],
+            ], 200);
+        }
+
+        // Block sensitive queries – rule-based safety, no Gemini, no card
+        if ($intent['intent'] === AiIntentService::INTENT_SENSITIVE) {
+            return response()->json([
+                'message'                   => $this->personaService->sensitive(),
+                'source'                    => 'rule_based_sensitive',
+                'fallback'                  => false,
+                'fallback_reason'           => null,
+                'called_gemini'             => false,
+                'intent'                    => $intent['intent'],
+                'intent_confidence'         => $intent['confidence'],
+                'context_items_count'       => 0,
+                'suggested_items_count'     => 0,
+                'has_user_profile'          => false,
+                'user_profile_genres_count' => 0,
+                'suggested_items'           => [],
+            ], 200);
+        }
 
         // Block irrelevant queries – no Gemini call, no daily usage consumed
         if ($intent['intent'] === AiIntentService::INTENT_IRRELEVANT) {
             return response()->json([
-                'message'                   => 'Mình là trợ lý phim của RecoDB nên chỉ hỗ trợ tìm phim, review và gợi ý nội dung trong hệ thống nhé. 🎬',
+                'message'                   => $this->personaService->irrelevant(),
                 'source'                    => 'system',
                 'fallback'                  => true,
                 'fallback_reason'           => 'irrelevant',
+                'called_gemini'             => false,
+                'intent'                    => $intent['intent'],
+                'intent_confidence'         => $intent['confidence'],
+                'context_items_count'       => 0,
+                'suggested_items_count'     => 0,
+                'has_user_profile'          => false,
+                'user_profile_genres_count' => 0,
+                'suggested_items'           => [],
+            ], 200);
+        }
+
+        // ── Rule-based: greeting ─────────────────────────────────────────────
+        if ($intent['intent'] === AiIntentService::INTENT_GREETING) {
+            return response()->json([
+                'message'                   => $this->personaService->greeting(),
+                'source'                    => 'rule_based_greeting',
+                'fallback'                  => false,
+                'fallback_reason'           => null,
+                'called_gemini'             => false,
+                'intent'                    => $intent['intent'],
+                'intent_confidence'         => $intent['confidence'],
+                'context_items_count'       => 0,
+                'suggested_items_count'     => 0,
+                'has_user_profile'          => false,
+                'user_profile_genres_count' => 0,
+                'suggested_items'           => [],
+            ], 200);
+        }
+
+        // ── Rule-based: acknowledgement (cảm ơn / ok / được rồi) ────────────
+        if ($intent['intent'] === AiIntentService::INTENT_ACK) {
+            return response()->json([
+                'message'                   => $this->personaService->ack(),
+                'source'                    => 'rule_based_ack',
+                'fallback'                  => false,
+                'fallback_reason'           => null,
+                'called_gemini'             => false,
+                'intent'                    => $intent['intent'],
+                'intent_confidence'         => $intent['confidence'],
+                'context_items_count'       => 0,
+                'suggested_items_count'     => 0,
+                'has_user_profile'          => false,
+                'user_profile_genres_count' => 0,
+                'suggested_items'           => [],
+            ], 200);
+        }
+
+        // ── Rule-based: smalltalk (câu hỏi ngoài chủ đề phim) ───────────────
+        if ($intent['intent'] === AiIntentService::INTENT_SMALLTALK) {
+            return response()->json([
+                'message'                   => $this->personaService->smalltalk($message),
+                'source'                    => 'rule_based_smalltalk',
+                'fallback'                  => false,
+                'fallback_reason'           => null,
                 'called_gemini'             => false,
                 'intent'                    => $intent['intent'],
                 'intent_confidence'         => $intent['confidence'],
@@ -93,10 +250,10 @@ class AiAssistantController extends Controller
             $isReviewHelp   = count(array_intersect($intent['keywords'], $reviewHelpKeys)) > 0;
 
             if ($isReviewHelp) {
-                $msg    = "Để viết review hay trên RecoDB, bạn có thể:\n1. Nói ngắn gọn cảm nhận chung.\n2. Nhắc điểm mạnh/yếu như nội dung, diễn xuất, hình ảnh, âm thanh.\n3. Tránh spoil chi tiết quan trọng.\n4. Chấm điểm công bằng theo trải nghiệm của bạn.\n\nBạn có thể vào trang phim và chọn phần Viết review để gửi đánh giá.";
+                $msg    = $this->personaService->reviewHelp();
                 $source = 'rule_based_review_help';
             } else {
-                $msg    = "RecoDB là nền tảng khám phá phim lẻ và phim bộ. Bạn có thể tìm kiếm phim, xem thông tin chi tiết, đọc review cộng đồng, viết đánh giá, thêm phim vào yêu thích/watchlist và nhận gợi ý cá nhân hóa dựa trên lịch sử tương tác của bạn. Bạn cũng có thể dùng Trợ lý RecoDB để hỏi nhanh về phim, thể loại, review hoặc phim đang nổi bật.";
+                $msg    = $this->personaService->siteHelp();
                 $source = 'rule_based_site_help';
             }
 
@@ -120,7 +277,7 @@ class AiAssistantController extends Controller
         // ── 2. Cooldown check ────────────────────────────────────────────────
         $intentName      = $intent['intent'] ?? 'unknown';
         $wantsType       = $intent['wants_type'] ?? null;
-        $isListingIntent = in_array($intentName, ['movie.recommend', 'movie.popular', 'movie.genre', 'movie.person']) || !empty($wantsType);
+        $isListingIntent = AiIntentService::isMovieRelatedIntent($intentName, $wantsType);
 
         if ($isListingIntent) {
             $cooldown = (int) config('ai_assistant.local_cooldown_seconds', 3);

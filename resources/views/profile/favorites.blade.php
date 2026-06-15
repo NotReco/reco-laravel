@@ -39,17 +39,25 @@
                 </div>
             @else
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5 md:gap-6">
-                    @foreach($favorites as $movie)
-                        <a href="{{ route('movies.show', $movie) }}" class="group relative aspect-[2/3] rounded-xl overflow-hidden bg-white border border-slate-200 block hover:border-slate-300 hover:shadow-md transition-all duration-200">
-                            <img src="{{ $movie->poster }}" alt="{{ $movie->title }}" class="w-full h-full object-cover" loading="lazy">
-                            <div class="absolute inset-0 bg-gradient-to-t from-slate-900/85 via-slate-900/10 to-transparent"></div>
-                            <div class="absolute bottom-0 left-0 right-0 p-3">
-                                <p class="text-white font-semibold text-[11px] leading-tight line-clamp-2 drop-shadow-md">{{ $movie->title }}</p>
-                                @if($movie->release_date)
-                                    <p class="text-rose-200 font-medium text-[10px] mt-0.5">{{ \Carbon\Carbon::parse($movie->release_date)->format('Y') }}</p>
-                                @endif
-                            </div>
-                        </a>
+                    @foreach($favorites as $favorite)
+                        @php
+                            $item = $favorite->movie_id ? $favorite->movie : $favorite->tvShow;
+                            $route = $favorite->movie_id ? route('movies.show', $item) : route('tv-shows.show', $item);
+                            $title = $item->title;
+                            $releaseDate = $favorite->movie_id ? $item->release_date : $item->first_air_date;
+                        @endphp
+                        @if($item)
+                            <a href="{{ $route }}" class="group relative aspect-[2/3] rounded-xl overflow-hidden bg-white border border-slate-200 block hover:border-slate-300 hover:shadow-md transition-all duration-200">
+                                <img src="{{ $item->poster }}" alt="{{ $title }}" class="w-full h-full object-cover" loading="lazy">
+                                <div class="absolute inset-0 bg-gradient-to-t from-slate-900/85 via-slate-900/10 to-transparent"></div>
+                                <div class="absolute bottom-0 left-0 right-0 p-3">
+                                    <p class="text-white font-semibold text-[11px] leading-tight line-clamp-2 drop-shadow-md">{{ $title }}</p>
+                                    @if($releaseDate)
+                                        <p class="text-rose-200 font-medium text-[10px] mt-0.5">{{ \Carbon\Carbon::parse($releaseDate)->format('Y') }}</p>
+                                    @endif
+                                </div>
+                            </a>
+                        @endif
                     @endforeach
                 </div>
 

@@ -22,12 +22,17 @@ class ProfileController extends Controller
     {
         $user->loadCount(['followers', 'following', 'reviews'])
             ->load([
-                'favorites' => fn($q) => $q->latest()->take(6),
                 'reviews' => fn($q) => $q->with(['movie', 'tvShow'])->latest()->take(5),
                 'activeTitle',
                 'activeFrame',
                 'topMovies' => fn($q) => $q->orderBy('user_top_movies.order'),
             ]);
+
+        $recentFavorites = \App\Models\Favorite::with(['movie', 'tvShow'])
+            ->where('user_id', $user->id)
+            ->latest()
+            ->take(6)
+            ->get();
 
         $isOwnProfile = Auth::check() && Auth::id() === $user->id;
         /** @var \App\Models\User|null $authUser */
@@ -40,19 +45,22 @@ class ProfileController extends Controller
             'reviews_count' => $user->reviews_count,
             'followers_count' => $user->followers_count,
             'following_count' => $user->following_count,
-            'favorites_count' => $user->favorites()->count(),
+            'favorites_count' => \App\Models\Favorite::where('user_id', $user->id)->count(),
             'watch_time' => 0 // Gợi ý: có thể tính tổng thời lượng phim đã xem
         ];
 
-        return view('profile.show', compact('user', 'isOwnProfile', 'isFollowing', 'stats'));
+        return view('profile.show', compact('user', 'isOwnProfile', 'isFollowing', 'stats', 'recentFavorites'));
     }
 
     /**
-     * Display the specified user's favorite movies.
+     * Display the specified user's favorite movies and TV shows.
      */
     public function favorites(User $user)
     {
-        $favorites = $user->favorites()->latest()->paginate(24);
+        $favorites = \App\Models\Favorite::with(['movie', 'tvShow'])
+            ->where('user_id', $user->id)
+            ->latest()
+            ->paginate(24);
         
         $isOwnProfile = Auth::check() && Auth::id() === $user->id;
         

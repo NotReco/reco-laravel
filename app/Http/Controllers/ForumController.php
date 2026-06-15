@@ -124,6 +124,13 @@ class ForumController extends Controller
             'content' => 'required|string|min:10',
         ]);
 
+        app(\App\Services\ModerationService::class)->moderateContent(
+            $validated['title'] . ' ' . $validated['content'],
+            'moderation.forum_thread',
+            null,
+            true
+        );
+
         $thread = ForumThread::create([
             'forum_category_id' => $validated['forum_category_id'],
             'user_id' => Auth::id(),
@@ -151,6 +158,13 @@ class ForumController extends Controller
             'content' => 'required|string|max:10000',
             'parent_id' => 'nullable|exists:forum_replies,id',
         ]);
+
+        app(\App\Services\ModerationService::class)->moderateContent(
+            $validated['content'],
+            'moderation.forum_reply',
+            null,
+            true
+        );
 
         $parentId = !empty($validated['parent_id']) ? (int)$validated['parent_id'] : null;
 
@@ -230,6 +244,13 @@ class ForumController extends Controller
             'title' => 'required|string|min:5|max:255',
             'content' => 'required|string|min:10',
         ]);
+
+        app(\App\Services\ModerationService::class)->moderateContent(
+            $validated['title'] . ' ' . $validated['content'],
+            'moderation.forum_thread',
+            $thread,
+            true
+        );
 
         $thread->update([
             'forum_category_id' => $validated['forum_category_id'],
@@ -340,6 +361,13 @@ class ForumController extends Controller
         $validated = $request->validate([
             'content' => 'required|string|max:10000',
         ]);
+
+        app(\App\Services\ModerationService::class)->moderateContent(
+            $validated['content'],
+            'moderation.forum_reply',
+            $reply,
+            true
+        );
 
         $reply->update([
             'content' => Purify::clean($validated['content']),

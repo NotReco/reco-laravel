@@ -1,4 +1,4 @@
-<x-admin-layout title="Khung Avatar" pageTitle="Quản lý khung Avatar">
+﻿<x-superadmin-layout title="Khung Avatar" pageTitle="Quản lý khung Avatar">
 
     <div class="flex justify-between items-center mb-6">
         <div>
@@ -117,4 +117,4 @@
         </div>
     @endif
 
-</x-admin-layout>
+</x-superadmin-layout>

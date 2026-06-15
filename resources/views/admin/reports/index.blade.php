@@ -165,7 +165,7 @@
 
                         {{-- Actions --}}
                         <td class="px-5 py-3">
-                            <div class="flex items-center justify-end gap-1">
+                            <div class="flex items-center justify-end gap-2">
 
                                 @if($report->status === 'pending')
                                     {{-- Resolve --}}
@@ -202,10 +202,10 @@
                                 @endif
 
                                 {{-- Delete --}}
-                                <form action="{{ route('admin.reports.destroy', $report) }}" method="POST"
-                                      onsubmit="return confirm('Xóa báo cáo này?')">
+                                <form id="delete-report-{{ $report->id }}" action="{{ route('admin.reports.destroy', $report) }}" method="POST">
                                     @csrf @method('DELETE')
-                                    <button type="submit" title="Xóa"
+                                    <button type="button" title="Xóa"
+                                            @click="$dispatch('admin-confirm', { title: 'Xóa báo cáo này?', message: 'Hành động này không thể hoàn tác.', formId: 'delete-report-{{ $report->id }}', confirmText: 'Đồng ý Xóa', type: 'danger' })"
                                             class="text-dark-400 hover:text-red-400 transition-colors p-1.5 rounded-lg hover:bg-red-500/10">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
@@ -222,7 +222,7 @@
                                 <svg class="w-10 h-10 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"/>
                                 </svg>
-                                <p class="text-sm">Không có báo cáo nào.</p>
+                                <p class="text-sm">Tuyệt vời! Không có báo cáo nào ở đây.</p>
                             </div>
                         </td>
                     </tr>

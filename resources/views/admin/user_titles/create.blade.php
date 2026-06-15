@@ -1,4 +1,4 @@
-<x-admin-layout :pageTitle="isset($userTitle) ? 'Sửa danh hiệu' : 'Thêm danh hiệu'">
+﻿<x-superadmin-layout :pageTitle="isset($userTitle) ? 'Sửa danh hiệu' : 'Thêm danh hiệu'">
     <div class="flex items-center justify-between mb-6">
         <div>
             <h2 class="text-xl font-semibold text-white">
@@ -244,4 +244,4 @@
     </script>
     @endpush
 
-</x-admin-layout>
+</x-superadmin-layout>

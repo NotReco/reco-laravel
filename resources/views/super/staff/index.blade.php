@@ -1,4 +1,4 @@
-<x-superadmin-layout title="Nhân viên" pageTitle="Quản lý nhân viên nội bộ">
+﻿<x-superadmin-layout title="Nhân viên" pageTitle="Quản lý nhân viên nội bộ">
     <div x-data="{
         showConfirmModal: false,
         confirmUrl: '',

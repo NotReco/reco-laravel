@@ -23,6 +23,7 @@ class DashboardController extends Controller
             'today_reviews'   => Review::whereDate('created_at', today())->count(),
             'forum_threads'   => ForumThread::count(),
             'pending_reports' => Report::where('status', 'pending')->count(),
+            'moderation_logs' => \App\Models\ActivityLog::where('action', 'like', 'moderation.%')->count(),
         ];
 
         $todayReviews = Review::with(['user', 'movie', 'tvShow'])

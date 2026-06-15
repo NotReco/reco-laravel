@@ -1,6 +1,8 @@
 <x-admin-layout :title="'Viết bài mới'" pageTitle="Viết bài mới">
 
-    <form action="{{ route('admin.articles.store') }}" method="POST" enctype="multipart/form-data" class="max-w-4xl"
+    @include('admin.partials.mobile-admin-warning', ['mode' => 'blocked-form'])
+
+    <form action="{{ route('admin.articles.store') }}" method="POST" enctype="multipart/form-data" class="hidden lg:block max-w-4xl"
         id="article-form">
         @csrf
 

@@ -57,6 +57,27 @@ class AiContextService
     ];
 
     // ──────────────────────────────────────────────────────────────────────
+    // Mood → Genre mapping (uses actual DB genre names verified from RecoDB)
+    // ──────────────────────────────────────────────────────────────────────
+    private const MOOD_GENRE_MAP = [
+        'buon'      => ['Phim Chính Kịch', 'Phim Lãng Mạn'],
+        'cam_dong'  => ['Phim Chính Kịch', 'Phim Lãng Mạn'],
+        'khoc'      => ['Phim Chính Kịch', 'Phim Lãng Mạn'],
+        'nhe_nhang' => ['Phim Hài', 'Phim Gia Đình', 'Phim Hoạt Hình', 'Phim Lãng Mạn'],
+        'chua_lanh' => ['Phim Hài', 'Phim Gia Đình', 'Phim Hoạt Hình', 'Phim Lãng Mạn'],
+        'am_ap'     => ['Phim Hài', 'Phim Gia Đình', 'Phim Hoạt Hình', 'Phim Lãng Mạn'],
+        'chill'     => ['Phim Hài', 'Phim Gia Đình', 'Phim Hoạt Hình'],
+        'vui'       => ['Phim Hài', 'Phim Hoạt Hình'],
+        'hai'       => ['Phim Hài', 'Phim Hoạt Hình'],
+        'giai_toa'  => ['Phim Hài', 'Phim Hoạt Hình'],
+        'kich_tinh' => ['Phim Gây Cấn', 'Phim Hình Sự', 'Phim Bí Ẩn', 'Phim Khoa Học Viễn Tưởng'],
+        'cang_nao'  => ['Phim Gây Cấn', 'Phim Hình Sự', 'Phim Bí Ẩn', 'Phim Khoa Học Viễn Tưởng'],
+        'phieu_luu' => ['Phim Phiêu Lưu', 'Phim Hành Động', 'Phim Giả Tượng'],
+        'hao_hung'  => ['Phim Phiêu Lưu', 'Phim Hành Động', 'Phim Giả Tượng'],
+        'tinh_cam'  => ['Phim Lãng Mạn', 'Phim Chính Kịch'],
+    ];
+
+    // ──────────────────────────────────────────────────────────────────────
     // Limits (from config, cached in constructor)
     // ──────────────────────────────────────────────────────────────────────
     private int $maxItems;
@@ -92,7 +113,8 @@ class AiContextService
         mixed  $user = null,
         array  $userProfile = [],
         array  $recentItems = [],
-        ?string $wantsType = null
+        ?string $wantsType = null,
+        ?string $mood = null
     ): array {
         try {
             return match ($intent) {
@@ -103,6 +125,8 @@ class AiContextService
                 'movie.detail'    => $this->contextDetail($message),
                 'movie.search'    => $this->contextSearch($message),
                 'movie.person'    => $this->contextPerson($message, $keywords),
+                'movie.mood'      => $this->contextMood($mood, $recentItems, $wantsType),
+                'adult.movie_request' => $this->contextAdultMovies($recentItems, $wantsType),
                 'site.help'       => $this->contextSiteHelp(),
                 default           => $this->contextFallback(),
             };
@@ -357,7 +381,7 @@ class AiContextService
         }
 
         // Tìm Person
-        $person = Person::where('name', 'like', "%{$nameHint}%")->first();
+        $person = Person::query()->where('name', 'like', "%{$nameHint}%")->first();
         if (!$person) {
              return $this->emptyContext("Mình chưa tìm thấy {$nameHint} trong dữ liệu RecoDB. Bạn có thể thử tên diễn viên/đạo diễn khác nhé.");
         }
@@ -441,6 +465,244 @@ class AiContextService
         ];
     }
 
+    /** movie.mood – Phim theo tâm trạng (mood → genre mapping) */
+    private function contextMood(?string $mood, array $recentItems = [], ?string $wantsType = null): array
+    {
+        // Lookup genre names from MOOD_GENRE_MAP
+        $genreNames = self::MOOD_GENRE_MAP[$mood] ?? [];
+
+        if (empty($genreNames)) {
+            // Unknown mood → return empty with friendly message, NOT "AI bận"
+            return [
+                'summary'   => 'Không xác định được mood cụ thể',
+                'items'     => [],
+                'reviews'   => [],
+                'genres'    => [],
+                'raw_count' => 0,
+                'mood'      => $mood,
+            ];
+        }
+
+        $movieQuery = Movie::with('genres')
+            ->active()
+            ->select(['poster', 'id', 'slug', 'title', 'synopsis', 'avg_rating', 'view_count', 'age_rating', 'release_date'])
+            ->whereNotNull('poster')
+            ->whereHas('genres', fn($q) => $q->where(function ($sub) use ($genreNames) {
+                foreach ($genreNames as $name) {
+                    $sub->orWhere('genres.name', $name);
+                }
+            }))
+            ->orderByDesc('avg_rating')
+            ->orderByDesc('view_count');
+
+        $tvQuery = TvShow::with('genres')
+            ->active()
+            ->select(['poster', 'id', 'slug', 'title', 'synopsis', 'avg_rating', 'view_count', 'age_rating', 'first_air_date'])
+            ->whereNotNull('poster')
+            ->whereHas('genres', fn($q) => $q->where(function ($sub) use ($genreNames) {
+                foreach ($genreNames as $name) {
+                    $sub->orWhere('genres.name', $name);
+                }
+            }))
+            ->orderByDesc('avg_rating')
+            ->orderByDesc('view_count');
+
+        // 1. Fetch a large pool of items to score
+        $all = $this->queryWithPoolAndDiversity($movieQuery, $tvQuery, 20, $recentItems, $wantsType);
+        
+        // 2. Score each item
+        $scoredItems = [];
+        foreach ($all as $item) {
+            $score = $this->scoreMoodFit($item, $mood);
+            if ($score >= 2) {
+                $item->mood_score = $score;
+                $item->mood_reason = $this->buildMoodReason($item, $mood);
+                $scoredItems[] = $item;
+            }
+        }
+
+        // 3. Sort by score desc, then rating/views
+        usort($scoredItems, function($a, $b) {
+            if ($a->mood_score !== $b->mood_score) {
+                return $b->mood_score <=> $a->mood_score; // desc
+            }
+            if ($a->avg_rating !== $b->avg_rating) {
+                return $b->avg_rating <=> $a->avg_rating; // desc
+            }
+            return $b->view_count <=> $a->view_count; // desc
+        });
+
+        // 4. Take top 3
+        $topItems = array_slice($scoredItems, 0, 3);
+        $items = $this->formatItems(collect($topItems), 'movie');
+
+        // Append the reason to the formatted items
+        foreach ($items as $k => $formattedItem) {
+            $items[$k]['mood_reason'] = $topItems[$k]->mood_reason;
+        }
+
+        return [
+            'summary'   => 'Phim theo tâm trạng: ' . ($mood ?? 'chung'),
+            'items'     => $items,
+            'reviews'   => [],
+            'genres'    => $genreNames,
+            'raw_count' => count($items),
+            'mood'      => $mood,
+        ];
+    }
+
+    /**
+     * Score how well an item fits the mood.
+     */
+    private function scoreMoodFit(\Illuminate\Database\Eloquent\Model $item, string $mood): int
+    {
+        $score = 0;
+        $genreNames = $item->genres->pluck('name')->map(fn($n) => mb_strtolower($n))->toArray();
+        $synopsis = mb_strtolower($item->synopsis ?? '');
+        $title = mb_strtolower($item->title ?? '');
+
+        $hasGenre = function(array $keywords) use ($genreNames) {
+            foreach ($keywords as $kw) {
+                if (in_array(mb_strtolower($kw), $genreNames)) return true;
+            }
+            return false;
+        };
+
+        $containsAny = function(string $text, array $keywords) {
+            foreach ($keywords as $kw) {
+                if (str_contains($text, mb_strtolower($kw))) return true;
+            }
+            return false;
+        };
+
+        if (in_array($mood, ['buon', 'cam_dong', 'khoc'])) {
+            if ($hasGenre(['Phim Chính Kịch', 'Phim Lãng Mạn', 'Drama', 'Romance'])) $score += 2;
+            if ($containsAny($synopsis, ['mất mát', 'chia ly', 'hy vọng', 'ký ức', 'gia đình', 'tình yêu', 'đau thương', 'trưởng thành', 'cảm xúc', 'số phận'])) $score += 1;
+            
+            // Penalize pure action/comedy
+            if ($hasGenre(['Phim Hài', 'Phim Hành Động', 'Sci-Fi & Fantasy', 'Action & Adventure', 'Phim Hoạt Hình']) && !$hasGenre(['Phim Chính Kịch', 'Phim Lãng Mạn', 'Drama', 'Romance'])) {
+                $score -= 2;
+            }
+        } elseif (in_array($mood, ['vui', 'hai', 'giai_toa'])) {
+            if ($hasGenre(['Phim Hài', 'Hài Hước', 'Comedy', 'Phim Hoạt Hình', 'Animation', 'Phim Gia Đình', 'Family'])) $score += 2;
+            
+            // Penalize heavy genres
+            if ($hasGenre(['Phim Chính Kịch', 'Phim Hình Sự', 'Phim Bí Ẩn', 'Phim Gây Cấn']) && !$hasGenre(['Phim Hài', 'Comedy'])) {
+                $score -= 2;
+            }
+        } elseif (in_array($mood, ['cang_nao', 'kich_tinh'])) {
+            if ($hasGenre(['Phim Gây Cấn', 'Phim Bí Ẩn', 'Phim Hình Sự', 'Phim Khoa Học Viễn Tưởng', 'Thriller', 'Mystery', 'Crime', 'Sci-Fi'])) $score += 2;
+        } elseif (in_array($mood, ['nhe_nhang', 'chua_lanh', 'am_ap', 'chill'])) {
+            if ($hasGenre(['Phim Hài', 'Phim Gia Đình', 'Phim Hoạt Hình', 'Phim Lãng Mạn', 'Comedy', 'Family', 'Animation', 'Romance'])) $score += 2;
+            if ($hasGenre(['Phim Chính Kịch', 'Drama'])) $score += 1; // Light drama
+        } else {
+            $score = 2; // Default pass for unknown moods mapped to genres
+        }
+
+        return $score;
+    }
+
+    /**
+     * Build an empathetic reason for why this movie fits the mood.
+     */
+    private function buildMoodReason(\Illuminate\Database\Eloquent\Model $item, string $mood): string
+    {
+        $genreNames = $item->genres->pluck('name')->map(fn($n) => mb_strtolower($n))->toArray();
+        $hasGenre = function(array $keywords) use ($genreNames) {
+            foreach ($keywords as $kw) {
+                if (in_array(mb_strtolower($kw), $genreNames)) return true;
+            }
+            return false;
+        };
+
+        if (in_array($mood, ['buon', 'cam_dong', 'khoc'])) {
+            if ($hasGenre(['Phim Chính Kịch', 'Phim Lãng Mạn', 'Drama', 'Romance'])) {
+                return "Phù hợp với mood buồn vì phim nghiêng về chính kịch/lãng mạn, dễ tạo cảm giác lắng và nhiều suy ngẫm.";
+            }
+            return "Phù hợp nếu bạn muốn một câu chuyện lắng, nhiều cảm xúc và có dư âm sau khi xem.";
+        }
+        
+        if (in_array($mood, ['vui', 'hai', 'giai_toa'])) {
+            return "Phù hợp nếu bạn muốn xem gì đó nhẹ đầu, vui vẻ và dễ giải tỏa sau một ngày mệt.";
+        }
+        
+        if (in_array($mood, ['cang_nao', 'kich_tinh'])) {
+            return "Phù hợp nếu bạn muốn một câu chuyện nhiều bí ẩn, nhịp căng và có cảm giác phải suy luận theo từng lớp.";
+        }
+        
+        if (in_array($mood, ['nhe_nhang', 'chua_lanh', 'am_ap', 'chill'])) {
+            return "Phù hợp nếu bạn muốn một bộ phim ấm hơn, dễ xem và không quá nặng nề.";
+        }
+
+        // Fallback reason
+        return "Phim này có không khí và thể loại khá hợp với tâm trạng bạn đang tìm kiếm.";
+    }
+
+    /**
+     * Format items specifically for movie.mood using plain text (no markdown, no bold)
+     */
+    public function formatMoodItemsResponse(array $context, string $intro): string
+    {
+        $lines = [];
+        $lines[] = $intro;
+
+        if (!empty($context['items'])) {
+            foreach ($context['items'] as $item) {
+                $title  = $item['title'];
+                $type   = str_contains($item['id'] ?? '', 'tv_') ? 'Phim bộ' : 'Phim lẻ';
+                $genres = $item['genres'] ?? 'Không rõ';
+                $reason = $item['mood_reason'] ?? 'Phù hợp với tâm trạng của bạn.';
+
+                $lines[] = "🎬 $title";
+                $lines[] = "Loại: $type";
+                $lines[] = "Thể loại: $genres";
+                $lines[] = "Lý do: $reason";
+                $lines[] = "";
+            }
+            
+            $lines[] = "Bạn có thể bấm vào thẻ phim bên dưới để xem chi tiết.";
+        }
+
+        return implode("\n", $lines);
+    }
+
+    /** adult.movie_request - Phim có rating 18+, R, NC-17, TV-MA */
+    private function contextAdultMovies(array $recentItems = [], ?string $wantsType = null): array
+    {
+        $adultRatings = ['18+', 'R', 'NC-17', 'TV-MA'];
+
+        $movieQuery = Movie::with('genres')
+            ->active()
+            ->select(['poster', 'id', 'slug', 'title', 'synopsis', 'avg_rating', 'view_count', 'age_rating', 'release_date'])
+            ->whereNotNull('poster')
+            ->whereIn('age_rating', $adultRatings)
+            ->orderByDesc('avg_rating')
+            ->orderByDesc('view_count');
+
+        $tvQuery = TvShow::with('genres')
+            ->active()
+            ->select(['poster', 'id', 'slug', 'title', 'synopsis', 'avg_rating', 'view_count', 'age_rating', 'first_air_date'])
+            ->whereNotNull('poster')
+            ->whereIn('age_rating', $adultRatings)
+            ->orderByDesc('avg_rating')
+            ->orderByDesc('view_count');
+
+        // Lấy pool để lọc đa dạng
+        $all = $this->queryWithPoolAndDiversity($movieQuery, $tvQuery, $this->maxItems, $recentItems, $wantsType);
+
+        // Chuyển collection sang array và shuffle nhẹ rồi lấy 3 phim đầu tiên
+        $randomized = $all->shuffle()->take(3);
+        $items = $this->formatItems($randomized, 'movie');
+
+        return [
+            'summary'   => 'Gợi ý phim 18+ (Dành cho người trưởng thành)',
+            'items'     => $items,
+            'reviews'   => [],
+            'genres'    => [],
+            'raw_count' => count($items),
+        ];
+    }
+
     /** site.help – Không cần DB; trả hướng dẫn website cố định */
     private function contextSiteHelp(): array
     {
@@ -504,7 +766,7 @@ class AiContextService
         return $this->queryWithPoolAndDiversity($movieQuery, $tvQuery, $limit, $recentItems, $wantsType);
     }
 
-    private function queryWithPoolAndDiversity($movieQuery, $tvQuery, int $limit, array $recentItems, ?string $wantsType): \Illuminate\Support\Collection
+    private function queryWithPoolAndDiversity(?\Illuminate\Database\Eloquent\Builder $movieQuery, ?\Illuminate\Database\Eloquent\Builder $tvQuery, int $limit, array $recentItems, ?string $wantsType): \Illuminate\Support\Collection
     {
         $poolSize = config('ai_assistant.recommendation_pool', 40);
         $half = (int) ceil($poolSize / 2);

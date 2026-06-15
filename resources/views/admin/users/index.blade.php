@@ -1,4 +1,4 @@
-<x-admin-layout title="Người dùng" pageTitle="Quản lý thành viên">
+﻿<x-superadmin-layout title="Người dùng" pageTitle="Quản lý thành viên">
 
     {{-- ── Filters ───────────────────────────────────────────────── --}}
     <div class="mb-6">
@@ -116,4 +116,4 @@
         {{ $users->links() }}
     </div>
 
-</x-admin-layout>
+</x-superadmin-layout>

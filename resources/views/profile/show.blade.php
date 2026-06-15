@@ -818,27 +818,30 @@
                             </div>
                         </div>
 
-                        @if ($user->favorites->isEmpty())
-                            <div class="empty-state">
-                                <div class="empty-icon-wrap">
-                                    <svg class="empty-icon" fill="none" stroke="currentColor" stroke-width="1.5"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                                    </svg>
-                                </div>
-                                <p class="text-slate-500 text-xs">Chưa có phim yêu thích nào.</p>
+                        @if ($recentFavorites->isEmpty())
+                            <div class="py-12 text-center bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+                                <svg class="w-12 h-12 text-slate-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                </svg>
+                                <p class="text-slate-500 text-sm">Chưa có tác phẩm yêu thích</p>
                             </div>
                         @else
                             <div class="grid grid-cols-3 gap-3">
-                                @foreach ($user->favorites as $favMovie)
-                                    <a href="{{ route('movies.show', $favMovie) }}"
-                                        class="block relative rounded-md overflow-hidden border border-[e2e8f0] shadow-sm"
-                                        style="aspect-ratio: 2/3;">
-                                        <img src="{{ $favMovie->poster }}" alt="{{ $favMovie->title }}"
-                                            class="w-full h-full object-cover transition-opacity duration-300 hover:opacity-80"
-                                            loading="lazy">
-                                    </a>
+                                @foreach ($recentFavorites as $favorite)
+                                    @php
+                                        $item = $favorite->movie_id ? $favorite->movie : $favorite->tvShow;
+                                        $route = $favorite->movie_id ? route('movies.show', $item) : route('tv-shows.show', $item);
+                                        $title = $item->title;
+                                    @endphp
+                                    @if($item)
+                                        <a href="{{ $route }}"
+                                            class="block relative rounded-md overflow-hidden border border-[e2e8f0] shadow-sm"
+                                            style="aspect-ratio: 2/3;">
+                                            <img src="{{ $item->poster }}" alt="{{ $title }}"
+                                                class="w-full h-full object-cover transition-opacity duration-300 hover:opacity-80"
+                                                loading="lazy">
+                                        </a>
+                                    @endif
                                 @endforeach
                             </div>
                         @endif

@@ -1,4 +1,4 @@
-<x-superadmin-layout :pageTitle="isset($user) ? 'Sửa tài khoản nhân viên' : 'Tạo tài khoản nhân viên'">
+﻿<x-superadmin-layout :pageTitle="isset($user) ? 'Sửa tài khoản nhân viên' : 'Tạo tài khoản nhân viên'">
     <div x-data="{
         showModal: false,
         modalTitle: '',
