@@ -113,38 +113,124 @@ class RecommendationService
         });
     }
 
-    /**
-     * Lấy các id thể loại user quan tâm nhất dựa trên lịch sử xem.
-     */
     public function getFavoriteGenreIds(User $user): array
     {
-        // Lấy các record view history
-        $views = ViewHistory::with('viewable.genres')
-            ->where('user_id', $user->id)
-            ->get();
+        $genreScores = [];
 
-        $genreCounts = [];
-
-        foreach ($views as $view) {
-            $item = $view->viewable;
-            if ($item && $item->relationLoaded('genres')) {
-                foreach ($item->genres as $genre) {
-                    if (!isset($genreCounts[$genre->id])) {
-                        $genreCounts[$genre->id] = 0;
-                    }
-                    $genreCounts[$genre->id]++;
+        $addScore = function ($genres, float $points) use (&$genreScores) {
+            if (!$genres) return;
+            foreach ($genres as $genre) {
+                if (!isset($genreScores[$genre->id])) {
+                    $genreScores[$genre->id] = 0.0;
                 }
+                $genreScores[$genre->id] += $points;
+            }
+        };
+
+        // 1. Tương tác (Interactions) - 50% trọng số (5.0 điểm)
+        // 1.1. Favorites
+        $favMovies = $user->favorites()->with('genres')->get();
+        foreach ($favMovies as $movie) {
+            $addScore($movie->genres, 5.0);
+        }
+        $favTvShows = $user->tvShowFavorites()->with('genres')->get();
+        foreach ($favTvShows as $tvShow) {
+            $addScore($tvShow->genres, 5.0);
+        }
+
+        // 1.2. Watchlists
+        $wlMovies = $user->watchlists()->with('genres')->get();
+        foreach ($wlMovies as $movie) {
+            $addScore($movie->genres, 5.0);
+        }
+        $wlTvShows = $user->tvShowWatchlists()->with('genres')->get();
+        foreach ($wlTvShows as $tvShow) {
+            $addScore($tvShow->genres, 5.0);
+        }
+
+        // 1.3. Reviews
+        $reviews = $user->reviews()->with(['movie.genres', 'tvShow.genres'])->get();
+        foreach ($reviews as $review) {
+            // Không tính điểm cho review có rating thấp (<= 4) vì user có thể không thích
+            if ($review->rating !== null && $review->rating <= 4) {
+                continue;
+            }
+            if ($review->movie_id && $review->movie) {
+                $addScore($review->movie->genres, 5.0);
+            }
+            if ($review->tv_show_id && $review->tvShow) {
+                $addScore($review->tvShow->genres, 5.0);
             }
         }
 
-        if (empty($genreCounts)) {
+        // 2. Lịch sử xem (View History) - 30% trọng số (3.0 điểm)
+        $views = ViewHistory::with('viewable.genres')
+            ->where('user_id', $user->id)
+            ->orderByDesc('viewed_at')
+            ->limit(50) // Lấy 50 lượt xem gần nhất
+            ->get();
+            
+        foreach ($views as $view) {
+            $item = $view->viewable;
+            if ($item && $item->relationLoaded('genres')) {
+                $addScore($item->genres, 3.0);
+            }
+        }
+
+        // 3. Lịch sử tìm kiếm (Search History) - 20% trọng số (2.0 điểm)
+        $searches = \App\Models\SearchHistory::where('user_id', $user->id)
+            ->orderByDesc('searched_at')
+            ->limit(20)
+            ->pluck('keyword')
+            ->unique()
+            ->values();
+
+        foreach ($searches as $keyword) {
+            $keyword = trim(mb_strtolower($keyword, 'UTF-8'));
+            // Bỏ qua keyword quá ngắn
+            if (mb_strlen($keyword, 'UTF-8') < 3) {
+                continue;
+            }
+
+            // Tìm phim/tv show khớp keyword (ưu tiên match title/original_title, lấy tối đa 2 kết quả đầu)
+            $movies = Movie::with('genres')
+                ->active()
+                ->where(function($q) use ($keyword) {
+                    $q->where('title', 'like', "%{$keyword}%")
+                      ->orWhere('original_title', 'like', "%{$keyword}%");
+                })
+                ->orderByDesc('view_count')
+                ->limit(2)
+                ->get();
+                
+            foreach ($movies as $movie) {
+                $addScore($movie->genres, 2.0);
+            }
+
+            $tvs = TvShow::with('genres')
+                ->active()
+                ->where(function($q) use ($keyword) {
+                    $q->where('title', 'like', "%{$keyword}%")
+                      ->orWhere('original_title', 'like', "%{$keyword}%");
+                })
+                ->orderByDesc('view_count')
+                ->limit(2)
+                ->get();
+                
+            foreach ($tvs as $tv) {
+                $addScore($tv->genres, 2.0);
+            }
+        }
+
+        if (empty($genreScores)) {
             return [];
         }
 
-        arsort($genreCounts);
+        // Sắp xếp giảm dần theo điểm số
+        arsort($genreScores);
 
         // Trả về top 3 thể loại
-        return array_slice(array_keys($genreCounts), 0, 3);
+        return array_slice(array_keys($genreScores), 0, 3);
     }
 
     /**
