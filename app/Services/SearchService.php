@@ -360,6 +360,13 @@ class SearchService
             $variants[] = mb_substr($keyword, 0, -1); // truncate 1 ký tự
         }
 
+        // Lấy chuỗi ngắn hơn để bắt lỗi gõ sai/thiếu chữ ở giữa hoặc cuối từ
+        // VD: interstelar -> interstel (khớp với LIKE %interstel% của interstellar)
+        if (mb_strlen($keyword) >= 6) {
+            $variants[] = mb_substr($keyword, 0, -2);
+            $variants[] = mb_substr($keyword, 0, 5); 
+        }
+
         // Bỏ duplicate và trả về
         return array_unique(array_filter($variants, fn($v) => $v !== $keyword && mb_strlen($v) >= 2));
     }
