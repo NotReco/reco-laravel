@@ -1,6 +1,6 @@
 <div x-data="{ open: false }" 
      @ai-opened.window="open = false"
-     class="fixed bottom-24 right-4 md:bottom-24 md:right-6 z-[9980]">
+     class="hidden md:block fixed bottom-24 right-4 md:bottom-24 md:right-6 z-[9980]">
     {{-- Panel --}}
     <div x-show="open" 
          x-transition:enter="transition ease-out duration-200"

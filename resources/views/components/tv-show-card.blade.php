@@ -3,11 +3,30 @@
 
 @props(['tvShow', 'rank' => null, 'showGenre' => false, 'hideOriginalTitle' => false])
 
+@php
+    $isAdult = \App\Helpers\AgeRatingHelper::isAdult($tvShow->age_rating, $tvShow->adult ?? false);
+    $tvShowUrl = route('tv-shows.show', $tvShow);
+@endphp
+
 <div {{ $attributes->merge(['class' => 'group block relative']) }} x-data="{
     open: false,
+    isAdult: {{ $isAdult ? 'true' : 'false' }},
     inWatchlist: {{ auth()->check() && auth()->user()->tvShowWatchlists()->where('tv_shows.id', $tvShow->id)->exists() ? 'true' : 'false' }},
     watchlistStatus: '{{ auth()->check() ? auth()->user()->tvShowWatchlists()->where('tv_shows.id', $tvShow->id)->value('watchlists.status') ?? '' : '' }}',
     isFavorited: {{ auth()->check() && auth()->user()->tvShowFavorites()->where('tv_shows.id', $tvShow->id)->exists() ? 'true' : 'false' }},
+
+    handleCardClick(url, event) {
+        if (!this.isAdult) return;
+        if (localStorage.getItem('reco_age_confirmed') === 'true') return;
+        event.preventDefault();
+        window.dispatchEvent(new CustomEvent('open-age-modal', {
+            detail: {
+                targetUrl: url,
+                onConfirm: null,
+                onCancel: null
+            }
+        }));
+    },
 
     toggle() {
         if (this.open) {
@@ -57,8 +76,9 @@ try {
     @contextmenu.window="open = false">
     {{-- Poster wrapper --}}
     <div class="relative aspect-[2/3] rounded-xl overflow-hidden bg-gray-100 shadow-sm">
-        {{-- Link to tvShow --}}
-        <a href="{{ route('tv-shows.show', $tvShow) }}" class="absolute inset-0 z-0">
+        {{-- Link to tvShow (with 18+ intercept) --}}
+        <a href="{{ $tvShowUrl }}" class="absolute inset-0 z-0"
+            @click="handleCardClick('{{ $tvShowUrl }}', $event)">
             @if ($tvShow->poster)
                 <img src="{{ $tvShow->poster }}" alt="{{ $tvShow->title }}"
                     class="w-full h-full object-cover transition-all duration-300 bg-gray-200" loading="lazy">
@@ -237,7 +257,7 @@ try {
     @endif
 
     {{-- Title & Meta --}}
-    <a href="{{ route('tv-shows.show', $tvShow) }}" class="block mt-2">
+    <a href="{{ $tvShowUrl }}" class="block mt-2" @click="handleCardClick('{{ $tvShowUrl }}', $event)">
         <h3 class="text-sm font-bold text-gray-900 group-hover:text-sky-600 transition-colors font-heading line-clamp-2">
             {{ $tvShow->title }}
             @if (!isset($hideOriginalTitle) || !$hideOriginalTitle)

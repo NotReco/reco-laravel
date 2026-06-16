@@ -15,7 +15,8 @@
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
     <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('web-app-manifest-192x192.png') }}">
     <link rel="icon" type="image/png" sizes="512x512" href="{{ asset('web-app-manifest-512x512.png') }}">
-    <link rel="manifest" href="{{ asset('site.webmanifest') }}">
+    {{-- Manifest disabled: no auto PWA install prompt needed --}}
+    {{-- <link rel="manifest" href="{{ asset('site.webmanifest') }}"> --}}
     <meta property="og:image" content="https://i.ibb.co/ynjxvNhx/logo-dark.jpg">
 
     {{-- Google Fonts --}}

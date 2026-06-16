@@ -3,11 +3,30 @@
 
 @props(['movie', 'rank' => null, 'showGenre' => false, 'hideOriginalTitle' => false])
 
+@php
+    $isAdult = \App\Helpers\AgeRatingHelper::isAdult($movie->age_rating, $movie->adult ?? false);
+    $movieUrl = route('movies.show', $movie);
+@endphp
+
 <div {{ $attributes->merge(['class' => 'group block relative']) }} x-data="{
     open: false,
+    isAdult: {{ $isAdult ? 'true' : 'false' }},
     inWatchlist: {{ auth()->check() && auth()->user()->watchlists()->where('movies.id', $movie->id)->exists() ? 'true' : 'false' }},
     watchlistStatus: '{{ auth()->check() ? auth()->user()->watchlists()->where('movies.id', $movie->id)->value('watchlists.status') ?? '' : '' }}',
     isFavorited: {{ auth()->check() && auth()->user()->favorites()->where('movies.id', $movie->id)->exists() ? 'true' : 'false' }},
+
+    handleCardClick(url, event) {
+        if (!this.isAdult) return; // normal link — don't intercept
+        if (localStorage.getItem('reco_age_confirmed') === 'true') return; // already confirmed
+        event.preventDefault();
+        window.dispatchEvent(new CustomEvent('open-age-modal', {
+            detail: {
+                targetUrl: url,
+                onConfirm: null,
+                onCancel: null
+            }
+        }));
+    },
 
     toggle() {
         if (this.open) {
@@ -57,8 +76,9 @@ try {
     @contextmenu.window="open = false">
     {{-- Poster wrapper --}}
     <div class="relative aspect-[2/3] rounded-xl overflow-hidden bg-gray-100 shadow-sm">
-        {{-- Link to movie --}}
-        <a href="{{ route('movies.show', $movie) }}" class="absolute inset-0 z-0">
+        {{-- Link to movie (with 18+ intercept) --}}
+        <a href="{{ $movieUrl }}" class="absolute inset-0 z-0"
+            @click="handleCardClick('{{ $movieUrl }}', $event)">
             @if ($movie->poster)
                 <img src="{{ $movie->poster }}" alt="{{ $movie->title }}"
                     class="w-full h-full object-cover transition-all duration-300 bg-gray-200" loading="lazy">
@@ -237,7 +257,7 @@ try {
     @endif
 
     {{-- Title & Meta --}}
-    <a href="{{ route('movies.show', $movie) }}" class="block mt-2">
+    <a href="{{ $movieUrl }}" class="block mt-2" @click="handleCardClick('{{ $movieUrl }}', $event)">
         <h3 class="text-sm font-bold text-gray-900 group-hover:text-sky-600 transition-colors font-heading line-clamp-2">
             {{ $movie->title }}
             @if (!isset($hideOriginalTitle) || !$hideOriginalTitle)

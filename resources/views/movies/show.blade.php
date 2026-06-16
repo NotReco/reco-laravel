@@ -6,40 +6,40 @@
         {{-- ══════════════════════════════════════════════════ --}}
         {{-- HERO: Backdrop + Gradient to white                 --}}
         {{-- ══════════════════════════════════════════════════ --}}
-        <div class="relative -mt-16 overflow-hidden" style="height: 520px;">
+        <div class="relative -mt-16 overflow-hidden h-[280px] md:h-[460px] lg:h-[500px]">
             {{-- Backdrop Image --}}
             @if ($movie->backdrop)
                 <img src="{{ $movie->backdrop }}" alt="{{ $movie->title }}"
-                    class="absolute inset-0 w-full h-full object-cover object-center">
+                    class="absolute inset-0 w-full h-full object-cover object-center opacity-80 md:opacity-100">
             @else
                 <div class="absolute inset-0 bg-gradient-to-br from-gray-800 via-gray-900 to-gray-950"></div>
             @endif
 
             {{-- Dark overlay for contrast --}}
-            <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-black/30"></div>
+            <div class="absolute inset-0 bg-slate-950/30 md:bg-gradient-to-t md:from-slate-950/80 md:via-slate-950/40 md:to-transparent"></div>
 
-            {{-- Fade to white at the bottom --}}
-            <div class="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-white to-transparent"></div>
+            {{-- Bottom dark gradient (Mobile) --}}
+            <div class="absolute inset-x-0 bottom-0 h-[150px] bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/80 to-transparent md:hidden"></div>
         </div>
 
         {{-- ══════════════════════════════════════════════════ --}}
-        {{-- CONTENT AREA: Light themed                        --}}
+        {{-- CONTENT AREA: Bottom Sheet on Mobile              --}}
         {{-- ══════════════════════════════════════════════════ --}}
-        <div class="bg-white">
+        <div class="bg-white relative z-20 -mt-12 md:mt-0 rounded-t-[2rem] md:rounded-none pt-8 md:pt-12 shadow-[0_-10px_40px_rgba(0,0,0,0.15)] md:shadow-none pb-12">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
                 {{-- ── MOVIE INFO BLOCK ── --}}
-                <div class="flex flex-col md:flex-row gap-8 -mt-52 mb-10">
+                <div class="flex flex-col md:flex-row gap-6 md:gap-10 mb-6 md:mb-10">
 
                     {{-- Poster --}}
-                    <div class="shrink-0 w-40 md:w-56 mx-auto md:mx-0 relative z-10">
+                    <div class="shrink-0 w-36 md:w-64 lg:w-72 mx-auto md:mx-0 relative z-30 -mt-28 md:-mt-48 lg:-mt-64">
                         @if ($movie->poster)
-                            <div class="rounded-2xl overflow-hidden shadow-2xl ring-4 ring-white">
+                            <div class="rounded-2xl overflow-hidden shadow-xl ring-4 ring-white md:ring-0">
                                 <img src="{{ $movie->poster }}" alt="{{ $movie->title }}" class="w-full block">
                             </div>
                         @else
                             <div
-                                class="w-full aspect-[2/3] rounded-2xl bg-gray-200 flex items-center justify-center shadow-2xl ring-4 ring-white">
+                                class="w-full aspect-[2/3] rounded-2xl bg-gray-200 flex items-center justify-center shadow-xl ring-4 ring-white md:ring-0">
                                 <svg class="w-14 h-14 text-gray-400" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
@@ -50,83 +50,100 @@
                     </div>
 
                     {{-- Details --}}
-                    <div class="flex-1 pt-4 md:pt-6 relative z-10">
+                    <div class="flex-1 text-center md:text-left relative z-10">
 
-                        {{-- Title (white while still over hero gradient) --}}
-                        <div class="mb-3">
-                            <h1 class="text-3xl lg:text-4xl font-display font-bold text-white drop-shadow-lg">
-                                {{ $movie->title }}</h1>
-                            @if ($movie->original_title && $movie->original_title !== $movie->title)
-                                <p class="text-gray-300 text-sm italic mt-1 drop-shadow">{{ $movie->original_title }}
-                                </p>
-                            @endif
-                        </div>
+                        {{-- Top Section (Inside White Card on Mobile / White Background on Desktop) --}}
+                        <div class="flex flex-col md:max-w-3xl">
 
-                        @if ($movie->tagline)
-                            <p class="text-sky-300 font-medium italic text-base mb-4 drop-shadow">
-                                "{{ $movie->tagline }}"</p>
-                        @endif
-
-                        {{-- Meta Info --}}
-                        <div class="flex items-center flex-wrap gap-3 text-sm mb-4">
-                            @if ($movie->release_date)
-                                <span
-                                    class="flex items-center gap-1.5 bg-black/30 backdrop-blur-sm text-white px-3 py-1.5 rounded-full border border-white/20">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
-                                    {{ \Carbon\Carbon::parse($movie->release_date)->format('d/m/Y') }}
-                                </span>
-                            @endif
-                            @if ($movie->runtime)
-                                @php
-                                    $h = intdiv($movie->runtime, 60);
-                                    $m = $movie->runtime % 60;
-                                @endphp
-                                <span
-                                    class="flex items-center gap-1.5 bg-black/30 backdrop-blur-sm text-white px-3 py-1.5 rounded-full border border-white/20">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    {{ $h > 0 ? $h . ' tiếng ' : '' }}{{ $m > 0 ? $m . ' phút' : '' }}
-                                </span>
-                            @endif
-                            @if ($movie->country)
-                                <span
-                                    class="flex items-center gap-1.5 bg-black/30 backdrop-blur-sm text-white px-3 py-1.5 rounded-full border border-white/20">
-                                    🌍 {{ $countryName }}
-                                </span>
-                            @endif
-                            @if ($movie->age_rating)
-                                @php
-                                    $normalizedAge = \App\Helpers\AgeRatingHelper::normalize($movie->age_rating, $movie->adult ?? false);
-                                @endphp
-                                @if ($normalizedAge['badge'])
-                                <div class="relative group/tooltip">
-                                    <span class="flex items-center gap-1.5 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/20 font-bold uppercase tracking-wider cursor-help {{ $normalizedAge['colorClass'] }}">
-                                        {{ $normalizedAge['badge'] }}
-                                    </span>
-                                    <div class="absolute left-0 top-full mt-2 hidden group-hover/tooltip:block w-max max-w-[200px] p-2 bg-gray-900 text-white text-xs rounded shadow-lg z-50 whitespace-normal leading-relaxed pointer-events-none">
-                                        {{ $normalizedAge['description'] }}
-                                    </div>
-                                </div>
+                            {{-- Title --}}
+                            <div class="mb-2 md:mb-3">
+                                <h1 class="text-3xl lg:text-4xl font-display font-bold text-gray-900 tracking-tight">
+                                    {{ $movie->title }}</h1>
+                                @if ($movie->original_title && $movie->original_title !== $movie->title)
+                                    <p class="text-gray-500 text-sm md:text-base italic mt-1">{{ $movie->original_title }}</p>
                                 @endif
-                            @endif
-                        </div>
-
-                        {{-- Genres --}}
-                        @if ($movie->genres->isNotEmpty())
-                            <div class="flex flex-wrap gap-2 mb-6">
-                                @foreach ($movie->genres as $genre)
-                                    <a href="{{ route('explore', ['genre' => $genre->id]) }}"
-                                        class="px-3 py-1 text-sm font-medium bg-sky-50 text-sky-600 border border-sky-200 rounded-full hover:bg-sky-100 transition-colors">
-                                        {{ $genre->name }}
-                                    </a>
-                                @endforeach
                             </div>
-                        @endif
+
+                            @if ($movie->tagline)
+                                <p class="text-sky-600 font-medium italic text-base mb-4">
+                                    "{{ $movie->tagline }}"</p>
+                            @endif
+
+                            {{-- Meta Info --}}
+                            <div class="flex items-center justify-center md:justify-start flex-wrap gap-2 md:gap-3 text-[13px] md:text-sm mb-4 text-gray-600">
+                                @if ($movie->release_date)
+                                    <span class="flex items-center gap-1.5 font-medium">
+                                        <svg class="w-4 h-4 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                        {{ \Carbon\Carbon::parse($movie->release_date)->format('d/m/Y') }}
+                                    </span>
+                                @endif
+
+                                @if ($movie->release_date && $movie->runtime)
+                                    <span class="w-1 h-1 rounded-full bg-gray-300"></span>
+                                @endif
+
+                                @if ($movie->runtime)
+                                    @php
+                                        $h = intdiv($movie->runtime, 60);
+                                        $m = $movie->runtime % 60;
+                                    @endphp
+                                    <span class="flex items-center gap-1.5 font-medium">
+                                        <svg class="w-4 h-4 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        {{ $h > 0 ? $h . ' tiếng ' : '' }}{{ $m > 0 ? $m . ' phút' : '' }}
+                                    </span>
+                                @endif
+
+                                @if ($movie->country && ($movie->release_date || $movie->runtime))
+                                    <span class="w-1 h-1 rounded-full bg-gray-300"></span>
+                                @endif
+
+                                @if ($movie->country)
+                                    <span class="flex items-center gap-1.5 font-medium">
+                                        🌍 {{ $countryName }}
+                                    </span>
+                                @endif
+
+                                @if ($movie->age_rating)
+                                    @php
+                                        $normalizedAge = \App\Helpers\AgeRatingHelper::normalize(
+                                            $movie->age_rating,
+                                            $movie->adult ?? false,
+                                        );
+                                    @endphp
+                                    @if ($normalizedAge['badge'])
+                                        <div class="relative group/tooltip ml-1">
+                                            <span
+                                                class="flex items-center gap-1.5 px-2 py-0.5 rounded border border-gray-200 font-bold uppercase tracking-wider cursor-help {{ $normalizedAge['colorClass'] }} text-[11px] md:text-xs">
+                                                {{ $normalizedAge['badge'] }}
+                                            </span>
+                                            <div
+                                                class="absolute left-1/2 md:left-0 -translate-x-1/2 md:translate-x-0 top-full mt-2 hidden group-hover/tooltip:block w-max max-w-[200px] p-2 bg-gray-900 text-white text-xs rounded shadow-lg z-50 whitespace-normal leading-relaxed pointer-events-none">
+                                                {{ $normalizedAge['description'] }}
+                                            </div>
+                                        </div>
+                                    @endif
+                                @endif
+                            </div>
+
+                            {{-- Genres --}}
+                            @if ($movie->genres->isNotEmpty())
+                                <div class="flex flex-wrap justify-center md:justify-start gap-1.5 md:gap-2 mb-4 md:mb-6">
+                                    @foreach ($movie->genres as $genre)
+                                        <a href="{{ route('explore', ['genre' => $genre->id]) }}"
+                                            class="px-3 py-1 text-xs md:text-sm font-medium bg-gray-100 text-gray-700 border border-gray-200 rounded-full hover:bg-gray-200 transition-colors">
+                                            {{ $genre->name }}
+                                        </a>
+                                    @endforeach
+                                </div>
+                            @endif
+
+                        </div> {{-- End Top Section --}}
 
                         {{-- Rating + Actions --}}
                         @php
@@ -147,7 +164,7 @@
                             $myTone = $myVibe->tone ?? null;
                         @endphp
 
-                        <div class="flex flex-col gap-4" x-data="{
+                        <div class="flex flex-col gap-3.5 md:gap-4" x-data="{
                             topMoods: @js($topMoods),
                             myMood: @js($myMood),
                             isFavorited: {{ auth()->check() && $movie->favoritedBy->contains(auth()->id()) ? 'true' : 'false' }},
@@ -197,7 +214,7 @@
                             @vibes-updated.window="topMoods = [...$event.detail.top_moods]; myMood = $event.detail.mood;">
 
                             {{-- Row 1: Score + Vibe --}}
-                            <div class="flex flex-wrap items-center gap-4">
+                            <div class="flex flex-col md:flex-row md:flex-wrap items-start md:items-center gap-3.5 md:gap-4">
 
                                 {{-- User Score Widget (TMDb-style) --}}
                                 @php
@@ -405,7 +422,7 @@
                                 </div>
 
                                 {{-- Top Emojis & Vibe Trigger --}}
-                                <div class="flex items-center gap-4 ml-[15px]">
+                                <div class="flex items-center gap-4 md:ml-[15px]">
                                     {{-- Overlapping Top Emojis --}}
                                     <div class="flex items-center -space-x-3" x-show="topMoods && topMoods.length > 0"
                                         x-cloak>
@@ -443,14 +460,15 @@
                             </div> {{-- End Row 1 --}}
 
                             {{-- Row 2: Actions --}}
-                            <div class="flex flex-wrap items-center gap-4">
+                            <div class="flex flex-row flex-wrap items-center gap-2.5 md:gap-4">
 
                                 {{-- Actions --}}
                                 @if (!empty($trailerCandidates) || $movie->trailer_url)
-                                    <button @click="$store.trailerModal.open('{{ !empty($trailerCandidates) ? '' : $movie->trailer_url }}', {!! Js::from(!empty($trailerCandidates) ? $trailerCandidates : []) !!})"
+                                    <button
+                                        @click="$store.trailerModal.open('{{ !empty($trailerCandidates) ? '' : $movie->trailer_url }}', {!! Js::from(!empty($trailerCandidates) ? $trailerCandidates : []) !!})"
                                         title="Trailer"
-                                        class="inline-flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-5 py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-sky-600/30">
-                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                        class="inline-flex items-center justify-center gap-1.5 md:gap-2 w-[42px] h-[42px] md:w-auto md:h-auto md:px-5 md:py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-sky-600/30 shrink-0">
+                                        <svg class="w-5 h-5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                             <path fill-rule="evenodd"
                                                 d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
                                                 clip-rule="evenodd" />
@@ -459,10 +477,9 @@
                                     </button>
                                 @endif
 
-                                <a href="#review-form"
-                                    title="Viết review"
-                                    class="inline-flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-5 py-2.5 bg-white hover:bg-gray-50 text-gray-700 font-semibold rounded-xl border border-gray-200 transition-all duration-200 shadow-sm">
-                                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor"
+                                <a href="#review-form" title="Viết review"
+                                    class="inline-flex items-center justify-center gap-1.5 md:gap-2 w-[42px] h-[42px] md:w-auto md:h-auto md:px-5 md:py-2.5 bg-white hover:bg-gray-50 text-gray-700 font-semibold rounded-xl border border-gray-200 transition-all duration-200 shadow-sm shrink-0">
+                                    <svg class="w-5 h-5 text-gray-500 shrink-0" fill="none" stroke="currentColor"
                                         viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -485,10 +502,12 @@
 
                                 {{-- Share Button & Web Popup --}}
                                 <div x-data="{ showSharePopup: false }">
-                                    <button @click="navigator.clipboard.writeText(window.location.href).then(() => { showSharePopup = true; setTimeout(() => showSharePopup = false, 3000); })"
+                                    <button
+                                        @click="navigator.clipboard.writeText(window.location.href).then(() => { showSharePopup = true; setTimeout(() => showSharePopup = false, 3000); })"
                                         title="Chia sẻ"
                                         class="p-2 md:p-2.5 rounded-xl border bg-white border-gray-200 text-gray-500 hover:text-sky-600 hover:border-sky-300 hover:bg-sky-50 transition-all shadow-sm flex items-center justify-center h-[42px] w-[42px] md:h-[46px] md:w-[46px] shrink-0">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
                                         </svg>
@@ -496,7 +515,7 @@
 
                                     {{-- Web Toast Popup --}}
                                     <template x-teleport="body">
-                                        <div x-show="showSharePopup" 
+                                        <div x-show="showSharePopup"
                                             x-transition:enter="transition ease-out duration-300"
                                             x-transition:enter-start="opacity-0 translate-y-4"
                                             x-transition:enter-end="opacity-100 translate-y-0"
@@ -505,12 +524,20 @@
                                             x-transition:leave-end="opacity-0 translate-y-4"
                                             class="fixed bottom-6 right-6 z-[100] flex items-center gap-3 px-5 py-4 bg-gray-900 border border-gray-700/50 rounded-xl shadow-2xl backdrop-blur-sm"
                                             style="display: none;">
-                                            <svg class="w-5 h-5 text-green-400 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                            <svg class="w-5 h-5 text-green-400 shrink-0" fill="currentColor"
+                                                viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd"
+                                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                                    clip-rule="evenodd" />
                                             </svg>
                                             <p class="text-sm font-medium text-white">Đã sao chép liên kết phim lẻ!</p>
-                                            <button @click="showSharePopup = false" class="ml-2 text-gray-400 hover:text-white transition-colors shrink-0">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                            <button @click="showSharePopup = false"
+                                                class="ml-2 text-gray-400 hover:text-white transition-colors shrink-0">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
                                             </button>
                                         </div>
                                     </template>
@@ -539,7 +566,7 @@
                                 @endphp
                                 <div class="relative" x-data="{ open: false }" @click.outside="open = false">
                                     <button @click="open = !open" title="Danh sách theo dõi"
-                                        class="flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-4 py-2.5 rounded-xl border text-sm font-medium transition-all"
+                                        class="flex items-center justify-center gap-1.5 md:gap-2 w-[42px] h-[42px] md:w-auto md:h-auto md:px-4 md:py-2.5 rounded-xl border text-sm font-medium transition-all shrink-0"
                                         :class="{
                                             'bg-sky-50 border-sky-400 text-sky-700': watchlistStatus === 'want_to_watch',
                                             'bg-amber-50 border-amber-400 text-amber-700': watchlistStatus === 'watching',
@@ -556,7 +583,7 @@
                                         </svg>
                                         <span class="hidden sm:inline"
                                             x-text="watchlistStatus === 'want_to_watch' ? 'Muốn xem' : (watchlistStatus === 'watching' ? 'Đang xem' : (watchlistStatus === 'watched' ? 'Đã xem' : (watchlistStatus === 'dropped' ? 'Bỏ dở' : 'Watchlist')))">{{ $wlText }}</span>
-                                        <svg class="w-3.5 h-3.5 opacity-50" fill="none" stroke="currentColor"
+                                        <svg class="w-3.5 h-3.5 opacity-50 hidden md:block" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M19 9l-7 7-7-7" />
@@ -718,15 +745,18 @@
                                                         class="w-full h-full object-cover" loading="lazy">
                                                 @else
                                                     <div class="w-full h-full flex items-center justify-center">
-                                                        <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                                        <svg class="w-10 h-10 text-gray-400" fill="none"
+                                                            stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="1.5"
                                                                 d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                                         </svg>
                                                     </div>
                                                 @endif
                                             </div>
                                             <div class="p-3">
-                                                <p class="text-[15px] font-bold text-gray-900 leading-snug group-hover:text-sky-600 transition-colors">
+                                                <p
+                                                    class="text-[15px] font-bold text-gray-900 leading-snug group-hover:text-sky-600 transition-colors">
                                                     {{ $person->name }}
                                                 </p>
                                                 @if ($person->pivot->character_name)
@@ -759,21 +789,24 @@
                                             <button @click="activeTab = 'videos'"
                                                 :class="{ 'bg-white shadow text-gray-900': activeTab === 'videos', 'text-gray-500 hover:text-gray-700': activeTab !== 'videos' }"
                                                 class="px-3 py-1.5 text-sm font-medium rounded-md transition-all shrink-0">
-                                                Videos <span class="text-xs text-gray-400 ml-1">{{ count($media['videos']) }}</span>
+                                                Videos <span
+                                                    class="text-xs text-gray-400 ml-1">{{ count($media['videos']) }}</span>
                                             </button>
                                         @endif
                                         @if (count($media['backdrops']) > 0)
                                             <button @click="activeTab = 'backdrops'"
                                                 :class="{ 'bg-white shadow text-gray-900': activeTab === 'backdrops', 'text-gray-500 hover:text-gray-700': activeTab !== 'backdrops' }"
                                                 class="px-3 py-1.5 text-sm font-medium rounded-md transition-all shrink-0">
-                                                Backdrops <span class="text-xs text-gray-400 ml-1">{{ count($media['backdrops']) }}</span>
+                                                Backdrops <span
+                                                    class="text-xs text-gray-400 ml-1">{{ count($media['backdrops']) }}</span>
                                             </button>
                                         @endif
                                         @if (count($media['posters']) > 0)
                                             <button @click="activeTab = 'posters'"
                                                 :class="{ 'bg-white shadow text-gray-900': activeTab === 'posters', 'text-gray-500 hover:text-gray-700': activeTab !== 'posters' }"
                                                 class="px-3 py-1.5 text-sm font-medium rounded-md transition-all shrink-0">
-                                                Posters <span class="text-xs text-gray-400 ml-1">{{ count($media['posters']) }}</span>
+                                                Posters <span
+                                                    class="text-xs text-gray-400 ml-1">{{ count($media['posters']) }}</span>
                                             </button>
                                         @endif
                                     </div>
@@ -781,102 +814,119 @@
 
                                 <div class="min-h-[260px]">
                                     {{-- Most Popular --}}
-                                    <div x-show="activeTab === 'popular'" class="flex gap-4 overflow-x-auto pb-4 snap-x -mx-1 px-1">
-                                    {{-- 1 Top Video --}}
-                                    @php
-                                        $topVideo = collect($media['videos'])->firstWhere('site', 'YouTube');
-                                    @endphp
-                                    @if($topVideo)
-                                        <div class="shrink-0 w-72 sm:w-80 snap-start">
-                                            <div class="relative aspect-video rounded-xl overflow-hidden group cursor-pointer shadow-sm border border-gray-100"
-                                                @click="$store.trailerModal.open('https://www.youtube.com/watch?v={{ $topVideo['key'] }}', [])">
-                                                <img src="https://img.youtube.com/vi/{{ $topVideo['key'] }}/mqdefault.jpg"
-                                                    alt="{{ $topVideo['name'] }}"
-                                                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                                                <div class="absolute inset-0 bg-black/20 flex items-center justify-center group-hover:bg-black/30 transition-colors">
-                                                    <div class="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                                                        <svg class="w-5 h-5 text-sky-600 translate-x-0.5" fill="currentColor" viewBox="0 0 20 20">
-                                                            <path d="M4 4l12 6-12 6z" />
-                                                        </svg>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    @endif
-
-                                    {{-- 2 Top Backdrops --}}
-                                    @foreach (array_slice($media['backdrops'], 0, 2) as $image)
-                                        <div class="shrink-0 w-72 sm:w-80 snap-start">
-                                            <div class="aspect-video rounded-xl overflow-hidden shadow-sm border border-gray-100 bg-gray-100">
-                                                <img src="https://image.tmdb.org/t/p/w780{{ $image['file_path'] }}"
-                                                    class="w-full h-full object-cover" loading="lazy">
-                                            </div>
-                                        </div>
-                                    @endforeach
-
-                                    {{-- 2 Top Posters --}}
-                                    @foreach (array_slice($media['posters'], 0, 2) as $image)
-                                        <div class="shrink-0 w-36 sm:w-40 snap-start">
-                                            <div class="aspect-[2/3] rounded-xl overflow-hidden shadow-sm border border-gray-100 bg-gray-100">
-                                                <img src="https://image.tmdb.org/t/p/w342{{ $image['file_path'] }}"
-                                                    class="w-full h-full object-cover" loading="lazy">
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                </div>
-
-                                {{-- Videos --}}
-                                @if (count($media['videos']) > 0)
-                                    <div x-show="activeTab === 'videos'" class="flex gap-4 overflow-x-auto pb-4 snap-x -mx-1 px-1" style="display: none;">
-                                        @foreach ($media['videos'] as $video)
-                                            @if ($video['site'] === 'YouTube')
-                                                <div class="shrink-0 w-72 sm:w-80 snap-start">
-                                                    <div class="relative aspect-video rounded-xl overflow-hidden group cursor-pointer shadow-sm border border-gray-100"
-                                                        @click="$store.trailerModal.open('https://www.youtube.com/watch?v={{ $video['key'] }}', [])">
-                                                        <img src="https://img.youtube.com/vi/{{ $video['key'] }}/mqdefault.jpg"
-                                                            alt="{{ $video['name'] }}"
-                                                            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                                                        <div class="absolute inset-0 bg-black/20 flex items-center justify-center group-hover:bg-black/30 transition-colors">
-                                                            <div class="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                                                                <svg class="w-5 h-5 text-sky-600 translate-x-0.5" fill="currentColor" viewBox="0 0 20 20">
-                                                                    <path d="M4 4l12 6-12 6z" />
-                                                                </svg>
-                                                            </div>
+                                    <div x-show="activeTab === 'popular'"
+                                        class="flex gap-4 overflow-x-auto pb-4 snap-x -mx-1 px-1">
+                                        {{-- 1 Top Video --}}
+                                        @php
+                                            $topVideo = collect($media['videos'])->firstWhere('site', 'YouTube');
+                                        @endphp
+                                        @if ($topVideo)
+                                            <div class="shrink-0 w-72 sm:w-80 snap-start">
+                                                <div class="relative aspect-video rounded-xl overflow-hidden group cursor-pointer shadow-sm border border-gray-100"
+                                                    @click="$store.trailerModal.open('https://www.youtube.com/watch?v={{ $topVideo['key'] }}', [])">
+                                                    <img src="https://img.youtube.com/vi/{{ $topVideo['key'] }}/mqdefault.jpg"
+                                                        alt="{{ $topVideo['name'] }}"
+                                                        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                                                    <div
+                                                        class="absolute inset-0 bg-black/20 flex items-center justify-center group-hover:bg-black/30 transition-colors">
+                                                        <div
+                                                            class="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                                                            <svg class="w-5 h-5 text-sky-600 translate-x-0.5"
+                                                                fill="currentColor" viewBox="0 0 20 20">
+                                                                <path d="M4 4l12 6-12 6z" />
+                                                            </svg>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            @endif
-                                        @endforeach
-                                    </div>
-                                @endif
+                                            </div>
+                                        @endif
 
-                                {{-- Backdrops --}}
-                                @if (count($media['backdrops']) > 0)
-                                    <div x-show="activeTab === 'backdrops'" class="flex gap-4 overflow-x-auto pb-4 snap-x -mx-1 px-1" style="display: none;">
-                                        @foreach (array_slice($media['backdrops'], 0, 20) as $image)
+                                        {{-- 2 Top Backdrops --}}
+                                        @foreach (array_slice($media['backdrops'], 0, 2) as $image)
                                             <div class="shrink-0 w-72 sm:w-80 snap-start">
-                                                <div class="aspect-video rounded-xl overflow-hidden shadow-sm border border-gray-100 bg-gray-100">
+                                                <div
+                                                    class="aspect-video rounded-xl overflow-hidden shadow-sm border border-gray-100 bg-gray-100">
                                                     <img src="https://image.tmdb.org/t/p/w780{{ $image['file_path'] }}"
                                                         class="w-full h-full object-cover" loading="lazy">
                                                 </div>
                                             </div>
                                         @endforeach
-                                    </div>
-                                @endif
 
-                                {{-- Posters --}}
-                                @if (count($media['posters']) > 0)
-                                    <div x-show="activeTab === 'posters'" class="flex gap-4 overflow-x-auto pb-4 snap-x -mx-1 px-1" style="display: none;">
-                                        @foreach (array_slice($media['posters'], 0, 20) as $image)
+                                        {{-- 2 Top Posters --}}
+                                        @foreach (array_slice($media['posters'], 0, 2) as $image)
                                             <div class="shrink-0 w-36 sm:w-40 snap-start">
-                                                <div class="aspect-[2/3] rounded-xl overflow-hidden shadow-sm border border-gray-100 bg-gray-100">
+                                                <div
+                                                    class="aspect-[2/3] rounded-xl overflow-hidden shadow-sm border border-gray-100 bg-gray-100">
                                                     <img src="https://image.tmdb.org/t/p/w342{{ $image['file_path'] }}"
                                                         class="w-full h-full object-cover" loading="lazy">
                                                 </div>
                                             </div>
                                         @endforeach
                                     </div>
-                                @endif
+
+                                    {{-- Videos --}}
+                                    @if (count($media['videos']) > 0)
+                                        <div x-show="activeTab === 'videos'"
+                                            class="flex gap-4 overflow-x-auto pb-4 snap-x -mx-1 px-1"
+                                            style="display: none;">
+                                            @foreach ($media['videos'] as $video)
+                                                @if ($video['site'] === 'YouTube')
+                                                    <div class="shrink-0 w-72 sm:w-80 snap-start">
+                                                        <div class="relative aspect-video rounded-xl overflow-hidden group cursor-pointer shadow-sm border border-gray-100"
+                                                            @click="$store.trailerModal.open('https://www.youtube.com/watch?v={{ $video['key'] }}', [])">
+                                                            <img src="https://img.youtube.com/vi/{{ $video['key'] }}/mqdefault.jpg"
+                                                                alt="{{ $video['name'] }}"
+                                                                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                                                            <div
+                                                                class="absolute inset-0 bg-black/20 flex items-center justify-center group-hover:bg-black/30 transition-colors">
+                                                                <div
+                                                                    class="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                                                                    <svg class="w-5 h-5 text-sky-600 translate-x-0.5"
+                                                                        fill="currentColor" viewBox="0 0 20 20">
+                                                                        <path d="M4 4l12 6-12 6z" />
+                                                                    </svg>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                @endif
+                                            @endforeach
+                                        </div>
+                                    @endif
+
+                                    {{-- Backdrops --}}
+                                    @if (count($media['backdrops']) > 0)
+                                        <div x-show="activeTab === 'backdrops'"
+                                            class="flex gap-4 overflow-x-auto pb-4 snap-x -mx-1 px-1"
+                                            style="display: none;">
+                                            @foreach (array_slice($media['backdrops'], 0, 20) as $image)
+                                                <div class="shrink-0 w-72 sm:w-80 snap-start">
+                                                    <div
+                                                        class="aspect-video rounded-xl overflow-hidden shadow-sm border border-gray-100 bg-gray-100">
+                                                        <img src="https://image.tmdb.org/t/p/w780{{ $image['file_path'] }}"
+                                                            class="w-full h-full object-cover" loading="lazy">
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @endif
+
+                                    {{-- Posters --}}
+                                    @if (count($media['posters']) > 0)
+                                        <div x-show="activeTab === 'posters'"
+                                            class="flex gap-4 overflow-x-auto pb-4 snap-x -mx-1 px-1"
+                                            style="display: none;">
+                                            @foreach (array_slice($media['posters'], 0, 20) as $image)
+                                                <div class="shrink-0 w-36 sm:w-40 snap-start">
+                                                    <div
+                                                        class="aspect-[2/3] rounded-xl overflow-hidden shadow-sm border border-gray-100 bg-gray-100">
+                                                        <img src="https://image.tmdb.org/t/p/w342{{ $image['file_path'] }}"
+                                                            class="w-full h-full object-cover" loading="lazy">
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @endif
                                 </div>
                             </section>
                         @endif
@@ -917,12 +967,14 @@
 
                         {{-- Movie Facts Card (TMDB-style compact) --}}
                         <div class="bg-transparent lg:bg-gray-50 lg:border lg:border-gray-100 rounded-2xl lg:p-5">
-                            <h3 class="hidden lg:block text-sm font-bold text-gray-900 mb-6 uppercase tracking-wider">Thông tin</h3>
+                            <h3 class="hidden lg:block text-sm font-bold text-gray-900 mb-6 uppercase tracking-wider">
+                                Thông tin</h3>
                             <dl class="space-y-5">
                                 @if ($movie->original_title && $movie->original_title !== $movie->title)
                                     <div>
                                         <dt class="text-[15px] font-bold text-gray-900 mb-0.5">Tên gốc</dt>
-                                        <dd class="text-[15px] text-gray-800 font-normal leading-snug">{{ $movie->original_title }}</dd>
+                                        <dd class="text-[15px] text-gray-800 font-normal leading-snug">
+                                            {{ $movie->original_title }}</dd>
                                     </div>
                                 @endif
 
@@ -946,21 +998,24 @@
                                 @if ($movie->language)
                                     <div>
                                         <dt class="text-[15px] font-bold text-gray-900 mb-0.5">Ngôn ngữ gốc</dt>
-                                        <dd class="text-[15px] text-gray-800 font-normal leading-snug">{{ $languageName }}</dd>
+                                        <dd class="text-[15px] text-gray-800 font-normal leading-snug">
+                                            {{ $languageName }}</dd>
                                     </div>
                                 @endif
 
                                 @if ($movie->budget && $movie->budget > 0)
                                     <div>
                                         <dt class="text-[15px] font-bold text-gray-900 mb-0.5">Ngân sách</dt>
-                                        <dd class="text-[15px] text-gray-800 font-normal leading-snug">${{ number_format($movie->budget, 0, ',', '.') }}</dd>
+                                        <dd class="text-[15px] text-gray-800 font-normal leading-snug">
+                                            ${{ number_format($movie->budget, 0, ',', '.') }}</dd>
                                     </div>
                                 @endif
 
                                 @if ($movie->revenue && $movie->revenue > 0)
                                     <div>
                                         <dt class="text-[15px] font-bold text-gray-900 mb-0.5">Doanh thu</dt>
-                                        <dd class="text-[15px] text-gray-800 font-normal leading-snug">${{ number_format($movie->revenue, 0, ',', '.') }}</dd>
+                                        <dd class="text-[15px] text-gray-800 font-normal leading-snug">
+                                            ${{ number_format($movie->revenue, 0, ',', '.') }}</dd>
                                     </div>
                                 @endif
 
@@ -969,7 +1024,8 @@
                                         <dt class="text-[15px] font-bold text-gray-900 mb-2">Từ khóa</dt>
                                         <dd class="flex flex-wrap gap-1.5">
                                             @foreach ($movie->tags as $tag)
-                                                <span class="inline-block px-2.5 py-1 text-[13px] font-normal text-gray-800 bg-gray-200/80 hover:bg-gray-300 rounded-md transition-colors cursor-default">{{ $tag->name }}</span>
+                                                <span
+                                                    class="inline-block px-2.5 py-1 text-[13px] font-normal text-gray-800 bg-gray-200/80 hover:bg-gray-300 rounded-md transition-colors cursor-default">{{ $tag->name }}</span>
                                             @endforeach
                                         </dd>
                                     </div>
@@ -994,32 +1050,33 @@
 </x-app-layout>
 
 @push('scripts')
-<script>
-    document.addEventListener('alpine:init', () => {
-        Alpine.data('movieDetailData', () => ({
-            isAdult: {{ $movie->isAdultRated() ? 'true' : 'false' }},
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('movieDetailData', () => ({
+                isAdult: {{ $movie->isAdultRated() ? 'true' : 'false' }},
 
-            init() {
-                if (this.isAdult && localStorage.getItem('reco_age_confirmed') !== 'true') {
-                    this.$nextTick(() => {
-                        window.dispatchEvent(new CustomEvent('open-age-modal', {
-                            detail: {
-                                onConfirm: () => {},
-                                onCancel: () => {
-                                    if (window.history.length > 1) {
-                                        window.history.back();
-                                    } else {
-                                        window.location.href = '{{ route('explore') }}';
+                init() {
+                    if (this.isAdult && localStorage.getItem('reco_age_confirmed') !== 'true') {
+                        this.$nextTick(() => {
+                            window.dispatchEvent(new CustomEvent('open-age-modal', {
+                                detail: {
+                                    onConfirm: () => {},
+                                    onCancel: () => {
+                                        if (window.history.length > 1) {
+                                            window.history.back();
+                                        } else {
+                                            window.location.href =
+                                                '{{ route('explore') }}';
+                                        }
                                     }
                                 }
-                            }
-                        }));
-                    });
+                            }));
+                        });
+                    }
                 }
-            }
-        }));
-    });
-</script>
+            }));
+        });
+    </script>
 @endpush
 <script>
     function userScore(config) {

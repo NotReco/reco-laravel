@@ -49,11 +49,79 @@ class AiIntentService
     ];
 
     /**
+     * Intents that ALWAYS carry an implicit recommendation intent.
+     * Genre/detail intents require an explicit recommendation keyword.
+     */
+    private const ALWAYS_RECOMMEND_INTENTS = [
+        self::INTENT_RECOMMEND,
+        self::INTENT_SEARCH,
+        self::INTENT_POPULAR,
+        self::INTENT_MOOD,
+        self::INTENT_ADULT_MOVIE_REQUEST,
+    ];
+
+    /**
+     * Explicit recommendation/search keywords (normalized, no diacritics).
+     * Message MUST contain at least one of these to trigger card display
+     * for genre/detail/person intents.
+     */
+    private const RECOMMEND_INTENT_KEYWORDS = [
+        'goi y',       // gợi ý
+        'de xuat',     // đề xuất
+        'cho toi phim',// cho tôi phim
+        'cho minh phim',
+        'tim phim',    // tìm phim
+        'kiem phim',   // kiếm phim
+        'co phim nao', // có phim nào
+        'phim nao',    // phim nào
+        'recommend',
+        'nen xem',     // nên xem
+        'muon xem phim',
+        'phim giong',  // phim giống
+        'co phim',     // có phim
+        'phim gi hay', // phim gì hay
+        'xem phim gi', // xem phim gì
+        'phim hay',    // phim hay
+        'phim nao hay',
+        'muon xem',
+        'tim kiem',
+    ];
+
+    /**
      * Return true when the given intent should trigger local DB recommendation lookup.
+     * For genre/detail/person intents, also requires has_recommend_intent = true.
      */
     public static function isMovieRelatedIntent(string $intent, ?string $wantsType = null): bool
     {
         return in_array($intent, self::MOVIE_INTENTS, true) || !empty($wantsType);
+    }
+
+    /**
+     * Return true if we should actually show movie cards for this classified intent.
+     * Genre/topic-only intents without explicit recommend language should NOT show cards.
+     */
+    public static function shouldShowMovieCards(array $classifyResult): bool
+    {
+        $intent = $classifyResult['intent'] ?? '';
+        $hasRecommendIntent = $classifyResult['has_recommend_intent'] ?? false;
+        $wantsType = $classifyResult['wants_type'] ?? null;
+
+        // Intents that always show cards (user clearly wants recommendations)
+        if (in_array($intent, self::ALWAYS_RECOMMEND_INTENTS, true)) {
+            return true;
+        }
+
+        // For wantsType explicitly set (phim bộ/phim lẻ), needs recommend intent
+        if (!empty($wantsType)) {
+            return $hasRecommendIntent;
+        }
+
+        // Genre/detail/person: only show cards if user explicitly asked for recommendations
+        if (in_array($intent, [self::INTENT_GENRE, self::INTENT_DETAIL, self::INTENT_PERSON], true)) {
+            return $hasRecommendIntent;
+        }
+
+        return in_array($intent, self::MOVIE_INTENTS, true) && $hasRecommendIntent;
     }
 
     // -----------------------------------------------------------------------
@@ -352,6 +420,7 @@ class AiIntentService
                     'keywords'               => [$kw],
                     'is_personalized'        => false,
                     'has_explicit_condition' => false,
+                    'has_recommend_intent'   => false,
                     'wants_type'             => null,
                     'mood'                   => null,
                 ];
@@ -368,6 +437,7 @@ class AiIntentService
                     'keywords'               => [$kw],
                     'is_personalized'        => false,
                     'has_explicit_condition' => false,
+                    'has_recommend_intent'   => true,
                     'wants_type'             => null,
                     'mood'                   => null,
                 ];
@@ -403,6 +473,7 @@ class AiIntentService
                     'keywords'               => [],
                     'is_personalized'        => false,
                     'has_explicit_condition' => false,
+                    'has_recommend_intent'   => false,
                     'wants_type'             => null,
                     'mood'                   => null,
                 ];
@@ -420,6 +491,7 @@ class AiIntentService
                 'keywords'               => [],
                 'is_personalized'        => false,
                 'has_explicit_condition' => false,
+                'has_recommend_intent'   => false,
                 'wants_type'             => null,
                 'mood'                   => null,
             ];
@@ -433,6 +505,7 @@ class AiIntentService
                 'keywords'               => [],
                 'is_personalized'        => false,
                 'has_explicit_condition' => false,
+                'has_recommend_intent'   => false,
                 'wants_type'             => null,
                 'mood'                   => null,
             ];
@@ -447,6 +520,7 @@ class AiIntentService
                 'keywords'               => [$moodResult['matched_keyword']],
                 'is_personalized'        => $isPersonalized,
                 'has_explicit_condition' => true,
+                'has_recommend_intent'   => true, // mood intent already requires a movie signal
                 'wants_type'             => $this->detectWantsType($message),
                 'mood'                   => $moodResult['mood'],
             ];
@@ -472,6 +546,7 @@ class AiIntentService
                 'keywords'               => [],
                 'is_personalized'        => $isPersonalized,
                 'has_explicit_condition' => $hasExplicitCondition,
+                'has_recommend_intent'   => false,
                 'wants_type'             => null,
                 'mood'                   => null,
             ];
@@ -485,6 +560,7 @@ class AiIntentService
                 'keywords'               => array_unique($matched[self::INTENT_SMALLTALK] ?? []),
                 'is_personalized'        => false,
                 'has_explicit_condition' => false,
+                'has_recommend_intent'   => false,
                 'wants_type'             => null,
                 'mood'                   => null,
             ];
@@ -498,6 +574,7 @@ class AiIntentService
                 'keywords'               => array_unique($matched[self::INTENT_IRRELEVANT] ?? []),
                 'is_personalized'        => $isPersonalized,
                 'has_explicit_condition' => $hasExplicitCondition,
+                'has_recommend_intent'   => false,
                 'wants_type'             => null,
                 'mood'                   => null,
             ];
@@ -527,6 +604,7 @@ class AiIntentService
             'keywords'               => array_unique($matched[$topIntent] ?? []),
             'is_personalized'        => $isPersonalized,
             'has_explicit_condition' => $hasExplicitCondition,
+            'has_recommend_intent'   => $this->hasRecommendIntent($normalized),
             'wants_type'             => $this->detectWantsType($message),
             'mood'                   => null,
         ];
@@ -582,6 +660,20 @@ class AiIntentService
 
         foreach ($patterns as $p) {
             if (str_contains($normalized, $p)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Detect if the user explicitly requested movie recommendations/search.
+     * This separates "phim gay" (topic mention) from "gợi ý phim gay" (recommend intent).
+     */
+    private function hasRecommendIntent(string $normalized): bool
+    {
+        foreach (self::RECOMMEND_INTENT_KEYWORDS as $kw) {
+            if (str_contains($normalized, $kw)) {
                 return true;
             }
         }

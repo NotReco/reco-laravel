@@ -1,21 +1,23 @@
 {
-  "name": "MyWebSite",
-  "short_name": "MySite",
+  "name": "RecoDB",
+  "short_name": "RecoDB",
+  "description": "Khám phá, đánh giá và chia sẻ cảm nhận về phim điện ảnh cùng cộng đồng.",
   "icons": [
     {
-      "src": "/images/web-app-manifest-192x192.png",
+      "src": "/web-app-manifest-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "/images/web-app-manifest-512x512.png",
+      "src": "/web-app-manifest-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
     }
   ],
-  "theme_color": "#ffffff",
+  "theme_color": "#0ea5e9",
   "background_color": "#ffffff",
-  "display": "standalone"
+  "display": "browser",
+  "start_url": "/"
 }

@@ -71,9 +71,9 @@ class AiAssistantService
         $contextCount  = $dbContext['raw_count'] ?? 0;
 
         // LOCAL FIRST FOR LISTING
-        // Only trigger local recommendation for known movie intents.
-        // unknown / greeting / ack / smalltalk must NOT reach this path.
-        $isListingIntent = AiIntentService::isMovieRelatedIntent($intentName, $wantsType);
+        // Only trigger local recommendation when user EXPLICITLY requested it.
+        // Topic mentions like "phim gay", "LGBT", "18+" do NOT trigger card display.
+        $isListingIntent = AiIntentService::shouldShowMovieCards($intent);
 
         if ($isListingIntent) {
             // ── movie.mood: use mood-specific intro and empty handling ────────
@@ -170,8 +170,30 @@ class AiAssistantService
             }
 
             // ── Standard local-first recommendation ──────────────────────────
-            $localMsg = $this->contextService->formatContextItemsResponse($dbContext);
             $displayItems = array_slice($dbContext['items'] ?? [], 0, 3);
+
+            // Empty result for an explicit recommendation request → clear message, no fallback cards
+            if (empty($displayItems)) {
+                $noResultMsg = 'Hiện RecoDB chưa có dữ liệu phim phù hợp với yêu cầu này. Bạn có thể thử tìm bằng thể loại hoặc từ khóa khác nhé. 🎬';
+                return [
+                    'message'                   => $noResultMsg,
+                    'source'                    => 'local_no_result',
+                    'fallback'                  => false,
+                    'fallback_reason'           => null,
+                    'used_local_formatter'      => true,
+                    'called_gemini'             => false,
+                    'context_items_count'       => 0,
+                    'suggested_items_count'     => 0,
+                    'excluded_recent_count'     => count($recentItems),
+                    'wants_type'                => $wantsType,
+                    'intent'                    => $intentName,
+                    'has_user_profile'          => $userProfile['available'] ?? false,
+                    'user_profile_genres_count' => count($userProfile['favorite_genres'] ?? []),
+                    'suggested_items'           => [],
+                ];
+            }
+
+            $localMsg = $this->contextService->formatContextItemsResponse($dbContext);
 
             return [
                 'message'                   => $localMsg,
@@ -260,13 +282,13 @@ class AiAssistantService
                         'used_local_formatter'      => false,
                         'called_gemini'             => true,
                         'context_items_count'       => $contextCount,
-                        'suggested_items_count'     => count($dbContext['items'] ?? []),
+                        'suggested_items_count'     => 0,
                         'excluded_recent_count'     => count($recentItems),
                         'wants_type'                => $wantsType,
                         'intent'                    => $intentName,
                         'has_user_profile'          => $userProfile['available'] ?? false,
                         'user_profile_genres_count' => count($userProfile['favorite_genres'] ?? []),
-                        'suggested_items'           => $dbContext['items'] ?? [],
+                        'suggested_items'           => [], // Explicitly return empty to prevent unrelated cards
                     ];
                 }
 

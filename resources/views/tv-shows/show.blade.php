@@ -6,40 +6,40 @@
         {{-- ══════════════════════════════════════════════════ --}}
         {{-- HERO: Backdrop + Gradient to white                 --}}
         {{-- ══════════════════════════════════════════════════ --}}
-        <div class="relative -mt-16 overflow-hidden" style="height: 520px;">
+        <div class="relative -mt-16 overflow-hidden h-[280px] md:h-[460px] lg:h-[500px]">
             {{-- Backdrop Image --}}
             @if ($tvShow->backdrop)
                 <img src="{{ $tvShow->backdrop }}" alt="{{ $tvShow->title }}"
-                    class="absolute inset-0 w-full h-full object-cover object-center">
+                    class="absolute inset-0 w-full h-full object-cover object-center opacity-80 md:opacity-100">
             @else
                 <div class="absolute inset-0 bg-gradient-to-br from-gray-800 via-gray-900 to-gray-950"></div>
             @endif
 
             {{-- Dark overlay for contrast --}}
-            <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-black/30"></div>
+            <div class="absolute inset-0 bg-slate-950/30 md:bg-gradient-to-t md:from-slate-950/80 md:via-slate-950/40 md:to-transparent"></div>
 
-            {{-- Fade to white at the bottom --}}
-            <div class="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-white to-transparent"></div>
+            {{-- Bottom dark gradient (Mobile) --}}
+            <div class="absolute inset-x-0 bottom-0 h-[150px] bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/80 to-transparent md:hidden"></div>
         </div>
 
         {{-- ══════════════════════════════════════════════════ --}}
-        {{-- CONTENT AREA: Light themed                        --}}
+        {{-- CONTENT AREA: Bottom Sheet on Mobile              --}}
         {{-- ══════════════════════════════════════════════════ --}}
-        <div class="bg-white">
+        <div class="bg-white relative z-20 -mt-12 md:mt-0 rounded-t-[2rem] md:rounded-none pt-8 md:pt-12 shadow-[0_-10px_40px_rgba(0,0,0,0.15)] md:shadow-none pb-12">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
                 {{-- ── MOVIE INFO BLOCK ── --}}
-                <div class="flex flex-col md:flex-row gap-8 -mt-52 mb-10">
+                <div class="flex flex-col md:flex-row gap-6 md:gap-10 mb-6 md:mb-10">
 
                     {{-- Poster --}}
-                    <div class="shrink-0 w-40 md:w-56 mx-auto md:mx-0 relative z-10">
+                    <div class="shrink-0 w-36 md:w-64 lg:w-72 mx-auto md:mx-0 relative z-30 -mt-28 md:-mt-48 lg:-mt-64">
                         @if ($tvShow->poster)
-                            <div class="rounded-2xl overflow-hidden shadow-2xl ring-4 ring-white">
+                            <div class="rounded-2xl overflow-hidden shadow-xl ring-4 ring-white md:ring-0">
                                 <img src="{{ $tvShow->poster }}" alt="{{ $tvShow->title }}" class="w-full block">
                             </div>
                         @else
                             <div
-                                class="w-full aspect-[2/3] rounded-2xl bg-gray-200 flex items-center justify-center shadow-2xl ring-4 ring-white">
+                                class="w-full aspect-[2/3] rounded-2xl bg-gray-200 flex items-center justify-center shadow-xl ring-4 ring-white md:ring-0">
                                 <svg class="w-14 h-14 text-gray-400" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
@@ -50,79 +50,96 @@
                     </div>
 
                     {{-- Details --}}
-                    <div class="flex-1 pt-4 md:pt-6 relative z-10">
+                    <div class="flex-1 text-center md:text-left relative z-10">
 
-                        {{-- Title (white while still over hero gradient) --}}
-                        <div class="mb-3">
-                            <h1 class="text-3xl lg:text-4xl font-display font-bold text-white drop-shadow-lg">
-                                {{ $tvShow->title }}</h1>
-                            @if ($tvShow->original_title && $tvShow->original_title !== $tvShow->title)
-                                <p class="text-gray-300 text-sm italic mt-1 drop-shadow">{{ $tvShow->original_title }}
-                                </p>
-                            @endif
-                        </div>
+                        {{-- Top Section (Inside White Card on Mobile / White Background on Desktop) --}}
+                        <div class="flex flex-col md:max-w-3xl">
 
-                        @if ($tvShow->tagline)
-                            <p class="text-sky-300 font-medium italic text-base mb-4 drop-shadow">
-                                "{{ $tvShow->tagline }}"</p>
-                        @endif
-
-                        {{-- Meta Info --}}
-                        <div class="flex items-center flex-wrap gap-3 text-sm mb-4">
-                            @if ($tvShow->first_air_date)
-                                <span
-                                    class="flex items-center gap-1.5 bg-black/30 backdrop-blur-sm text-white px-3 py-1.5 rounded-full border border-white/20">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
-                                    {{ \Carbon\Carbon::parse($tvShow->first_air_date)->format('d/m/Y') }}
-                                </span>
-                            @endif
-                            @if ($tvShow->episode_run_time)
-                                <span
-                                    class="flex items-center gap-1.5 bg-black/30 backdrop-blur-sm text-white px-3 py-1.5 rounded-full border border-white/20">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    {{ $tvShow->episode_run_time }} phút/tập
-                                </span>
-                            @endif
-                            @if ($tvShow->country)
-                                <span
-                                    class="flex items-center gap-1.5 bg-black/30 backdrop-blur-sm text-white px-3 py-1.5 rounded-full border border-white/20">
-                                    🌍 {{ $countryName }}
-                                </span>
-                            @endif
-                            @if ($tvShow->age_rating)
-                                @php
-                                    $normalizedAge = \App\Helpers\AgeRatingHelper::normalize($tvShow->age_rating, $tvShow->adult ?? false);
-                                @endphp
-                                @if ($normalizedAge['badge'])
-                                <div class="relative group/tooltip">
-                                    <span class="flex items-center gap-1.5 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/20 font-bold uppercase tracking-wider cursor-help {{ $normalizedAge['colorClass'] }}">
-                                        {{ $normalizedAge['badge'] }}
-                                    </span>
-                                    <div class="absolute left-0 top-full mt-2 hidden group-hover/tooltip:block w-max max-w-[200px] p-2 bg-gray-900 text-white text-xs rounded shadow-lg z-50 whitespace-normal leading-relaxed pointer-events-none">
-                                        {{ $normalizedAge['description'] }}
-                                    </div>
-                                </div>
+                            {{-- Title --}}
+                            <div class="mb-2 md:mb-3">
+                                <h1 class="text-3xl lg:text-4xl font-display font-bold text-gray-900 tracking-tight">
+                                    {{ $tvShow->title }}</h1>
+                                @if ($tvShow->original_title && $tvShow->original_title !== $tvShow->title)
+                                    <p class="text-gray-500 text-sm md:text-base italic mt-1">{{ $tvShow->original_title }}</p>
                                 @endif
-                            @endif
-                        </div>
-
-                        {{-- Genres --}}
-                        @if ($tvShow->genres->isNotEmpty())
-                            <div class="flex flex-wrap gap-2 mb-6">
-                                @foreach ($tvShow->genres as $genre)
-                                    <a href="{{ route('explore', ['genre' => $genre->id]) }}"
-                                        class="px-3 py-1 text-sm font-medium bg-sky-50 text-sky-600 border border-sky-200 rounded-full hover:bg-sky-100 transition-colors">
-                                        {{ $genre->name }}
-                                    </a>
-                                @endforeach
                             </div>
-                        @endif
+
+                            @if ($tvShow->tagline)
+                                <p class="text-sky-600 font-medium italic text-base mb-4">
+                                    "{{ $tvShow->tagline }}"</p>
+                            @endif
+
+                            {{-- Meta Info --}}
+                            <div class="flex items-center justify-center md:justify-start flex-wrap gap-2 md:gap-3 text-[13px] md:text-sm mb-4 text-gray-600">
+                                @if ($tvShow->first_air_date)
+                                    <span class="flex items-center gap-1.5 font-medium">
+                                        <svg class="w-4 h-4 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                        {{ \Carbon\Carbon::parse($tvShow->first_air_date)->format('d/m/Y') }}
+                                    </span>
+                                @endif
+
+                                @if ($tvShow->first_air_date && $tvShow->episode_run_time)
+                                    <span class="w-1 h-1 rounded-full bg-gray-300"></span>
+                                @endif
+
+                                @if ($tvShow->episode_run_time)
+                                    <span class="flex items-center gap-1.5 font-medium">
+                                        <svg class="w-4 h-4 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        {{ $tvShow->episode_run_time }} phút/tập
+                                    </span>
+                                @endif
+
+                                @if ($tvShow->country && ($tvShow->first_air_date || $tvShow->episode_run_time))
+                                    <span class="w-1 h-1 rounded-full bg-gray-300"></span>
+                                @endif
+
+                                @if ($tvShow->country)
+                                    <span class="flex items-center gap-1.5 font-medium">
+                                        🌍 {{ $countryName }}
+                                    </span>
+                                @endif
+
+                                @if ($tvShow->age_rating)
+                                    @php
+                                        $normalizedAge = \App\Helpers\AgeRatingHelper::normalize(
+                                            $tvShow->age_rating,
+                                            $tvShow->adult ?? false,
+                                        );
+                                    @endphp
+                                    @if ($normalizedAge['badge'])
+                                        <div class="relative group/tooltip ml-1">
+                                            <span
+                                                class="flex items-center gap-1.5 px-2 py-0.5 rounded border border-gray-200 font-bold uppercase tracking-wider cursor-help {{ $normalizedAge['colorClass'] }} text-[11px] md:text-xs">
+                                                {{ $normalizedAge['badge'] }}
+                                            </span>
+                                            <div
+                                                class="absolute left-1/2 md:left-0 -translate-x-1/2 md:translate-x-0 top-full mt-2 hidden group-hover/tooltip:block w-max max-w-[200px] p-2 bg-gray-900 text-white text-xs rounded shadow-lg z-50 whitespace-normal leading-relaxed pointer-events-none">
+                                                {{ $normalizedAge['description'] }}
+                                            </div>
+                                        </div>
+                                    @endif
+                                @endif
+                            </div>
+
+                            {{-- Genres --}}
+                            @if ($tvShow->genres->isNotEmpty())
+                                <div class="flex flex-wrap justify-center md:justify-start gap-1.5 md:gap-2 mb-4 md:mb-6">
+                                    @foreach ($tvShow->genres as $genre)
+                                        <a href="{{ route('explore', ['genre' => $genre->id]) }}"
+                                            class="px-3 py-1 text-xs md:text-sm font-medium bg-gray-100 text-gray-700 border border-gray-200 rounded-full hover:bg-gray-200 transition-colors">
+                                            {{ $genre->name }}
+                                        </a>
+                                    @endforeach
+                                </div>
+                            @endif
+
+                        </div> {{-- End Top Section --}}
 
                         {{-- Rating + Actions --}}
                         @php
@@ -143,7 +160,7 @@
                             $myTone = $myVibe->tone ?? null;
                         @endphp
 
-                        <div class="flex flex-col gap-4" x-data="{
+                        <div class="flex flex-col gap-3.5 md:gap-4" x-data="{
                             topMoods: @js($topMoods),
                             myMood: @js($myMood),
                             isFavorited: {{ auth()->check() && $tvShow->favoritedBy->contains(auth()->id()) ? 'true' : 'false' }},
@@ -193,7 +210,7 @@
                             @vibes-updated.window="topMoods = [...$event.detail.top_moods]; myMood = $event.detail.mood;">
 
                             {{-- Row 1: Score + Vibe --}}
-                            <div class="flex flex-wrap items-center gap-4">
+                            <div class="flex flex-col md:flex-row md:flex-wrap items-start md:items-center gap-3.5 md:gap-4">
 
                                 {{-- User Score Widget (TMDb-style) --}}
                                 @php
@@ -401,7 +418,7 @@
                                 </div>
 
                                 {{-- Top Emojis & Vibe Trigger --}}
-                                <div class="flex items-center gap-4 ml-[15px]">
+                                <div class="flex items-center gap-4 md:ml-[15px]">
                                     {{-- Overlapping Top Emojis --}}
                                     <div class="flex items-center -space-x-3" x-show="topMoods && topMoods.length > 0"
                                         x-cloak>
@@ -439,14 +456,14 @@
                             </div> {{-- End Row 1 --}}
 
                             {{-- Row 2: Actions --}}
-                            <div class="flex flex-wrap items-center gap-4">
+                            <div class="flex flex-row flex-wrap items-center gap-2.5 md:gap-4">
 
                                 {{-- Actions --}}
                                 @if (!empty($trailerCandidates) || $tvShow->trailer_url)
                                     <button @click="$store.trailerModal.open('{{ !empty($trailerCandidates) ? '' : $tvShow->trailer_url }}', {!! Js::from(!empty($trailerCandidates) ? $trailerCandidates : []) !!})"
                                         title="Trailer"
-                                        class="inline-flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-5 py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-sky-600/30">
-                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                        class="inline-flex items-center justify-center gap-1.5 md:gap-2 w-[42px] h-[42px] md:w-auto md:h-auto md:px-5 md:py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-sky-600/30 shrink-0">
+                                        <svg class="w-5 h-5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                             <path fill-rule="evenodd"
                                                 d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
                                                 clip-rule="evenodd" />
@@ -457,8 +474,8 @@
 
                                 <a href="#review-form"
                                     title="Viết review"
-                                    class="inline-flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-5 py-2.5 bg-white hover:bg-gray-50 text-gray-700 font-semibold rounded-xl border border-gray-200 transition-all duration-200 shadow-sm">
-                                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor"
+                                    class="inline-flex items-center justify-center gap-1.5 md:gap-2 w-[42px] h-[42px] md:w-auto md:h-auto md:px-5 md:py-2.5 bg-white hover:bg-gray-50 text-gray-700 font-semibold rounded-xl border border-gray-200 transition-all duration-200 shadow-sm shrink-0">
+                                    <svg class="w-5 h-5 text-gray-500 shrink-0" fill="none" stroke="currentColor"
                                         viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -535,7 +552,7 @@
                                 @endphp
                                 <div class="relative" x-data="{ open: false }" @click.outside="open = false">
                                     <button @click="open = !open" title="Danh sách theo dõi"
-                                        class="flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-4 py-2.5 rounded-xl border text-sm font-medium transition-all"
+                                        class="flex items-center justify-center gap-1.5 md:gap-2 w-[42px] h-[42px] md:w-auto md:h-auto md:px-4 md:py-2.5 rounded-xl border text-sm font-medium transition-all shrink-0"
                                         :class="{
                                             'bg-sky-50 border-sky-400 text-sky-700': watchlistStatus === 'want_to_watch',
                                             'bg-amber-50 border-amber-400 text-amber-700': watchlistStatus === 'watching',
@@ -552,7 +569,7 @@
                                         </svg>
                                         <span class="hidden sm:inline"
                                             x-text="watchlistStatus === 'want_to_watch' ? 'Muốn xem' : (watchlistStatus === 'watching' ? 'Đang xem' : (watchlistStatus === 'watched' ? 'Đã xem' : (watchlistStatus === 'dropped' ? 'Bỏ dở' : 'Watchlist')))">{{ $wlText }}</span>
-                                        <svg class="w-3.5 h-3.5 opacity-50" fill="none" stroke="currentColor"
+                                        <svg class="w-3.5 h-3.5 opacity-50 hidden md:block" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M19 9l-7 7-7-7" />

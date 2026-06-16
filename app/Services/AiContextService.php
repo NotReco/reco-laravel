@@ -54,6 +54,15 @@ class AiContextService
         'fantasy'              => ['Viễn Tưởng', 'Fantasy'],
         'action'               => ['Hành Động', 'Action'],
         'thriller'             => ['Hồi Hộp', 'Thriller'],
+        // Unsupported/Specific topics to prevent popular fallback
+        'gay'                  => ['_UNSUPPORTED_LGBT_'],
+        'lgbt'                 => ['_UNSUPPORTED_LGBT_'],
+        'les'                  => ['_UNSUPPORTED_LGBT_'],
+        'dam my'               => ['_UNSUPPORTED_LGBT_'],
+        'bach hop'             => ['_UNSUPPORTED_LGBT_'],
+        'boylove'              => ['_UNSUPPORTED_LGBT_'],
+        'bl'                   => ['_UNSUPPORTED_LGBT_'],
+        'dong tinh'            => ['_UNSUPPORTED_LGBT_'],
     ];
 
     // ──────────────────────────────────────────────────────────────────────
@@ -178,6 +187,7 @@ class AiContextService
             $filterNames = $genreNamesToFilter;
         }
 
+        // Apply genre filter if available
         if (!empty($filterNames)) {
             $movieQuery->whereHas('genres', fn($q) => $q->where(function ($sub) use ($filterNames) {
                 foreach ($filterNames as $name) {
@@ -189,16 +199,24 @@ class AiContextService
                     $sub->orWhere('genres.name', 'like', "%{$name}%");
                 }
             }));
-        }
+            
+            $movieQuery->orderByDesc('avg_rating')->orderByDesc('view_count');
+            $tvQuery->orderByDesc('avg_rating')->orderByDesc('view_count');
 
-        $movieQuery->orderByDesc('avg_rating')->orderByDesc('view_count');
-        $tvQuery->orderByDesc('avg_rating')->orderByDesc('view_count');
+            $all = $this->queryWithPoolAndDiversity($movieQuery, $tvQuery, $limit, $recentItems, $wantsType);
+            
+            // Do NOT supplement with top popular items if a specific genre/topic was requested.
+            // This ensures "gợi ý phim gay" returns empty and text-only instead of unrelated cards.
+        } else {
+            $movieQuery->orderByDesc('avg_rating')->orderByDesc('view_count');
+            $tvQuery->orderByDesc('avg_rating')->orderByDesc('view_count');
 
-        $all = $this->queryWithPoolAndDiversity($movieQuery, $tvQuery, $limit, $recentItems, $wantsType);
+            $all = $this->queryWithPoolAndDiversity($movieQuery, $tvQuery, $limit, $recentItems, $wantsType);
 
-        // If genre-filtered results are thin, supplement with top popular
-        if ($all->count() < 3) {
-            $all = $this->fetchTopItems($limit, 'rating', $recentItems, $wantsType);
+            // General recommendation can be supplemented
+            if ($all->count() < 3) {
+                $all = $this->fetchTopItems($limit, 'rating', $recentItems, $wantsType);
+            }
         }
 
         $items = $this->formatItems($all, 'movie');
@@ -727,15 +745,10 @@ class AiContextService
     /** Fallback khi intent không xác định */
     private function contextFallback(): array
     {
-        $all   = $this->fetchTopItems(5);
-        $items = $this->formatItems($all, 'movie');
-        return [
-            'summary'   => 'Các phim nổi bật trên RecoDB',
-            'items'     => $items,
-            'reviews'   => [],
-            'genres'    => [],
-            'raw_count' => count($items),
-        ];
+        // NO popular items fallback when intent is unknown or general.
+        // This ensures queries like "phim gay" do not get 5 random movies sent to Gemini
+        // which then get rendered as unrelated cards.
+        return $this->emptyContext('Người dùng có thể đang hỏi về một chủ đề không phổ biến hoặc không liên quan trực tiếp đến phim có sẵn. Hãy trả lời tự nhiên dựa trên kiến thức chung, nhưng tuyệt đối không bịa đặt thông tin phim trong RecoDB.');
     }
 
     // ──────────────────────────────────────────────────────────────────────

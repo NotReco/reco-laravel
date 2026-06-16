@@ -66,6 +66,19 @@ class AgeRatingHelper
         return self::mappedResult('', '', '');
     }
 
+    /**
+     * Quick boolean check: is this rating considered 18+ adult content?
+     * Used by card components to intercept navigation and show the age modal.
+     */
+    public static function isAdult(?string $cert, bool $adult = false): bool
+    {
+        if ($adult) return true;
+        if (empty($cert)) return false;
+        $upper = strtoupper(trim($cert));
+        return in_array($upper, ['R', 'NC-17', 'TV-MA', '18+', 'A', 'T18'], true)
+            || str_contains($upper, '18');
+    }
+
     private static function mappedResult(string $badge, string $desc, string $color): array
     {
         return [

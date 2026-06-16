@@ -3,12 +3,24 @@
 
 @props(['items'])
 
+@php
+    // Pre-compute adult flag per item so Alpine can intercept navigation client-side
+    $itemsIsAdult = $items->map(function($item) {
+        return \App\Helpers\AgeRatingHelper::isAdult(
+            $item->age_rating ?? null,
+            $item->adult ?? false
+        );
+    })->values()->toArray();
+@endphp
+
 @if($items->isNotEmpty())
 <section class="relative min-h-[600px] lg:min-h-[80vh] overflow-hidden -mt-16"
     x-data="{
         current: 0,
         total: {{ $items->count() }},
         autoplay: null,
+        itemsIsAdult: {{ json_encode($itemsIsAdult) }},
+
         startAutoplay() {
             this.autoplay = setInterval(() => this.next(), 6000);
         },
@@ -20,6 +32,14 @@
         },
         prev() {
             this.current = (this.current - 1 + this.total) % this.total;
+        },
+        handleHeroClick(url, index, event) {
+            if (!this.itemsIsAdult[index]) return;
+            if (localStorage.getItem('reco_age_confirmed') === 'true') return;
+            event.preventDefault();
+            window.dispatchEvent(new CustomEvent('open-age-modal', {
+                detail: { targetUrl: url }
+            }));
         }
     }"
     x-init="startAutoplay()"
@@ -128,7 +148,9 @@
                                 @php
                                     $routeInfo = get_class($item) === 'App\Models\Movie' ? route('movies.show', $item) : route('tv-shows.show', $item);
                                 @endphp
-                                <a href="{{ $routeInfo }}" class="px-5 py-2.5 rounded-xl text-sm font-semibold text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 transition-colors flex items-center">
+                                <a href="{{ $routeInfo }}"
+                                    @click="handleHeroClick('{{ $routeInfo }}', {{ $i }}, $event)"
+                                    class="px-5 py-2.5 rounded-xl text-sm font-semibold text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 transition-colors flex items-center">
                                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                     Chi tiết
                                 </a>
